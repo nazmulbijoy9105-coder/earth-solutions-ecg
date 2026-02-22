@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#0b1629"/>
   <title>Service Plans — Peopole AI | Earth Solutions Visa Zone</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --navy:#0b1629;--navy2:#111f3a;--navy3:#172544;
     --gold:#d4a843;--gold2:#f0c96a;
     --teal:#1ec8b0;--green:#25d366;
-    --rose:#e05c7a;--blue:#3b82f6;
+    --rose:#e05c7a;--blue:#3b82f6;--purple:#8b5cf6;
     --text:#e8edf5;--text2:#8fa3c0;
     --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
     --r:16px;
@@ -22,11 +22,10 @@
   body{background:var(--navy);color:var(--text);font-family:var(--font-b);font-size:14px;line-height:1.65;overflow-x:hidden}
   ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(212,168,67,.2);border-radius:10px}
 
-  /* AMBIENT */
   body::before{content:'';position:fixed;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(212,168,67,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
   body::after{content:'';position:fixed;bottom:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(30,200,176,.05) 0%,transparent 65%);pointer-events:none;z-index:0}
 
-  /* HEADER */
+  /* ── HEADER ── */
   header{position:relative;z-index:2;text-align:center;padding:60px 20px 40px;border-bottom:1px solid var(--border)}
   .header-logo{width:72px;height:72px;border-radius:18px;overflow:hidden;background:#fff;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:float 4s ease-in-out infinite}
   .header-logo img{width:100%;height:100%;object-fit:cover}
@@ -34,13 +33,14 @@
   h1{font-family:var(--font-d);font-size:clamp(26px,4vw,48px);font-weight:900;color:#fff;margin-bottom:12px;line-height:1.1}
   h1 span{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .subtitle{color:var(--text2);max-width:520px;margin:0 auto 24px;font-size:15px}
+  .motto{font-family:var(--font-d);font-size:17px;font-style:italic;color:var(--gold2);margin-bottom:20px}
   .badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
   .badge{padding:5px 14px;border-radius:100px;border:1px solid var(--border);font-size:12px;color:var(--text2);background:rgba(255,255,255,.03)}
   .badge.g{border-color:rgba(30,200,176,.3);color:var(--teal)}
   .badge.y{border-color:rgba(212,168,67,.3);color:var(--gold)}
   .badge.r{border-color:rgba(224,92,122,.3);color:var(--rose)}
 
-  /* PAYMENT NOTICE */
+  /* Payment notice */
   .pay-notice{max-width:680px;margin:30px auto 0;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start}
   .pay-notice-icon{font-size:22px;flex-shrink:0;margin-top:2px}
   .pay-notice strong{display:block;color:var(--gold2);margin-bottom:4px;font-size:14px}
@@ -48,7 +48,7 @@
   .pay-methods{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .pay-chip{background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text)}
 
-  /* STAGE TABS */
+  /* ── TABS ── */
   .tabs-wrap{position:sticky;top:0;z-index:10;background:rgba(11,22,41,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 20px}
   .tabs{display:flex;gap:6px;overflow-x:auto;max-width:980px;margin:0 auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
@@ -56,57 +56,60 @@
   .tab:hover{border-color:rgba(212,168,67,.4);color:var(--gold)}
   .tab.active{background:rgba(212,168,67,.12);border-color:var(--gold);color:var(--gold);font-weight:600}
 
-  /* MAIN LAYOUT */
+  /* ── CONTAINER ── */
   .container{max-width:980px;margin:0 auto;padding:50px 20px 80px;position:relative;z-index:1}
   .section-label{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:8px}
   .section-title{font-family:var(--font-d);font-size:clamp(20px,2.5vw,28px);font-weight:700;text-align:center;color:#fff;margin-bottom:40px}
 
-  /* PLAN CARDS */
+  /* ── PLAN CARDS ── */
   .plans{display:flex;flex-direction:column;gap:28px}
-
   .plan{background:var(--navy2);border:1px solid var(--border);border-radius:20px;overflow:hidden;animation:fadeUp .5s ease both}
-  .plan:nth-child(1){animation-delay:.05s}.plan:nth-child(2){animation-delay:.12s}.plan:nth-child(3){animation-delay:.19s}.plan:nth-child(4){animation-delay:.26s}
+  .plan:nth-child(1){animation-delay:.05s}.plan:nth-child(2){animation-delay:.12s}
+  .plan:nth-child(3){animation-delay:.19s}.plan:nth-child(4){animation-delay:.26s}.plan:nth-child(5){animation-delay:.33s}
 
-  .plan.free  {border-left:4px solid var(--teal)}
-  .plan.entry {border-left:4px solid #4ade80}
-  .plan.struct{border-left:4px solid var(--blue)}
-  .plan.mid   {border-left:4px solid var(--gold)}
-  .plan.elite {border-left:4px solid var(--rose);background:linear-gradient(135deg,#160b1a 0%,var(--navy2) 100%)}
+  .plan.free   {border-left:4px solid var(--teal)}
+  .plan.entry  {border-left:4px solid #4ade80}
+  .plan.struct {border-left:4px solid var(--blue)}
+  .plan.mid    {border-left:4px solid var(--gold)}
+  .plan.elite  {border-left:4px solid var(--rose);background:linear-gradient(135deg,#160b1a 0%,var(--navy2) 100%)}
 
-  /* Plan header */
   .plan-head{padding:24px 28px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
   .plan-left{display:flex;align-items:center;gap:14px}
   .plan-icon{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-  .free  .plan-icon{background:rgba(30,200,176,.12)}
-  .entry .plan-icon{background:rgba(74,222,128,.12)}
+  .free   .plan-icon{background:rgba(30,200,176,.12)}
+  .entry  .plan-icon{background:rgba(74,222,128,.12)}
   .struct .plan-icon{background:rgba(59,130,246,.12)}
-  .mid   .plan-icon{background:rgba(212,168,67,.12)}
-  .elite .plan-icon{background:rgba(224,92,122,.12)}
+  .mid    .plan-icon{background:rgba(212,168,67,.12)}
+  .elite  .plan-icon{background:rgba(224,92,122,.12)}
 
   .plan-name{font-family:var(--font-d);font-size:19px;font-weight:700;color:#fff;margin-bottom:2px}
   .plan-model{font-size:12px;color:var(--text2)}
   .plan-badge{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.5px;flex-shrink:0;margin-top:4px}
-  .free  .plan-badge{background:rgba(30,200,176,.15);color:var(--teal)}
-  .entry .plan-badge{background:rgba(74,222,128,.15);color:#4ade80}
+  .free   .plan-badge{background:rgba(30,200,176,.15);color:var(--teal)}
+  .entry  .plan-badge{background:rgba(74,222,128,.15);color:#4ade80}
   .struct .plan-badge{background:rgba(59,130,246,.15);color:var(--blue)}
-  .mid   .plan-badge{background:rgba(212,168,67,.15);color:var(--gold)}
-  .elite .plan-badge{background:rgba(224,92,122,.15);color:var(--rose)}
+  .mid    .plan-badge{background:rgba(212,168,67,.15);color:var(--gold)}
+  .elite  .plan-badge{background:rgba(224,92,122,.15);color:var(--rose)}
 
-  /* Plan body */
   .plan-body{padding:18px 28px 24px}
   .plan-desc{color:var(--text2);font-size:13px;line-height:1.7;margin-bottom:16px}
+  .plan-purpose{display:inline-block;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--text2)}
 
   /* Feature pills */
   .feats{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
   .feat{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:100px;padding:5px 12px;font-size:12px;color:var(--text)}
   .feat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-  .free  .feat-dot{background:var(--teal)}
-  .entry .feat-dot{background:#4ade80}
+  .free   .feat-dot{background:var(--teal)}
+  .entry  .feat-dot{background:#4ade80}
   .struct .feat-dot{background:var(--blue)}
-  .mid   .feat-dot{background:var(--gold)}
-  .elite .feat-dot{background:var(--rose)}
+  .mid    .feat-dot{background:var(--gold)}
+  .elite  .feat-dot{background:var(--rose)}
 
-  /* PRICING TABLE per stage */
+  /* Advantage box */
+  .advantage-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--text2);line-height:1.7}
+  .advantage-box strong{color:var(--gold2)}
+
+  /* Pricing table */
   .price-table-wrap{margin-bottom:20px}
   .price-table-title{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
   .price-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -115,36 +118,69 @@
   .price-table tr:last-child td{border-bottom:none}
   .price-table tr:hover td{background:rgba(255,255,255,.02)}
   .price-val{font-weight:700;font-family:var(--font-d)}
-  .free  .price-val{color:var(--teal)}
-  .entry .price-val{color:#4ade80}
+  .free   .price-val{color:var(--teal)}
+  .entry  .price-val{color:#4ade80}
   .struct .price-val{color:var(--blue)}
-  .mid   .price-val{color:var(--gold)}
-  .elite .price-val{color:var(--rose)}
+  .mid    .price-val{color:var(--gold)}
+  .elite  .price-val{color:var(--rose)}
   .stage-tag{display:inline-flex;align-items:center;gap:5px;font-size:12px}
 
   /* CTA */
   .plan-cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .plan-cta{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:opacity .2s,transform .1s}
   .plan-cta:hover{opacity:.85}.plan-cta:active{transform:scale(.97)}
-  .free  .plan-cta{background:var(--teal);color:#0b1629}
-  .entry .plan-cta{background:#4ade80;color:#0b1629}
+  .free   .plan-cta{background:var(--teal);color:#0b1629}
+  .entry  .plan-cta{background:#4ade80;color:#0b1629}
   .struct .plan-cta{background:var(--blue);color:#fff}
-  .mid   .plan-cta{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b1629}
-  .elite .plan-cta{background:linear-gradient(135deg,var(--rose),#ff8fa8);color:#fff}
-  .wa-cta{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff}
+  .mid    .plan-cta{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b1629}
+  .elite  .plan-cta{background:linear-gradient(135deg,var(--rose),#ff8fa8);color:#fff}
+  .wa-cta{background:linear-gradient(135deg,#25d366,#128c7e)!important;color:#fff!important}
 
   .plan-divider{height:1px;background:var(--border);margin:0 28px}
 
-  /* HOW IT WORKS */
+  /* ── COMPARISON TABLE ── */
+  .compare-section{margin-top:60px}
+  .compare-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--navy2);border-radius:14px;overflow:hidden}
+  .compare-table th{padding:12px 16px;background:rgba(212,168,67,.08);color:var(--gold2);font-weight:600;font-size:12px;text-align:center;border-bottom:1px solid var(--border)}
+  .compare-table th:first-child{text-align:left}
+  .compare-table td{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);text-align:center;color:var(--text2)}
+  .compare-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+  .compare-table tr:last-child td{border-bottom:none}
+  .compare-table tr:hover td{background:rgba(255,255,255,.02)}
+  .check{color:var(--teal);font-size:16px}
+  .cross{color:#e05c7a;font-size:16px}
+  .partial{color:var(--gold);font-size:12px}
+
+  /* ── HOW IT WORKS ── */
   .how-section{margin-top:70px}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
   .step{background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:22px 18px;text-align:center;animation:fadeUp .5s ease both}
-  .step:nth-child(1){animation-delay:.05s}.step:nth-child(2){animation-delay:.1s}.step:nth-child(3){animation-delay:.15s}.step:nth-child(4){animation-delay:.2s}.step:nth-child(5){animation-delay:.25s}
   .step-num{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b1629;font-family:var(--font-d);font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px rgba(212,168,67,.25)}
   .step-title{font-weight:600;font-size:14px;color:#fff;margin-bottom:5px;font-family:var(--font-d)}
   .step-desc{font-size:12px;color:var(--text2)}
 
-  /* PAYMENT SECTION */
+  /* ── AI HUMAN RATIO ── */
+  .ratio-section{margin-top:60px}
+  .ratio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .ratio-card{background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:18px 16px;text-align:center}
+  .ratio-card .plan-lbl{font-size:12px;color:var(--text2);margin-bottom:10px}
+  .ratio-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);margin:4px 0;position:relative;overflow:hidden}
+  .ratio-bar .fill-ai{height:100%;border-radius:99px;background:var(--teal)}
+  .ratio-bar .fill-human{height:100%;border-radius:99px;background:var(--gold)}
+  .ratio-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:2px}
+
+  /* ── LEGAL & PRIVACY ── */
+  .policy-section{margin-top:60px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:640px){.policy-section{grid-template-columns:1fr}}
+  .policy-card{background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:24px}
+  .policy-card h3{font-family:var(--font-d);font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .policy-card ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .policy-card li{font-size:12.5px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;line-height:1.6}
+  .policy-card li::before{content:'•';color:var(--gold);flex-shrink:0;margin-top:1px}
+  .policy-card .do-not{color:var(--rose)}
+  .policy-card .do-not::before{content:'✗';color:var(--rose)}
+
+  /* ── PAYMENT SECTION ── */
   .pay-section{margin-top:60px;background:rgba(212,168,67,.05);border:1px solid rgba(212,168,67,.18);border-radius:20px;padding:32px;text-align:center}
   .pay-section h3{font-family:var(--font-d);font-size:22px;font-weight:700;color:#fff;margin-bottom:8px}
   .pay-section p{color:var(--text2);max-width:480px;margin:0 auto 20px;font-size:14px}
@@ -155,20 +191,24 @@
   .pay-method-card .m-label{font-size:11px;color:var(--text2)}
   .pay-warn{background:rgba(224,92,122,.07);border:1px solid rgba(224,92,122,.2);border-radius:10px;padding:12px 18px;font-size:13px;color:#e08a9a;max-width:500px;margin:0 auto}
 
-  /* FLOAT WA */
+  /* ── FLOAT WA ── */
   .wa-float{position:fixed;bottom:24px;right:24px;z-index:50;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;text-decoration:none;border-radius:100px;padding:13px 18px 13px 15px;display:flex;align-items:center;gap:9px;font-family:var(--font-b);font-size:14px;font-weight:600;box-shadow:0 6px 24px rgba(37,211,102,.35);transition:all .25s;animation:wapop .5s ease 1s both}
   .wa-float:hover{transform:translateY(-3px) scale(1.03)}
   @keyframes wapop{from{opacity:0;transform:translateY(20px) scale(.85)}to{opacity:1;transform:none}}
 
-  /* FOOTER */
+  /* ── BACK LINK ── */
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text2);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color .2s}
+  .back-link:hover{color:var(--gold)}
+
+  /* ── FOOTER ── */
   footer{border-top:1px solid var(--border);padding:28px 20px;text-align:center;color:var(--text2);font-size:13px;position:relative;z-index:1}
   footer strong{color:var(--gold)}
 
-  /* ANIMATIONS */
+  /* ── ANIMATIONS ── */
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 
-  /* RESPONSIVE */
+  /* ── RESPONSIVE ── */
   @media(max-width:640px){
     .plan-head{flex-direction:column}.plan-cta-row{flex-direction:column;align-items:flex-start}
     .plan-body,.plan-head{padding-left:18px;padding-right:18px}
@@ -184,24 +224,25 @@
 <header>
   <div class="tagline">Academic Consulting · Bangladesh</div>
   <div class="header-logo"><img src="logo.jpg" alt="Earth Solutions Logo"/></div>
+  <div class="motto">"Dream → Ability → Achievement"</div>
   <h1>Service Plans &amp; <span>Pricing</span></h1>
-  <p class="subtitle">Transparent, stage-based pricing for every student and parent — from completely free to elite academic board access.</p>
+  <p class="subtitle">Multi-layer academic pathway pricing — from completely free to elite academic board access. AI + Human hybrid model with full transparency.</p>
   <div class="badges">
     <span class="badge g">✓ Free first session always</span>
-    <span class="badge">✓ Pay only after delivery confirmed</span>
+    <span class="badge">✓ No visa guarantee — honest advisory</span>
     <span class="badge y">✓ bKash &amp; Nagad accepted</span>
-    <span class="badge r">✓ Only admin-authorized payment details</span>
+    <span class="badge r">✓ Pay only after delivery confirmed</span>
+    <span class="badge g">✓ AI + Human hybrid system</span>
   </div>
 
-  <!-- Payment notice -->
   <div class="pay-notice" style="max-width:680px;margin:24px auto 0">
     <div class="pay-notice-icon">💳</div>
     <div>
       <strong>Payment via bKash / Nagad only</strong>
-      <p>Payment number: <strong style="color:#fff">01621777657</strong> (bKash &amp; Nagad). AI will provide this number when you're ready to pay. Only admin-authorized payment details are shared — never pay to any other number. After payment, send screenshot to confirm. Admin and customer both receive auto-confirmation.</p>
+      <p>Payment number: <strong style="color:#fff">01621-777657</strong>. AI confirms this number when you're ready to pay. Only admin-authorized details — never pay to any other number. Send payment screenshot to WhatsApp for confirmation.</p>
       <div class="pay-methods">
-        <span class="pay-chip">📱 bKash — 01621777657</span>
-        <span class="pay-chip">📱 Nagad — 01621777657</span>
+        <span class="pay-chip">📱 bKash — 01621-777657</span>
+        <span class="pay-chip">📱 Nagad — 01621-777657</span>
       </div>
     </div>
   </div>
@@ -210,21 +251,26 @@
 <!-- STAGE TABS -->
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab active" onclick="filterStage('all')">All Stages</button>
-    <button class="tab" onclick="filterStage('1')">🌱 Foundation</button>
-    <button class="tab" onclick="filterStage('2')">🔍 Development</button>
-    <button class="tab" onclick="filterStage('3')">🎯 Strategic</button>
-    <button class="tab" onclick="filterStage('4')">🎓 Undergraduate</button>
-    <button class="tab" onclick="filterStage('5')">🔬 Masters</button>
-    <button class="tab" onclick="filterStage('6')">🏛️ Doctoral</button>
-    <button class="tab" onclick="filterStage('7')">👨‍👩‍👧 Parent Mode</button>
+    <button class="tab active" onclick="filterStage('all',this)">All Plans</button>
+    <button class="tab" onclick="filterStage('1',this)">🌱 Foundation</button>
+    <button class="tab" onclick="filterStage('2',this)">🔍 Development</button>
+    <button class="tab" onclick="filterStage('3',this)">🎯 Strategic</button>
+    <button class="tab" onclick="filterStage('4',this)">🎓 Undergraduate</button>
+    <button class="tab" onclick="filterStage('5',this)">🔬 Masters</button>
+    <button class="tab" onclick="filterStage('6',this)">🏛️ Doctoral</button>
+    <button class="tab" onclick="filterStage('7',this)">👨‍👩‍👧 Parent Mode</button>
   </div>
 </div>
 
 <!-- MAIN CONTENT -->
 <div class="container">
-  <div class="section-label">4 Plan Levels</div>
-  <div class="section-title">Choose Your Plan</div>
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Chat
+  </a>
+
+  <div class="section-label">5 Plan Levels</div>
+  <div class="section-title">Choose Your Academic Pathway</div>
 
   <div class="plans">
 
@@ -235,145 +281,138 @@
           <div class="plan-icon">🟢</div>
           <div>
             <div class="plan-name">Basic Pathway Plan</div>
-            <div class="plan-model">Free Assessment &amp; General Information</div>
+            <div class="plan-model">Free Assessment &amp; Mass Outreach Model</div>
           </div>
         </div>
         <div class="plan-badge">FREE — ৳0</div>
       </div>
       <div class="plan-body">
-        <p class="plan-desc">
-          Every student and parent gets a free first session — no payment, no commitment. We review your previous results, identify what documents you need, explain language course requirements, visa essentials, and average accommodation/living costs based on publicly available data. If the conversation exceeds 10 minutes or needs deeper human input, we suggest a WhatsApp call.
-        </p>
+        <div class="plan-purpose">Purpose: Build trust + mass outreach + database building</div>
+        <p class="plan-desc">Every student and parent gets a free first session — no payment, no commitment. Our AI reviews your academic profile, maps your career options, and provides a complete document checklist. Human consultation available for complex cases.</p>
         <div class="feats">
-          <span class="feat"><span class="feat-dot"></span>Assessment session — all stages</span>
-          <span class="feat"><span class="feat-dot"></span>Previous results review</span>
-          <span class="feat"><span class="feat-dot"></span>Document checklist</span>
-          <span class="feat"><span class="feat-dot"></span>Language course overview</span>
-          <span class="feat"><span class="feat-dot"></span>Visa requirements (general)</span>
-          <span class="feat"><span class="feat-dot"></span>Average accommodation/living costs (Google-based)</span>
-          <span class="feat"><span class="feat-dot"></span>Q&amp;A for students &amp; parents</span>
-          <span class="feat"><span class="feat-dot"></span>10+ min chat → WhatsApp referral</span>
+          <span class="feat"><span class="feat-dot"></span>Basic assessment session</span>
+          <span class="feat"><span class="feat-dot"></span>Career mapping overview</span>
+          <span class="feat"><span class="feat-dot"></span>Academic result review</span>
+          <span class="feat"><span class="feat-dot"></span>University application checklist</span>
+          <span class="feat"><span class="feat-dot"></span>Language course document list</span>
+          <span class="feat"><span class="feat-dot"></span>Visa processing requirements</span>
+          <span class="feat"><span class="feat-dot"></span>Basic visa information</span>
+          <span class="feat"><span class="feat-dot"></span>Parent &amp; student Q&amp;A</span>
+          <span class="feat"><span class="feat-dot"></span>Short-term monitoring</span>
+        </div>
+        <div class="advantage-box">
+          <strong>⚖️ Strategy Advantage:</strong> Mass funnel entry + database building + future upsell opportunity. AI handles 90%, human only for complex queries.
         </div>
         <div class="plan-cta-row">
-          <a href="index.html" class="plan-cta">Start Free Chat →</a>
+          <a href="/" class="plan-cta">Start Free Chat →</a>
           <a href="https://wa.me/8801535778111" target="_blank" class="plan-cta wa-cta">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             WhatsApp
           </a>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PLAN 2: ENTRY ═══ -->
+    <!-- ═══ PLAN 2: ENTRY ৳30 ═══ -->
     <div class="plan entry">
       <div class="plan-head">
         <div class="plan-left">
           <div class="plan-icon">💰</div>
           <div>
-            <div class="plan-name">Entry-Level Report</div>
-            <div class="plan-model">Exact basic info structured with your profile</div>
+            <div class="plan-name">Entry-Level Country Insight</div>
+            <div class="plan-model">Fully Automated — Instant Delivery</div>
           </div>
         </div>
-        <div class="plan-badge">৳30 – ৳70 / stage</div>
+        <div class="plan-badge">৳30 / student</div>
       </div>
       <div class="plan-body">
-        <p class="plan-desc">
-          You provide more detail — academic results, financial goals, current stage, parent situation, any skills or scholarships. AI structures this into a personalised basic information report with exact figures and tailored university/country options.
-        </p>
+        <div class="plan-purpose">Purpose: Structured country overview with decision clarity</div>
+        <p class="plan-desc">Select your target country, pay ৳30, and receive an automatically generated 1–2 page PDF report instantly. <strong style="color:#4ade80">No human time used</strong> — 100% automated delivery to your email and dashboard.</p>
         <div class="feats">
-          <span class="feat"><span class="feat-dot"></span>Full profile-based report</span>
-          <span class="feat"><span class="feat-dot"></span>Academic results analysis</span>
-          <span class="feat"><span class="feat-dot"></span>Financial goal mapping</span>
-          <span class="feat"><span class="feat-dot"></span>Scholarship eligibility check</span>
-          <span class="feat"><span class="feat-dot"></span>Skills &amp; training overview</span>
-          <span class="feat"><span class="feat-dot"></span>Country &amp; university suggestions</span>
+          <span class="feat"><span class="feat-dot"></span>1–2 page country comparison report</span>
+          <span class="feat"><span class="feat-dot"></span>Approximate tuition cost range</span>
+          <span class="feat"><span class="feat-dot"></span>Accommodation estimate</span>
+          <span class="feat"><span class="feat-dot"></span>Living expenses overview</span>
+          <span class="feat"><span class="feat-dot"></span>Part-time job rules &amp; work hours</span>
+          <span class="feat"><span class="feat-dot"></span>Post-study work opportunity summary</span>
+          <span class="feat"><span class="feat-dot"></span>Auto PDF delivery to email</span>
         </div>
-        <div class="price-table-wrap">
-          <div class="price-table-title">Pricing by Stage</div>
-          <table class="price-table">
-            <thead><tr><th>Stage</th><th>Level</th><th>Price</th></tr></thead>
-            <tbody>
-              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation (Pre-School–Class 5)</td><td><span class="price-val">৳30</span></td></tr>
-              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development (Class 6–8)</td><td><span class="price-val">৳35</span></td></tr>
-              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic (Class 9–12)</td><td><span class="price-val">৳40</span></td></tr>
-              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳45</span></td></tr>
-              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳60</span></td></tr>
-              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳70</span></td></tr>
-              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode (per child/person)</td><td><span class="price-val">৳30–৳70</span></td></tr>
-            </tbody>
-          </table>
+        <div class="advantage-box">
+          <strong>📌 Note:</strong> Approximate ranges only — no exact figures. This is your "Low-cost structured information product." Must be fully automated to avoid operational cost.
         </div>
         <div class="plan-cta-row">
-          <a href="index.html" class="plan-cta">Get Entry Report →</a>
+          <a href="/" class="plan-cta">Get Country Report →</a>
           <a href="https://wa.me/8801535778111" target="_blank" class="plan-cta wa-cta">WhatsApp</a>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PLAN 3: STRUCTURED ═══ -->
+    <!-- ═══ PLAN 3: STRUCTURED ৳100–৳500 ═══ -->
     <div class="plan struct">
       <div class="plan-head">
         <div class="plan-left">
           <div class="plan-icon">🔵</div>
           <div>
             <div class="plan-name">Structured Academic Plan</div>
-            <div class="plan-model">Stage-based mentoring + human consultation</div>
+            <div class="plan-model">Professional Tier — AI + Human Combined</div>
           </div>
         </div>
-        <div class="plan-badge">৳120 – ৳250 / stage</div>
+        <div class="plan-badge">৳100 – ৳500</div>
       </div>
       <div class="plan-body">
-        <p class="plan-desc">
-          You share full details — academic records, family &amp; financial background, language scores (or risk assessment if no score). Receive a detailed, personalised plan with direct contact info for universities, embassy contacts, and local/international university agents for your chosen country. Includes human + AI combined review.
-        </p>
+        <div class="plan-purpose">Purpose: Real academic positioning + Risk analysis</div>
+        <p class="plan-desc">Submit your full academic profile and receive a professionally reviewed, personalised pathway plan. AI generates the draft, a human consultant verifies and signs off before delivery.</p>
         <div class="feats">
+          <span class="feat"><span class="feat-dot"></span>Academic records analysis</span>
+          <span class="feat"><span class="feat-dot"></span>Family financial capability assessment</span>
+          <span class="feat"><span class="feat-dot"></span>Language score evaluation</span>
+          <span class="feat"><span class="feat-dot"></span>Risk management (no score → assumption model)</span>
           <span class="feat"><span class="feat-dot"></span>Stage-based mentoring plan</span>
-          <span class="feat"><span class="feat-dot"></span>Admission support</span>
-          <span class="feat"><span class="feat-dot"></span>Human consultation session</span>
+          <span class="feat"><span class="feat-dot"></span>Admission strategy guidance</span>
           <span class="feat"><span class="feat-dot"></span>Scholarship advisory</span>
-          <span class="feat"><span class="feat-dot"></span>Language risk assessment</span>
-          <span class="feat"><span class="feat-dot"></span>University direct contacts</span>
-          <span class="feat"><span class="feat-dot"></span>Embassy &amp; agent contacts</span>
-          <span class="feat"><span class="feat-dot"></span>Human + AI combined report</span>
+          <span class="feat"><span class="feat-dot"></span>AI + Human combined risk analysis</span>
+          <span class="feat"><span class="feat-dot"></span>University direct contact details</span>
+          <span class="feat"><span class="feat-dot"></span>Embassy information (selected country)</span>
+          <span class="feat"><span class="feat-dot"></span>Approved agent references</span>
         </div>
         <div class="price-table-wrap">
           <div class="price-table-title">Pricing by Stage</div>
           <table class="price-table">
             <thead><tr><th>Stage</th><th>Level</th><th>Price</th></tr></thead>
             <tbody>
-              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation</td><td><span class="price-val">৳120</span></td></tr>
-              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development</td><td><span class="price-val">৳140</span></td></tr>
-              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic</td><td><span class="price-val">৳160</span></td></tr>
-              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳180</span></td></tr>
-              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳210</span></td></tr>
-              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳250</span></td></tr>
-              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode</td><td><span class="price-val">৳120–৳250</span></td></tr>
+              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation (Pre-School – Class 5)</td><td><span class="price-val">৳100</span></td></tr>
+              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development (Class 6–8)</td><td><span class="price-val">৳150</span></td></tr>
+              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic (Class 9–12)</td><td><span class="price-val">৳200</span></td></tr>
+              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳300</span></td></tr>
+              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳400</span></td></tr>
+              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳500</span></td></tr>
+              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode</td><td><span class="price-val">৳100–৳500</span></td></tr>
             </tbody>
           </table>
         </div>
+        <div class="advantage-box"><strong>📌 Core Professional Revenue Tier.</strong> AI prepares draft → Human verifies before sending.</div>
         <div class="plan-cta-row">
-          <a href="index.html" class="plan-cta">Get Structured Plan →</a>
+          <a href="/" class="plan-cta">Apply for Structured Plan →</a>
           <a href="https://wa.me/8801535778111" target="_blank" class="plan-cta wa-cta">WhatsApp</a>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PLAN 4: MID-TIER ═══ -->
+    <!-- ═══ PLAN 4: MID-TIER ৳500–৳20,000 ═══ -->
     <div class="plan mid">
       <div class="plan-head">
         <div class="plan-left">
           <div class="plan-icon">💼</div>
           <div>
             <div class="plan-name">Mentor-Led Programme</div>
-            <div class="plan-model">Mid-tier — matched mentor by age &amp; education level</div>
+            <div class="plan-model">Recurring Mentorship — Age &amp; Level Matched</div>
           </div>
         </div>
-        <div class="plan-badge">৳120 – ৳550 / stage</div>
+        <div class="plan-badge">৳500 – ৳20,000+</div>
       </div>
       <div class="plan-body">
-        <p class="plan-desc">
-          Matched with the right mentor by age and education level — from language instructors to full professors, local and international, online or offline. Office assistant reviews and selects your file. <strong style="color:var(--gold2)">Payment collected only after a human reviews, approves, and signs your documents.</strong>
-        </p>
+        <div class="plan-purpose">Purpose: Long-term academic shaping + recurring revenue</div>
+        <p class="plan-desc">Matched with the right mentor based on your age and education level — from language instructors to full professors. <strong style="color:var(--gold2)">No payment is collected without written mentor confirmation and signed agreement.</strong></p>
         <div class="feats">
           <span class="feat"><span class="feat-dot"></span>Age &amp; level matched mentor</span>
           <span class="feat"><span class="feat-dot"></span>Language course instructors</span>
@@ -381,27 +420,29 @@
           <span class="feat"><span class="feat-dot"></span>Lecturers, Asst. Professors, Professors</span>
           <span class="feat"><span class="feat-dot"></span>Local &amp; international mentors</span>
           <span class="feat"><span class="feat-dot"></span>Online or offline sessions</span>
-          <span class="feat"><span class="feat-dot"></span>File reviewed by office assistant</span>
-          <span class="feat"><span class="feat-dot"></span>Human-signed documents</span>
-          <span class="feat"><span class="feat-dot"></span>Pay ONLY after approval</span>
+          <span class="feat"><span class="feat-dot"></span>Office assistant file review</span>
+          <span class="feat"><span class="feat-dot"></span>Written mentor agreement</span>
+          <span class="feat"><span class="feat-dot"></span>Regular progress monitoring reports</span>
+          <span class="feat"><span class="feat-dot"></span>Pay ONLY after mentor confirmation</span>
         </div>
         <div class="price-table-wrap">
-          <div class="price-table-title">Pricing by Stage</div>
+          <div class="price-table-title">Pricing by Level</div>
           <table class="price-table">
-            <thead><tr><th>Stage</th><th>Level</th><th>Price</th></tr></thead>
+            <thead><tr><th>Stage</th><th>Level</th><th>Price Range</th></tr></thead>
             <tbody>
-              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation</td><td><span class="price-val">৳120</span></td></tr>
-              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development</td><td><span class="price-val">৳350</span></td></tr>
-              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic</td><td><span class="price-val">৳380</span></td></tr>
-              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳410</span></td></tr>
-              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳440</span></td></tr>
-              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳550</span></td></tr>
-              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode</td><td><span class="price-val">৳120–৳550</span></td></tr>
+              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation</td><td><span class="price-val">৳500–৳2,000</span></td></tr>
+              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development</td><td><span class="price-val">৳1,000–৳4,000</span></td></tr>
+              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic</td><td><span class="price-val">৳2,000–৳6,000</span></td></tr>
+              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳3,000–৳10,000</span></td></tr>
+              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳5,000–৳15,000</span></td></tr>
+              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳10,000–৳20,000+</span></td></tr>
+              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode</td><td><span class="price-val">৳500–৳20,000+</span></td></tr>
             </tbody>
           </table>
         </div>
+        <div class="advantage-box"><strong>📌 Creates recurring revenue + credibility.</strong> Mentor quality strictly controlled — CV verification, trial session, performance rating.</div>
         <div class="plan-cta-row">
-          <a href="index.html" class="plan-cta">Apply for Mentor →</a>
+          <a href="/" class="plan-cta">Apply for Mentor →</a>
           <a href="https://wa.me/8801535778111" target="_blank" class="plan-cta wa-cta">WhatsApp</a>
         </div>
       </div>
@@ -414,84 +455,174 @@
           <div class="plan-icon">🔴</div>
           <div>
             <div class="plan-name">Elite Academic Pathway</div>
-            <div class="plan-model">Academic board · Research mentorship · Global targeting</div>
+            <div class="plan-model">Academic Board · Research · Global Targeting</div>
           </div>
         </div>
-        <div class="plan-badge">★ Premium — ৳1,000–৳11,000</div>
+        <div class="plan-badge">★ Call for Details</div>
       </div>
       <div class="plan-body">
-        <p class="plan-desc">
-          Our highest tier — personalised academic board access, research mentorship with proper individual guidelines, offline and online meetings, global top university targeting, and a long-term career architecture built specifically for you.
-        </p>
+        <div class="plan-purpose">Purpose: Prestige tier — long-term career architecture</div>
+        <p class="plan-desc">Our highest tier — personalised academic board access, research mentorship, global top university targeting, and a 5–10 year career roadmap built specifically for you. Handled by senior advisors only.</p>
         <div class="feats">
           <span class="feat"><span class="feat-dot"></span>Academic board access</span>
-          <span class="feat"><span class="feat-dot"></span>Research mentorship</span>
-          <span class="feat"><span class="feat-dot"></span>Individual goal-based guidance</span>
+          <span class="feat"><span class="feat-dot"></span>Research mentorship team</span>
+          <span class="feat"><span class="feat-dot"></span>Individual goal-based strategy</span>
           <span class="feat"><span class="feat-dot"></span>Offline + online meetings</span>
           <span class="feat"><span class="feat-dot"></span>Global top university targeting</span>
-          <span class="feat"><span class="feat-dot"></span>Long-term career architecture</span>
-          <span class="feat"><span class="feat-dot"></span>Priority dedicated advisor</span>
-        </div>
-        <div class="price-table-wrap">
-          <div class="price-table-title">Pricing by Stage</div>
-          <table class="price-table">
-            <thead><tr><th>Stage</th><th>Level</th><th>Price</th></tr></thead>
-            <tbody>
-              <tr class="stage-row" data-stage="1"><td><span class="stage-tag">🌱 Stage 1</span></td><td>Foundation</td><td><span class="price-val">৳1,000</span></td></tr>
-              <tr class="stage-row" data-stage="2"><td><span class="stage-tag">🔍 Stage 2</span></td><td>Development</td><td><span class="price-val">৳2,000</span></td></tr>
-              <tr class="stage-row" data-stage="3"><td><span class="stage-tag">🎯 Stage 3</span></td><td>Strategic</td><td><span class="price-val">৳2,000–৳5,000</span></td></tr>
-              <tr class="stage-row" data-stage="4"><td><span class="stage-tag">🎓 Stage 4</span></td><td>Undergraduate</td><td><span class="price-val">৳3,000</span></td></tr>
-              <tr class="stage-row" data-stage="5"><td><span class="stage-tag">🔬 Stage 5</span></td><td>Masters</td><td><span class="price-val">৳5,000</span></td></tr>
-              <tr class="stage-row" data-stage="6"><td><span class="stage-tag">🏛️ Stage 6</span></td><td>Doctoral / PhD</td><td><span class="price-val">৳11,000</span></td></tr>
-              <tr class="stage-row" data-stage="7"><td><span class="stage-tag">👨‍👩‍👧 Stage 7</span></td><td>Parent Mode (per child)</td><td><span class="price-val">৳1,000–৳11,000</span></td></tr>
-            </tbody>
-          </table>
+          <span class="feat"><span class="feat-dot"></span>PhD / Research track planning</span>
+          <span class="feat"><span class="feat-dot"></span>High-level profile building</span>
+          <span class="feat"><span class="feat-dot"></span>Strategic documentation planning</span>
+          <span class="feat"><span class="feat-dot"></span>Long-term career architecture (5–10 years)</span>
+          <span class="feat"><span class="feat-dot"></span>Priority dedicated senior advisor</span>
         </div>
         <div class="plan-cta-row">
-          <a href="https://wa.me/8801535778111?text=I%20want%20Elite%20Plan%20details" target="_blank" class="plan-cta">Call / WhatsApp for Details →</a>
+          <a href="https://wa.me/8801535778111?text=I%20want%20Elite%20Academic%20Pathway%20details" target="_blank" class="plan-cta">Call / WhatsApp for Details →</a>
         </div>
       </div>
     </div>
 
   </div><!-- .plans -->
 
+  <!-- COMPARISON TABLE -->
+  <div class="compare-section">
+    <div class="section-label">Quick Comparison</div>
+    <div class="section-title">What's Included</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Free</th>
+          <th>৳30</th>
+          <th>৳100–৳500</th>
+          <th>৳500–৳20K</th>
+          <th>Elite</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>AI Assessment</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Document Checklist</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Country Report (PDF)</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Risk Analysis</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Human Consultant Review</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>University Contacts</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Matched Mentor</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Academic Board Access</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td></tr>
+        <tr><td>Research Mentorship</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓</td></tr>
+        <tr><td>AI Involvement</td><td class="partial">90%</td><td class="partial">100%</td><td class="partial">60%</td><td class="partial">20%</td><td class="partial">10%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AI vs HUMAN RATIO -->
+  <div class="ratio-section">
+    <div class="section-label">AI + Human Balance</div>
+    <div class="section-title">How We Work</div>
+    <div class="ratio-grid">
+      <div class="ratio-card">
+        <div class="plan-lbl">🟢 Free Plan</div>
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px">AI 90%</div>
+        <div class="ratio-bar"><div class="fill-ai" style="width:90%"></div></div>
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">Human 10%</div>
+        <div class="ratio-bar"><div class="fill-human" style="width:10%"></div></div>
+      </div>
+      <div class="ratio-card">
+        <div class="plan-lbl">💰 ৳30 Report</div>
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px">AI 100%</div>
+        <div class="ratio-bar"><div class="fill-ai" style="width:100%"></div></div>
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">Human 0%</div>
+        <div class="ratio-bar"><div class="fill-human" style="width:0%"></div></div>
+      </div>
+      <div class="ratio-card">
+        <div class="plan-lbl">🔵 Structured</div>
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px">AI 60%</div>
+        <div class="ratio-bar"><div class="fill-ai" style="width:60%"></div></div>
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">Human 40%</div>
+        <div class="ratio-bar"><div class="fill-human" style="width:40%"></div></div>
+      </div>
+      <div class="ratio-card">
+        <div class="plan-lbl">💼 Mentorship</div>
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px">AI 20%</div>
+        <div class="ratio-bar"><div class="fill-ai" style="width:20%"></div></div>
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">Human 80%</div>
+        <div class="ratio-bar"><div class="fill-human" style="width:80%"></div></div>
+      </div>
+      <div class="ratio-card">
+        <div class="plan-lbl">🔴 Elite</div>
+        <div style="font-size:11px;color:var(--teal);margin-bottom:4px">AI 10%</div>
+        <div class="ratio-bar"><div class="fill-ai" style="width:10%"></div></div>
+        <div style="font-size:11px;color:var(--gold);margin-bottom:4px">Human 90%</div>
+        <div class="ratio-bar"><div class="fill-human" style="width:90%"></div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- HOW IT WORKS -->
   <div class="how-section">
-    <div class="section-label" style="margin-top:0">How It Works</div>
+    <div class="section-label">How It Works</div>
     <div class="section-title">5 Simple Steps</div>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-title">Free Chat</div>
-        <div class="step-desc">Start with the free assessment session — no payment needed</div>
+        <div class="step-desc">Start with the free AI assessment — no payment, no commitment needed</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-title">Pick Plan</div>
-        <div class="step-desc">Choose Entry, Structured, Mentor or Elite based on your need</div>
+        <div class="step-desc">Choose ৳30 report, Structured plan, Mentorship or Elite based on your need</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-title">AI Confirms Price</div>
-        <div class="step-desc">AI tells you the exact amount for your stage and sends payment details</div>
+        <div class="step-desc">AI sends exact amount for your stage and shares payment number</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-title">Pay bKash/Nagad</div>
-        <div class="step-desc">Send to 01621777657 — screenshot confirms to admin &amp; you</div>
+        <div class="step-desc">Send to 01621-777657 — send screenshot to WhatsApp for confirmation</div>
       </div>
       <div class="step">
         <div class="step-num">5</div>
-        <div class="step-title">Get Report</div>
-        <div class="step-desc">Receive your plan — Mentor plans only after human signs off</div>
+        <div class="step-title">Get Your Plan</div>
+        <div class="step-desc">Receive report or mentor assignment — Mentor plans only after human signs off</div>
       </div>
+    </div>
+  </div>
+
+  <!-- LEGAL & DATA PROTECTION -->
+  <div class="policy-section">
+    <div class="policy-card">
+      <h3>⚖️ Legal Disclaimer</h3>
+      <ul>
+        <li>Earth Solutions provides academic consultancy and advisory services only</li>
+        <li>We do <span class="do-not">NOT guarantee visa approval</span></li>
+        <li>We do <span class="do-not">NOT guarantee university admission</span></li>
+        <li>We do <span class="do-not">NOT influence embassy decisions</span></li>
+        <li>We do <span class="do-not">NOT offer immigration legal representation</span></li>
+        <li>All final decisions are made by universities, embassies, and immigration authorities</li>
+        <li>Risk analysis provided is advisory in nature — not a guarantee of any outcome</li>
+        <li>User must agree to these terms before any paid service is activated</li>
+      </ul>
+    </div>
+    <div class="policy-card">
+      <h3>🔐 Data Protection Policy</h3>
+      <ul>
+        <li>We collect academic information, contact details, and financial overview (if voluntarily provided)</li>
+        <li>We do <span class="do-not">NOT sell personal data</span> to third parties</li>
+        <li>We do <span class="do-not">NOT share data without consent</span></li>
+        <li>We do <span class="do-not">NOT use data for unrelated marketing</span></li>
+        <li>Data is stored securely with restricted access and daily backups</li>
+        <li>Students may request data correction, deletion, or a copy of their submitted information</li>
+        <li>We comply with ethical data handling standards</li>
+        <li>Payment logs are stored securely for dispute protection</li>
+      </ul>
     </div>
   </div>
 
   <!-- PAYMENT SECTION -->
   <div class="pay-section">
     <h3>💳 Payment Details</h3>
-    <p>Only pay to admin-authorized numbers. AI will confirm these details when you're ready to pay. Never send money to any other number.</p>
+    <p>Only pay to admin-authorized numbers. AI will confirm these details when you're ready to pay. Never send money to any other number. Always send payment screenshot to WhatsApp for auto-confirmation.</p>
     <div class="pay-methods-big">
       <div class="pay-method-card">
         <div class="m-label">bKash (Send Money)</div>
@@ -505,7 +636,7 @@
       </div>
     </div>
     <div class="pay-warn">
-      ⚠️ Only this number is authorized by admin. After payment, send the screenshot to WhatsApp <strong>+880 1535-778111</strong> for confirmation.
+      ⚠️ Only this number is authorized by admin. After payment, send the screenshot to WhatsApp <strong>+880 1535-778111</strong> for confirmation. Auto-invoice will be generated for your records.
     </div>
   </div>
 
@@ -522,19 +653,17 @@
     Questions? Chat for free or <strong>WhatsApp +880 1535-778111</strong>
   </p>
   <p>© 2025 Peopole AI — Earth Solutions Visa Zone · Panthapath, Dhaka</p>
+  <p style="margin-top:8px;font-size:11px;opacity:.5">
+    Earth Solutions provides advisory services only. No visa or admission guarantee. All decisions rest with universities, embassies, and immigration authorities.
+  </p>
 </footer>
 
 <script>
-// Tab filter
-function filterStage(stage) {
+function filterStage(stage, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  btn.classList.add('active');
   document.querySelectorAll('.stage-row').forEach(row => {
-    if (stage === 'all') {
-      row.style.display = '';
-    } else {
-      row.style.display = row.dataset.stage === stage ? '' : 'none';
-    }
+    row.style.display = (stage === 'all' || row.dataset.stage === stage) ? '' : 'none';
   });
 }
 </script>
