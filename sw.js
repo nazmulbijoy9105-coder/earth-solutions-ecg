@@ -66,3 +66,10 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// Fix: handle extension message channel errors
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
