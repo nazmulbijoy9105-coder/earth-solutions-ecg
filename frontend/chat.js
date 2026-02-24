@@ -28,16 +28,18 @@ const LANG = {
     pushPrompt:  '🔔 Get updates & scholarship alerts?',
     pushAllow:   'Allow Notifications',
     pushDeny:    'No Thanks',
-    welcomeMsg:  `👋 Welcome to **Peopole AI** — your expert academic and visa consultant from **Earth Solutions Visa Zone, Dhaka**.
+    welcomeMsg:  `👋 **Welcome to Peopole AI** — Earth Solutions Visa Zone, Dhaka.
 
-I can help you with:
-• University selection & admissions
-• Visa requirements & step-by-step guidance
-• Scholarship opportunities & funding
-• SOP, CV & document preparation
-• Study abroad pathways & country comparisons
+I'm not just an information bot. I work as your **personal academic amplifier** — I find your strengths, understand your challenges, and build a path that fits *you specifically*.
 
-Select your academic stage to begin, or ask me anything directly!`,
+**Tell me about yourself:**
+• How old are you, and what class/level are you in?
+• What subject or career excites you most?
+• What feels hardest right now — studies, language, finances, or direction?
+
+*Every student is different. Your journey starts with your story — not a template.*
+
+🌱 Or select your academic stage below to begin.`,
     stageNames: {
       1: '🌱 Foundation (Pre-School – Class 5)',
       2: '🔍 Development (Class 6–8)',
@@ -70,16 +72,18 @@ Select your academic stage to begin, or ask me anything directly!`,
     pushPrompt:  '🔔 আপডেট ও বৃত্তির নোটিফিকেশন পেতে চান?',
     pushAllow:   'অনুমতি দিন',
     pushDeny:    'না, ধন্যবাদ',
-    welcomeMsg:  `👋 **পিপল এআই**-তে আপনাকে স্বাগতম — **আর্থ সলিউশনস ভিসা জোন, ঢাকা** থেকে আপনার বিশেষজ্ঞ শিক্ষা ও ভিসা পরামর্শদাতা।
+    welcomeMsg:  `👋 **পিপল এআই**-তে আপনাকে স্বাগতম — আর্থ সলিউশনস ভিসা জোন, ঢাকা।
 
-আমি আপনাকে সাহায্য করতে পারি:
-• বিশ্ববিদ্যালয় নির্বাচন ও ভর্তি প্রক্রিয়া
-• ভিসার প্রয়োজনীয়তা ও ধাপে ধাপে গাইডেন্স
-• বৃত্তির সুযোগ ও আর্থিক সহায়তা
-• এসওপি, সিভি ও ডকুমেন্ট প্রস্তুতি
-• বিদেশে পড়াশোনার পথনির্দেশ ও দেশ তুলনা
+আমি শুধু তথ্য দেওয়ার বট নই। আমি আপনার **ব্যক্তিগত একাডেমিক অ্যাম্পলিফায়ার** — আপনার শক্তি খুঁজে বের করি, দুর্বলতা বুঝি, এবং আপনার জন্য সঠিক পথ তৈরি করি।
 
-শুরু করতে আপনার একাডেমিক পর্যায় নির্বাচন করুন, বা সরাসরি প্রশ্ন করুন!`,
+**আপনার সম্পর্কে বলুন:**
+• আপনার বয়স কত এবং কোন ক্লাস বা স্তরে আছেন?
+• কোন বিষয় বা ক্যারিয়ার আপনাকে সবচেয়ে বেশি আগ্রহী করে?
+• এখন সবচেয়ে কঠিন কোনটা — পড়াশোনা, ভাষা, অর্থ, নাকি দিকনির্দেশনা?
+
+*প্রতিটি শিক্ষার্থী আলাদা। আপনার যাত্রা শুরু হয় আপনার গল্প থেকে — কোনো টেমপ্লেট থেকে নয়।*
+
+🌱 অথবা নিচে আপনার একাডেমিক পর্যায় বেছে নিন।`,
     stageNames: {
       1: '🌱 ফাউন্ডেশন (প্রি-স্কুল – ক্লাস ৫)',
       2: '🔍 ডেভেলপমেন্ট (ক্লাস ৬–৮)',
@@ -158,11 +162,15 @@ const AD_SLOTS = [
 // ═══════════════════════════════════════════════════════════════════════════
 let lang       = 'en';
 let stage      = null;
-let memory     = [];   // conversation history sent to server
+let memory     = [];   // resets every page load — always fresh start
 let isTyping   = false;
 let isOnline   = navigator.onLine;
-let aiMsgCount = 0;    // for ad slot triggers
-let userId     = localStorage.getItem('ppl_uid') || (() => {
+let aiMsgCount   = 0;  // for ad slot triggers
+let userMsgCount = 0;  // free message limit counter
+
+const FREE_MSG_LIMIT = 10; // free messages per session — change to adjust
+
+let userId = localStorage.getItem('ppl_uid') || (() => {
   const id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   localStorage.setItem('ppl_uid', id);
   return id;
@@ -297,10 +305,22 @@ async function sendMessage() {
 
   if (!isOnline) { addMessage('assistant', LANG[lang].offlineMsg); return; }
 
+  // ── Free message limit check ──────────────────────────────────────────
+  if (userMsgCount >= FREE_MSG_LIMIT) {
+    const limitMsg = lang === 'bn'
+      ? `🔒 **আপনি বিনামূল্যে ${FREE_MSG_LIMIT}টি বার্তার সীমায় পৌঁছেছেন।**\n\nআরও সহায়তার জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন অথবা একটি পরিষেবা পরিকল্পনা বেছে নিন:\n📱 [WhatsApp করুন →](https://wa.me/8801535778111?text=আমি+আরও+সাহায্য+চাই)\n💰 [সেবা পরিকল্পনা দেখুন →](/pricing.html)`
+      : `🔒 **You've reached the ${FREE_MSG_LIMIT}-message free limit for this session.**\n\nTo continue getting expert guidance, contact us or choose a service plan:\n📱 [WhatsApp Us →](https://wa.me/8801535778111?text=I+need+more+guidance)\n💰 [View Service Plans →](/pricing.html)`;
+    addMessage('assistant', limitMsg);
+    if (els.messageInput) els.messageInput.disabled = true;
+    if (els.sendBtn)      els.sendBtn.disabled      = true;
+    return;
+  }
+
   addMessage('user', text);
   memory.push({ role: 'user', content: text });
   input.value = '';
   input.style.height = 'auto';
+  userMsgCount++;
 
   isTyping = true;
   if (els.sendBtn) els.sendBtn.disabled = true;
@@ -667,6 +687,11 @@ function init() {
   updateOnlineStatus();
   setLang('en');
   buildFAQPanel();
+  // Always start fresh — clear any browser-restored content
+  if (els.messages) els.messages.innerHTML = '';
+  memory       = [];
+  aiMsgCount   = 0;
+  userMsgCount = 0;
   addMessage('assistant', LANG.en.welcomeMsg);
   setTimeout(showStageModal, 500);
   trackPageview();
