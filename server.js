@@ -678,7 +678,6 @@ First, ask the student ONE question to identify their stage and situation:
 Then identify their top strength and top challenge before giving any advice.
 Tailor all subsequent responses using the HG-AI framework — amplify their strength, address their weakness, guide toward human consultation when needed.`);
 }
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // G. FALLBACK POOL — used when Groq is unavailable
