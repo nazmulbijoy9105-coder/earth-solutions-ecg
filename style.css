@@ -75,7 +75,7 @@ textarea:focus {
   will-change: transform;
 }
 
-/* (All your sidebar, logo, buttons remain unchanged — omitted here for brevity in explanation but included fully in production use) */
+/* (Other sidebar styles omitted for brevity, unchanged) */
 
 /* ── MAIN ───────────────────────────────────────────────────────────────── */
 .main {
@@ -158,7 +158,8 @@ textarea:focus {
 .wa-float {
   position: fixed;
   bottom: 120px;
-  right: 18px;
+  left: 18px;      /* Align left */
+  right: auto;     /* Remove right positioning */
   z-index: 50;
   background: linear-gradient(135deg, #25d366, #128c7e);
   color: #fff;
@@ -176,11 +177,19 @@ textarea:focus {
   animation: waPop .5s ease 1.2s both;
 }
 
-.wa-float:hover { transform: translateY(-3px) scale(1.03); }
+.wa-float:hover {
+  transform: translateY(-3px) scale(1.03);
+}
 
 @keyframes waPop {
-  from { opacity: 0; transform: translateY(20px) scale(.85); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── MODAL BACKDROPS (Performance Tuned) ───────────────────────────────── */
@@ -216,7 +225,8 @@ textarea:focus {
 
   .wa-float {
     bottom: 110px;
-    right: 12px;
+    left: 12px;    /* Shift left on smaller screens */
+    right: auto;
     padding: 11px;
     border-radius: 50%;
   }
