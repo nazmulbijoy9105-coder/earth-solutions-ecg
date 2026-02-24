@@ -1,0 +1,17 @@
+{
+  "inquiries": [],
+  "stats": {
+    "total": 0,
+    "byStage": {},
+    "byLang": {
+      "en": 0,
+      "bn": 0
+    },
+    "daily": {},
+    "sources": {
+      "faq": 0,
+      "ai": 0,
+      "fallback": 0
+    }
+  }
+}
