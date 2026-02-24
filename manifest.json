@@ -1,15 +1,17 @@
 {
   "name": "Peopole AI — Earth Solutions Visa Zone",
   "short_name": "Peopole AI",
-  "description": "Academic & Visa Consultant powered by AI — Earth Solutions Visa Zone, Dhaka",
+  "description": "Expert academic and visa consultant for Bangladeshi students studying abroad",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b1629",
   "theme_color": "#0b1629",
   "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["education", "productivity"],
   "icons": [
-    { "src": "/logo.jpg", "sizes": "192x192", "type": "image/jpeg" },
-    { "src": "/logo.jpg", "sizes": "512x512", "type": "image/jpeg" }
+    { "src": "/logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any maskable" },
+    { "src": "/logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any maskable" }
   ],
   "screenshots": [
     {
@@ -17,7 +19,19 @@
       "sizes": "512x512",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Peopole AI Chat"
+      "label": "Peopole AI Chat Interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "url": "/",
+      "description": "Start a new conversation"
+    },
+    {
+      "name": "Pricing",
+      "url": "/pricing.html",
+      "description": "View service plans and pricing"
     }
   ]
 }

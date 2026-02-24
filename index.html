@@ -4,57 +4,27 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#0b1629"/>
-  <meta name="description" content="Peopole AI — Academic & Visa Consultant by Earth Solutions Visa Zone, Dhaka"/>
+  <meta name="description" content="Peopole AI — Academic & Visa Consultant by Earth Solutions Visa Zone, Dhaka. Study abroad guidance for Bangladeshi students."/>
   <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Peopole AI"/>
-  <link rel="manifest" href="/manifest.json"/>
+  <!-- Open Graph -->
+  <meta property="og:title"       content="Peopole AI — Earth Solutions Visa Zone"/>
+  <meta property="og:description" content="Expert academic and visa consultant for Bangladeshi students. Study in UK, Australia, Canada, Germany & more."/>
+  <meta property="og:image"       content="/logo.jpg"/>
+  <meta property="og:type"        content="website"/>
+  <link rel="manifest"        href="/manifest.json"/>
   <link rel="apple-touch-icon" href="/logo.jpg"/>
   <link rel="icon" type="image/jpeg" href="/logo.jpg"/>
   <title>Peopole AI — Earth Solutions Visa Zone</title>
   <link rel="stylesheet" href="/style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    /* Language toggle button */
-    .lang-btn {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--gold);
-      font-size: 12px;
-      font-weight: 700;
-      font-family: 'Noto Sans Bengali', var(--font-b);
-      padding: 6px 11px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all .2s;
-      white-space: nowrap;
-      letter-spacing: 0.3px;
-    }
-    .lang-btn:hover {
-      border-color: var(--gold);
-      background: rgba(212,168,67,.1);
-    }
-    /* Bangla font applied when bn mode active */
-    body.bn-mode {
-      font-family: 'Noto Sans Bengali', 'Outfit', sans-serif;
-    }
-    body.bn-mode .stage-modal,
-    body.bn-mode .msg-text,
-    body.bn-mode .welcome,
-    body.bn-mode .qp,
-    body.bn-mode .topbar-sub,
-    body.bn-mode .stage-badge,
-    body.bn-mode .disclaimer,
-    body.bn-mode .sidebar-footer {
-      font-family: 'Noto Sans Bengali', 'Outfit', sans-serif;
-    }
-    .whatsapp-btn { display: flex; align-items: center; gap: 10px; }
-  </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ══════════════ STAGE MODAL ══════════════ -->
+  <!-- ═══════════ STAGE SELECTION MODAL ═══════════ -->
   <div class="stage-modal-backdrop hidden" id="stageModalBackdrop">
     <div class="stage-modal">
       <div class="stage-modal-header">
@@ -113,10 +83,10 @@
     </div>
   </div>
 
-  <!-- ══════════════ OVERLAY ══════════════ -->
+  <!-- ═══════════ OVERLAY ═══════════ -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <!-- ═══════════ SIDEBAR ═══════════ -->
   <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-top">
@@ -132,7 +102,7 @@
 
     <button class="new-btn" id="newChatBtn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-       New Conversation
+      New Conversation
     </button>
 
     <div class="stage-badge-wrap" id="stageBadgeWrap" style="display:none">
@@ -169,8 +139,10 @@
     </div>
   </aside>
 
-  <!-- ══════════════ MAIN ══════════════ -->
+  <!-- ═══════════ MAIN ═══════════ -->
   <main class="main">
+
+    <!-- Topbar -->
     <header class="topbar">
       <button class="menu-btn" id="menuBtn" aria-label="Toggle sidebar">☰</button>
       <div class="topbar-logo-wrap">
@@ -178,7 +150,7 @@
       </div>
       <div class="topbar-info">
         <div class="topbar-title" id="chatTitle">Peopole AI</div>
-        <div class="topbar-sub" id="topbarSub">Earth Solutions Visa Zone, Dhaka</div>
+        <div class="topbar-sub"   id="topbarSub">Earth Solutions Visa Zone, Dhaka</div>
       </div>
       <div class="topbar-actions">
         <div class="status-dot" id="statusDot" title="Online"></div>
@@ -186,7 +158,7 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span id="pricingBtnLabel">Pricing</span>
         </button>
-        <button class="lang-btn" id="langBtn" title="Switch to Bangla">বাংলা</button>
+        <button class="lang-btn" id="langBtn" title="Switch Language">বাংলা</button>
         <button class="icon-btn" id="clearBtn" title="Clear conversation">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           <span class="clear-label"> Clear</span>
@@ -194,9 +166,10 @@
       </div>
     </header>
 
+    <!-- Messages -->
     <div class="messages" id="messages"></div>
 
-    <!-- ── FAQ Panel ── -->
+    <!-- FAQ Panel -->
     <div class="faq-area" id="faqArea">
       <button class="faq-toggle" id="faqToggleBtn" onclick="toggleFAQ()">
         💡 <span id="faqToggleLabel">Common Questions</span>
@@ -205,6 +178,7 @@
       <div class="faq-panel" id="faqPanel"></div>
     </div>
 
+    <!-- Input -->
     <div class="input-area">
       <div class="input-wrap">
         <textarea
@@ -220,16 +194,18 @@
       </div>
       <div class="disclaimer" id="disclaimerEl">Peopole AI can make mistakes. Always verify important decisions with an official consultant.</div>
     </div>
+
   </main>
 
-  <!-- ══════════════ FLOATING WHATSAPP ══════════════ -->
+  <!-- ═══════════ FLOATING WHATSAPP ═══════════ -->
   <a class="wa-float" href="https://wa.me/8801535778111?text=Hello%20Peopole%20AI%2C%20I%20need%20academic%20guidance." target="_blank" rel="noopener" title="Chat on WhatsApp">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     <span class="wa-float-label">WhatsApp</span>
   </a>
 
 </div>
-<!-- ══════════════ PRICING MODAL ══════════════ -->
+
+<!-- ═══════════ PRICING MODAL ═══════════ -->
 <div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" onclick="closePricingOnBackdrop(event)">
   <div class="pricing-modal" id="pricingModalBox">
     <div class="pm-header">
@@ -244,14 +220,12 @@
     </div>
 
     <div class="pm-plans">
-
-      <!-- Free -->
       <div class="pm-plan free" onclick="selectPlan('free')">
-        <div class="pm-plan-badge" id="ppBadge0">🟢 FREE</div>
-        <div class="pm-plan-name" id="ppName0">Basic Pathway</div>
-        <div class="pm-plan-price" id="ppPrice0">৳0</div>
-        <div class="pm-plan-desc" id="ppDesc0">Free AI guidance for every student. Ask anything, get instant answers 24/7.</div>
-        <ul class="pm-features" id="ppFeatures0">
+        <div class="pm-plan-badge">🟢 FREE</div>
+        <div class="pm-plan-name">Basic Pathway</div>
+        <div class="pm-plan-price">৳0</div>
+        <div class="pm-plan-desc">Free AI guidance for every student. Ask anything, 24/7.</div>
+        <ul class="pm-features">
           <li>✅ Unlimited AI chat</li>
           <li>✅ Stage-based guidance</li>
           <li>✅ Bangla + English support</li>
@@ -260,43 +234,40 @@
         <button class="pm-cta green" onclick="closePricingModal()">Start Chatting Free →</button>
       </div>
 
-      <!-- Entry -->
       <div class="pm-plan entry" onclick="selectPlan('entry')">
-        <div class="pm-plan-badge" id="ppBadge1">💰 ENTRY</div>
-        <div class="pm-plan-name" id="ppName1">Entry-Level Report</div>
-        <div class="pm-plan-price" id="ppPrice1">৳30 <small>/ student</small></div>
-        <div class="pm-plan-desc" id="ppDesc1">Automated country + university report tailored to your academic stage.</div>
-        <ul class="pm-features" id="ppFeatures1">
+        <div class="pm-plan-badge">💰 ENTRY</div>
+        <div class="pm-plan-name">Entry-Level Report</div>
+        <div class="pm-plan-price">৳30 <small>/ student</small></div>
+        <div class="pm-plan-desc">AI country & university report tailored to your stage, delivered to WhatsApp.</div>
+        <ul class="pm-features">
           <li>✅ Country suitability report</li>
           <li>✅ University shortlist (AI)</li>
           <li>✅ Visa requirement overview</li>
-          <li>✅ Delivered via WhatsApp</li>
+          <li>✅ Instant PDF delivery</li>
         </ul>
-        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+৳30" target="_blank">Get Report — ৳30 →</a>
+        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+%E2%82%B930" target="_blank">Get Report — ৳30 →</a>
       </div>
 
-      <!-- Structured -->
       <div class="pm-plan structured" onclick="selectPlan('structured')">
-        <div class="pm-plan-badge pm-popular" id="ppBadge2">🔵 POPULAR</div>
-        <div class="pm-plan-name" id="ppName2">Structured Guidance</div>
-        <div class="pm-plan-price" id="ppPrice2">৳100–৳500</div>
-        <div class="pm-plan-desc" id="ppDesc2">Risk analysis + human consultant review for serious applicants.</div>
-        <ul class="pm-features" id="ppFeatures3">
+        <div class="pm-plan-badge pm-popular">🔵 POPULAR</div>
+        <div class="pm-plan-name">Structured Guidance</div>
+        <div class="pm-plan-price">৳100–৳500</div>
+        <div class="pm-plan-desc">Human consultant review + AI risk analysis for serious applicants.</div>
+        <ul class="pm-features">
           <li>✅ AI risk analysis</li>
           <li>✅ Human consultant review</li>
-          <li>✅ Document checklist</li>
+          <li>✅ Full document checklist</li>
           <li>✅ SOP draft review</li>
         </ul>
         <a class="pm-cta blue" href="https://wa.me/8801535778111?text=I+want+Structured+Guidance" target="_blank">Get Started →</a>
       </div>
 
-      <!-- Mid-Tier -->
       <div class="pm-plan midtier" onclick="selectPlan('midtier')">
-        <div class="pm-plan-badge" id="ppBadge3">💼 PREMIUM</div>
-        <div class="pm-plan-name" id="ppName3">Mid-Tier Mentorship</div>
-        <div class="pm-plan-price" id="ppPrice3">৳500–৳20,000+</div>
-        <div class="pm-plan-desc" id="ppDesc3">Matched mentor + full application support. 80% human-led service.</div>
-        <ul class="pm-features" id="ppFeatures3b">
+        <div class="pm-plan-badge">💼 PREMIUM</div>
+        <div class="pm-plan-name">Mid-Tier Mentorship</div>
+        <div class="pm-plan-price">৳500–৳20,000+</div>
+        <div class="pm-plan-desc">Matched mentor + full application support. 80% human-led.</div>
+        <ul class="pm-features">
           <li>✅ Matched alumni mentor</li>
           <li>✅ Full SOP writing</li>
           <li>✅ Visa interview prep</li>
@@ -305,13 +276,12 @@
         <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+Mid-Tier+Mentorship" target="_blank">Book Consultation →</a>
       </div>
 
-      <!-- Elite -->
       <div class="pm-plan elite" onclick="selectPlan('elite')">
-        <div class="pm-plan-badge" id="ppBadge4">🔴 ELITE</div>
-        <div class="pm-plan-name" id="ppName4">Elite Academic Board</div>
-        <div class="pm-plan-price" id="ppPrice4">Call for Details</div>
-        <div class="pm-plan-desc" id="ppDesc4">Full academic board support for top institutions worldwide. 90% human expertise.</div>
-        <ul class="pm-features" id="ppFeatures4">
+        <div class="pm-plan-badge">🔴 ELITE</div>
+        <div class="pm-plan-name">Elite Academic Board</div>
+        <div class="pm-plan-price">Call for Details</div>
+        <div class="pm-plan-desc">Full academic board support for top institutions. 90% human expertise.</div>
+        <ul class="pm-features">
           <li>✅ Academic board review</li>
           <li>✅ Professor outreach</li>
           <li>✅ Scholarship negotiation</li>
@@ -319,8 +289,7 @@
         </ul>
         <a class="pm-cta rose" href="https://wa.me/8801535778111?text=I+want+Elite+Academic+Board+service" target="_blank">📞 Call Us Now →</a>
       </div>
-
-    </div><!-- /pm-plans -->
+    </div>
 
     <div class="pm-footer">
       <div class="pm-footer-note" id="pmNote">⚠️ No visa or admission guarantee. Results depend on individual eligibility.</div>
