@@ -418,11 +418,11 @@ textarea:focus { border-color: rgba(212,168,67,.4); }
 
 /* ── FLOATING WHATSAPP ───────────────────────────────────────────────────── */
 .wa-float {
-  position: fixed; bottom: 22px; right: 22px; z-index: 50;
+  position: fixed; bottom: 110px; right: 18px; z-index: 50;
   background: linear-gradient(135deg, #25d366, #128c7e);
   color: #fff; text-decoration: none; border-radius: 100px;
-  padding: 12px 16px 12px 14px; display: flex; align-items: center; gap: 8px;
-  font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  padding: 11px 15px 11px 13px; display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
   box-shadow: 0 6px 24px rgba(37,211,102,.35); transition: all .25s;
   animation: waPop .5s ease 1.2s both;
 }
@@ -467,7 +467,7 @@ textarea:focus { border-color: rgba(212,168,67,.4); }
   .send-btn { padding: 11px 14px; }
   .clear-label { display: none; }
   .stage-grid { grid-template-columns: 1fr 1fr; }
-  .wa-float { bottom: 16px; right: 16px; padding: 12px; border-radius: 50%; }
+  .wa-float { bottom: 105px; right: 12px; padding: 11px; border-radius: 50%; }
   .wa-float-label { display: none; }
   .push-prompt { right: 12px; bottom: 70px; max-width: 280px; }
   .pm-plans { grid-template-columns: 1fr; }
