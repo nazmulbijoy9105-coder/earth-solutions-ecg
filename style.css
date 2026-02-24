@@ -797,3 +797,43 @@ textarea::placeholder { color: var(--text2); }
   #pricingBtnLabel { display: none; }  /* icon only on mobile */
   .pricing-btn { padding: 7px 10px; }
 }
+/* ══════════════════════════════════════════════════════════
+   PATCH v6.0 — Bridges for new frontend/chat.js class names
+   ══════════════════════════════════════════════════════════ */
+
+/* .msg.assistant = same as .msg.ai */
+.msg.assistant { align-self: flex-start; max-width: 85%; display: flex; flex-direction: column; gap: 4px; }
+.msg.user       { display: flex; flex-direction: column; align-items: flex-end; }
+.msg.assistant .msg-text { background: var(--navy3, #172544); border-radius: 4px 18px 18px 18px; padding: 12px 16px; color: var(--text); line-height: 1.65; font-size: 14px; }
+.msg.user .msg-text      { background: linear-gradient(135deg, #1b3a6b, #1a3260); border-radius: 18px 4px 18px 18px; padding: 12px 16px; color: var(--text); line-height: 1.65; font-size: 14px; align-self: flex-end; max-width: 73%; }
+.msg-time { font-size: 10px; color: var(--text2); padding: 0 4px; }
+.msg.user .msg-time { text-align: right; }
+
+/* Typing animation inside .msg-text.typing */
+.msg-text.typing { background: var(--navy3, #172544); border-radius: 4px 18px 18px 18px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+.msg-text.typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--gold, #d4a843); opacity: 0.4; animation: typingPulse 1.2s ease-in-out infinite; }
+.msg-text.typing span:nth-child(2) { animation-delay: .2s; }
+.msg-text.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes typingPulse { 0%,80%,100% { transform: scale(.7); opacity: .3; } 40% { transform: scale(1); opacity: 1; } }
+
+/* .qp chips (FAQ quick prompts) */
+.qp { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 100px; padding: 7px 14px; font-size: 13px; color: var(--text2, #8fa3c0); cursor: pointer; transition: all .2s; white-space: nowrap; font-family: inherit; }
+.qp:hover { border-color: rgba(212,168,67,.5); color: var(--gold, #d4a843); background: rgba(212,168,67,.07); }
+
+/* .pm-selected plan highlight */
+.pm-plan.pm-selected { outline: 2px solid var(--gold); }
+
+/* Stage badge display fix */
+.stage-badge-wrap { display: flex; align-items: center; gap: 8px; margin: 8px 16px; }
+.stage-change-btn { background: none; border: 1px solid var(--border2); color: var(--text2); font-size: 11px; padding: 3px 10px; border-radius: 20px; cursor: pointer; transition: all .2s; font-family: inherit; }
+.stage-change-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Messages container needs flex column */
+.messages { display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; }
+
+/* msg-text links */
+.msg-text a { color: var(--teal, #1ec8b0); text-decoration: underline; }
+.msg-text strong { color: var(--gold2, #f0c96a); font-weight: 600; }
+.msg-text ul { padding-left: 18px; margin: 6px 0; }
+.msg-text li { margin-bottom: 4px; }
+.msg-text br { display: block; margin: 2px 0; }
