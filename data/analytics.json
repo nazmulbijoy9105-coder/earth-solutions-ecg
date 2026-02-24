@@ -1,4 +1,33 @@
 {
-  "events": [],
-  "pageviews": {}
+  "events": [
+    {
+      "type": "pageview",
+      "path": "/",
+      "referrer": "",
+      "time": "2026-02-24T19:32:38.647Z"
+    },
+    {
+      "type": "event",
+      "name": "language_toggle",
+      "meta": {
+        "lang": "en"
+      },
+      "time": "2026-02-24T19:32:39.208Z"
+    },
+    {
+      "type": "pageview",
+      "path": "/",
+      "referrer": "",
+      "time": "2026-02-24T19:32:39.229Z"
+    },
+    {
+      "type": "pageview",
+      "path": "/",
+      "referrer": "http://localhost:3000/sw.js",
+      "time": "2026-02-24T19:32:39.288Z"
+    }
+  ],
+  "pageviews": {
+    "/": 3
+  }
 }

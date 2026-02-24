@@ -192,6 +192,31 @@ textarea:focus {
   }
 }
 
+@media (max-width: 768px) {
+  .wa-float {
+    bottom: 110px;
+    left: 12px;       /* Shift left on smaller screens */
+    right: auto;
+    padding: 11px;
+    border-radius: 50%;
+  }
+}
+
+.wa-float:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+
+@keyframes waPop {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ── MODAL BACKDROPS (Performance Tuned) ───────────────────────────────── */
 .stage-modal-backdrop,
 .pricing-modal-backdrop {
