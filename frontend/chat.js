@@ -101,32 +101,32 @@ I'm not just an information bot. I work as your **personal academic amplifier** 
 // ═══════════════════════════════════════════════════════════════════════════
 const STAGE_FAQ = {
   1: {
-    en: ['Which is better — English medium or Bangla medium?', 'When should my child start IELTS preparation?', 'What subjects build the best foundation for studying abroad?', 'What is Cambridge Primary?'],
-    bn: ['ইংলিশ মিডিয়াম নাকি বাংলা মিডিয়াম কোনটা ভালো?', 'আমার সন্তানের আইইএলটিএস প্রস্তুতি কখন শুরু করা উচিত?', 'বিদেশে পড়াশোনার জন্য কোন বিষয়গুলো সবচেয়ে গুরুত্বপূর্ণ?']
+    en: ['Which is better — English medium or Bangla medium for going abroad?', 'When should my child start IELTS preparation?', 'How much will it cost to send my child abroad in total (in BDT)?', 'What subjects build the best foundation for studying abroad?'],
+    bn: ['বিদেশে পড়াশোনার জন্য ইংলিশ মিডিয়াম নাকি বাংলা মিডিয়াম কোনটা ভালো?', 'আমার সন্তানের আইইএলটিএস প্রস্তুতি কখন শুরু করা উচিত?', 'মোট কত টাকা লাগবে বিদেশে পড়াতে?', 'বিদেশে পড়াশোনার জন্য কোন বিষয়গুলো এখনই শুরু করা উচিত?']
   },
   2: {
-    en: ['How do I build a strong academic profile at this stage?', 'When should I start IELTS prep — Class 6 or later?', 'What extracurricular activities help for foreign university admission?', 'O-level vs SSC — which is better for studying abroad?'],
-    bn: ['এই পর্যায়ে কিভাবে ভালো একাডেমিক প্রোফাইল তৈরি করব?', 'আইইএলটিএস প্রস্তুতি কখন শুরু করা উচিত?', 'কোন এক্সট্রা কারিকুলার কার্যক্রম বিদেশে ভর্তিতে সাহায্য করে?']
+    en: ['Based on my class 6–8 grades, which countries can I target?', 'What extracurriculars help most for foreign university admission?', 'O-Level vs SSC — which is better recognised abroad?', 'How do I build a strong profile at this age?'],
+    bn: ['আমার ক্লাস ৬-৮ এর গ্রেড দিয়ে কোন দেশে পড়া সম্ভব?', 'কোন এক্সট্রা কারিকুলার কার্যক্রম বিদেশে ভর্তিতে সবচেয়ে বেশি কাজে লাগে?', 'বিদেশে পড়ার জন্য কি ও-লেভেল নাকি এসএসসি ভালো?', 'এই বয়সে কিভাবে ভালো প্রোফাইল তৈরি করব?']
   },
   3: {
-    en: ['What GPA do I need for Australian universities?', 'Should I take SAT or A-levels for USA admission?', 'What IELTS score do I need for UK universities?', 'How many universities should I apply to?'],
-    bn: ['অস্ট্রেলিয়ান বিশ্ববিদ্যালয়ের জন্য কত জিপিএ দরকার?', 'যুক্তরাষ্ট্রে ভর্তির জন্য স্যাট নাকি এ-লেভেল নেওয়া উচিত?', 'যুক্তরাজ্যের বিশ্ববিদ্যালয়ের জন্য কত আইইএলটিএস স্কোর দরকার?']
+    en: ['Based on my SSC/HSC result, which countries am I eligible for?', 'Do I need IELTS — and what score for which country?', 'Should I do foundation year or direct undergrad?', 'Which scholarships can I apply for with my grades?'],
+    bn: ['আমার এসএসসি/এইচএসসি রেজাল্ট দিয়ে কোন দেশে আবেদন করতে পারব?', 'আমার কি আইইএলটিএস লাগবে — কোন দেশে কত স্কোর দরকার?', 'ফাউন্ডেশন ইয়ার নাকি সরাসরি আন্ডারগ্র্যাড — কোনটা ভালো?', 'আমার গ্রেড দিয়ে কোন স্কলারশিপে আবেদন করা যাবে?']
   },
   4: {
-    en: ['What IELTS band do I need for Canada undergraduate?', 'Can I work part-time while studying in Australia?', 'How much does it cost to study in the UK?', 'What is the PR pathway after studying in Canada?'],
-    bn: ['কানাডায় আন্ডারগ্র্যাড পড়তে কত আইইএলটিএস দরকার?', 'অস্ট্রেলিয়ায় পড়াশোনা করার সময় কি পার্ট-টাইম কাজ করা যায়?', 'যুক্তরাজ্যে পড়াশোনার খরচ কত?', 'কানাডায় পড়ার পর পিআর পাওয়ার সুযোগ কেমন?']
+    en: ['Can I work part-time while studying — and how much can I earn?', 'What is the total cost of studying in UK/Australia/Canada in BDT?', 'What IELTS score do I need for which country?', 'What are my visa options and post-study work rights?'],
+    bn: ['পড়াশোনার সময় কি পার্ট-টাইম কাজ করা যাবে? কত আয় হবে?', 'যুক্তরাজ্য/অস্ট্রেলিয়া/কানাডায় মোট খরচ কত (বাংলাদেশি টাকায়)?', 'কোন দেশে কত আইইএলটিএস স্কোর লাগবে?', 'পড়াশোনার পর কোন দেশে থাকার সুযোগ বেশি?']
   },
   5: {
-    en: ['What GRE score do I need for a top Master\'s programme?', 'How do I write a strong SOP for a Master\'s application?', 'Which countries offer funded Master\'s degrees?', 'How do I find universities offering DAAD scholarships?'],
-    bn: ['শীর্ষ মাস্টার্স প্রোগ্রামের জন্য কত জিআরই স্কোর দরকার?', 'মাস্টার্স আবেদনের জন্য শক্তিশালী এসওপি কিভাবে লিখব?', 'কোন দেশে ফান্ডেড মাস্টার্স ডিগ্রি পাওয়া যায়?']
+    en: ['Taught Masters or Research Masters — which suits me better?', 'Which scholarships are available for Bangladeshi Masters students?', 'How do I write a strong SOP for Masters application?', 'Low CGPA — can I still get into a good Masters programme?'],
+    bn: ['টট মাস্টার্স নাকি রিসার্চ মাস্টার্স — কোনটা আমার জন্য ভালো?', 'বাংলাদেশি মাস্টার্স শিক্ষার্থীদের জন্য কোন স্কলারশিপ আছে?', 'মাস্টার্স আবেদনের জন্য শক্তিশালী এসওপি কিভাবে লিখব?', 'সিজিপিএ কম হলে কি ভালো মাস্টার্স প্রোগ্রামে সুযোগ আছে?']
   },
   6: {
-    en: ['How do I find a PhD supervisor in Germany?', 'What is a research proposal and how long should it be?', 'Which fully funded PhD scholarships accept Bangladeshi students?', 'How do I write a cold email to a professor?'],
-    bn: ['জার্মানিতে পিএইচডি সুপারভাইজার কিভাবে খুঁজব?', 'রিসার্চ প্রপোজাল কি এবং কত দীর্ঘ হওয়া উচিত?', 'কোন ফুলি ফান্ডেড পিএইচডি স্কলারশিপে বাংলাদেশি শিক্ষার্থীরা আবেদন করতে পারে?']
+    en: ['How do I find a PhD supervisor who will accept me?', 'Which fully funded PhD scholarships accept Bangladeshi students?', 'How do I write a cold email to a professor?', 'How do I write a strong research proposal?'],
+    bn: ['আমাকে গ্রহণ করবেন এমন পিএইচডি সুপারভাইজার কিভাবে খুঁজব?', 'বাংলাদেশি শিক্ষার্থীদের জন্য কোন ফুলি ফান্ডেড পিএইচডি স্কলারশিপ আছে?', 'প্রফেসরকে কোল্ড ইমেইল কিভাবে লিখব?', 'শক্তিশালী রিসার্চ প্রপোজাল কিভাবে তৈরি করব?']
   },
   7: {
-    en: ['What is the total cost of education abroad in BDT?', 'Which country is safest for Bangladeshi students?', 'Can I visit my child while they study abroad?', 'Will their foreign degree be recognized in Bangladesh?'],
-    bn: ['বিদেশে পড়াশোনার মোট খরচ বাংলাদেশি টাকায় কত?', 'বাংলাদেশি শিক্ষার্থীদের জন্য কোন দেশ সবচেয়ে নিরাপদ?', 'সন্তানের পড়াশোনার সময় কি আমি সেখানে যেতে পারব?', 'বিদেশি ডিগ্রি কি বাংলাদেশে স্বীকৃত হবে?']
+    en: ['What is the total cost in BDT to send my child abroad for 3–4 years?', 'Which country is safest and most affordable for Bangladeshi students?', 'Can I visit my child while they study abroad?', 'Will their foreign degree be recognised when they return to Bangladesh?'],
+    bn: ['৩-৪ বছর বিদেশে পড়াতে মোট কত টাকা লাগবে?', 'বাংলাদেশি শিক্ষার্থীদের জন্য কোন দেশ সবচেয়ে নিরাপদ এবং সাশ্রয়ী?', 'সন্তানের পড়াশোনার সময় কি আমি সেখানে যেতে পারব?', 'বিদেশি ডিগ্রি কি বাংলাদেশে স্বীকৃত হবে?']
   }
 };
 
