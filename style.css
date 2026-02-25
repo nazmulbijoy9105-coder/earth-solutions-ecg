@@ -19,8 +19,8 @@
   --border: rgba(255,255,255,.07);
   --border2:rgba(255,255,255,.13);
   --r: 14px;
-  --font-d: 'Playfair Display', serif;
-  --font-b: 'Outfit', sans-serif;
+  --font-d: 'Cormorant Garamond', serif;
+  --font-b: 'Plus Jakarta Sans', sans-serif;
   --sidebar-w: 268px;
   --topbar-h:  58px;
 }
@@ -68,7 +68,7 @@ body.bn-mode { font-family: 'Noto Sans Bengali', var(--font-b); }
   background: var(--navy3); flex-shrink: 0; border: 1px solid var(--border2);
 }
 .logo-gem img { width: 100%; height: 100%; object-fit: cover; }
-.logo-name { font-family: var(--font-d); font-size: 16px; font-weight: 700; color: var(--gold); }
+.logo-name { font-family: var(--font-d); font-size: 20px; font-weight: 600; color: var(--gold); letter-spacing: 0.3px; font-style: italic; }
 .logo-sub  { font-size: 10px; color: var(--text2); letter-spacing: .3px; }
 
 .new-btn {
@@ -145,7 +145,7 @@ body.bn-mode { font-family: 'Noto Sans Bengali', var(--font-b); }
 .topbar-logo-wrap { flex-shrink: 0; }
 .topbar-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; }
 .topbar-info { flex: 1; min-width: 0; }
-.topbar-title { font-family: var(--font-d); font-size: 16px; font-weight: 700; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-title { font-family: var(--font-d); font-size: 20px; font-weight: 600; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px; font-style: italic; }
 .topbar-sub   { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
@@ -318,7 +318,7 @@ textarea:focus { border-color: rgba(212,168,67,.4); }
   margin: 0 auto 14px; border: 1px solid var(--border2);
 }
 .stage-modal-logo img { width: 100%; height: 100%; object-fit: cover; }
-.stage-modal h2 { font-family: var(--font-d); font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.stage-modal h2 { font-family: var(--font-d); font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 6px; letter-spacing: 0.3px; font-style: italic; }
 .stage-modal h2 span { color: var(--gold); }
 .stage-modal p { color: var(--text2); font-size: 14px; }
 

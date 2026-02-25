@@ -1,1832 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peopole AI - Earth Solutions Visa Zone</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .chat-message {
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .typing-indicator {
-            display: inline-flex;
-            gap: 4px;
-        }
-        
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #667eea;
-            animation: typing 1.4s infinite;
-        }
-        
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-10px);
-            }
-        }
-        
-        .service-card {
-            transition: all 0.3s ease;
-        }
-        
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-        
-        .scroll-smooth {
-            scroll-behavior: smooth;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0b1629"/>
+  <meta name="description" content="Peopole AI — Academic & Visa Consultant by Earth Solutions Visa Zone, Dhaka. Study abroad guidance for Bangladeshi students."/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Peopole AI"/>
+  <!-- Open Graph -->
+  <meta property="og:title"       content="Peopole AI — Earth Solutions Visa Zone"/>
+  <meta property="og:description" content="Expert academic and visa consultant for Bangladeshi students. Study in UK, Australia, Canada, Germany & more."/>
+  <meta property="og:image"       content="/logo.jpg"/>
+  <meta property="og:type"        content="website"/>
+  <link rel="manifest"        href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/logo.jpg"/>
+  <link rel="icon" type="image/jpeg" href="/logo.jpg"/>
+  <title>Peopole AI — Earth Solutions Visa Zone</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // ==================== DATA MODELS ====================
-        const SERVICE_TIERS = [
-            {
-                id: 'free',
-                name: 'Basic Pathway',
-                icon: '🟢',
-                price: 0,
-                currency: '৳',
-                description: 'Free AI guidance for every student. Ask anything, 24/7.',
-                features: [
-                    'Unlimited AI chat',
-                    'Stage-based guidance',
-                    'Bangla + English support',
-                    'No registration needed'
-                ],
-                aiHumanRatio: '100% AI',
-                cta: 'Start Free Chat',
-                ctaAction: 'chat'
-            },
-            {
-                id: 'entry',
-                name: 'Entry-Level Report',
-                icon: '💰',
-                price: 30,
-                currency: '৳',
-                description: 'AI country & university report tailored to your stage, delivered to WhatsApp.',
-                features: [
-                    'Country suitability report',
-                    'University shortlist (AI)',
-                    'Visa requirement overview',
-                    'Instant PDF delivery'
-                ],
-                aiHumanRatio: '90% AI',
-                cta: 'Get Report — ৳30',
-                ctaAction: 'payment',
-                paymentMethods: ['bkash', 'nagad', 'stripe']
-            },
-            {
-                id: 'structured',
-                name: 'Structured Guidance',
-                icon: '🔵',
-                badge: 'POPULAR',
-                price: '100–500',
-                currency: '৳',
-                description: 'Human consultant review + AI risk analysis for serious applicants.',
-                features: [
-                    'AI risk analysis',
-                    'Human consultant review',
-                    'Full document checklist',
-                    'SOP draft review'
-                ],
-                aiHumanRatio: '50% AI + 50% Human',
-                cta: 'Get Started',
-                ctaAction: 'payment',
-                paymentMethods: ['bkash', 'nagad', 'stripe']
-            },
-            {
-                id: 'premium',
-                name: 'Mid-Tier Mentorship',
-                icon: '💼',
-                price: '500–20,000+',
-                currency: '৳',
-                description: 'Matched mentor + full application support. 80% human-led.',
-                features: [
-                    'Matched alumni mentor',
-                    'Full SOP writing',
-                    'Visa interview prep',
-                    'Application filing support'
-                ],
-                aiHumanRatio: '20% AI + 80% Human',
-                cta: 'Book Consultation',
-                ctaAction: 'whatsapp',
-                whatsappMessage: 'I want Mid-Tier Mentorship'
-            },
-            {
-                id: 'elite',
-                name: 'Elite Academic Board',
-                icon: '🔴',
-                price: 'Call for Details',
-                currency: '',
-                description: 'Full academic board support for top institutions. 90% human expertise.',
-                features: [
-                    'Academic board review',
-                    'Professor outreach',
-                    'Scholarship negotiation',
-                    'End-to-end management'
-                ],
-                aiHumanRatio: '10% AI + 90% Human',
-                cta: '📞 Call Us Now',
-                ctaAction: 'whatsapp',
-                whatsappMessage: 'I want Elite Academic Board service'
-            }
-        ];
-
-        const COMMON_QUESTIONS = [
-            {
-                en: "What are the best countries for studying Computer Science?",
-                bn: "কম্পিউটার সায়েন্স পড়ার জন্য সেরা দেশ কোনগুলো?"
-            },
-            {
-                en: "How much does it cost to study in Canada?",
-                bn: "কানাডায় পড়তে কত খরচ হয়?"
-            },
-            {
-                en: "What IELTS score do I need for USA universities?",
-                bn: "USA বিশ্ববিদ্যালয়ের জন্য আমার কত IELTS স্কোর দরকার?"
-            },
-            {
-                en: "How do I write a strong SOP?",
-                bn: "কিভাবে একটি শক্তিশালী SOP লিখব?"
-            },
-            {
-                en: "What scholarships are available for Bangladeshi students?",
-                bn: "বাংলাদেশী শিক্ষার্থীদের জন্য কী বৃত্তি পাওয়া যায়?"
-            }
-        ];
-
-        const AI_RESPONSES = {
-            greeting: {
-                en: "Hi! I'm Peopole AI, your personal academic amplifier. 🎓\n\nI'm here to help you navigate your study abroad journey. To give you the best guidance, could you tell me:\n\n1. What's your age or current class/level?\n2. What subject or career interests you?\n3. What's your biggest challenge? (studies, language, finances, or direction?)",
-                bn: "হাই! আমি Peopole AI, আপনার ব্যক্তিগত একাডেমিক সহায়ক। 🎓\n\nআমি আপনাকে বিদেশে পড়ার যাত্রায় সাহায্য করতে এখানে আছি। সেরা পরামর্শ দিতে, আমাকে বলুন:\n\n১. আপনার বয়স বা বর্তমান ক্লাস/লেভেল কী?\n২. কোন বিষয় বা ক্যারিয়ার আপনার আগ্রহের?\n৩. আপনার সবচেয়ে বড় চ্যালেঞ্জ কী? (পড়াশোনা, ভাষা, অর্থায়ন, নাকি দিকনির্দেশনা?)"
-            },
-            countries: {
-                en: "Great question! For Computer Science, the top countries are:\n\n🇺🇸 USA - MIT, Stanford, CMU (high cost, great ROI)\n🇨🇦 Canada - UofT, UBC, Waterloo (affordable, good immigration)\n🇬🇧 UK - Oxford, Cambridge, Imperial (1-year masters)\n🇩🇪 Germany - TUM, RWTH (low tuition, strong engineering)\n🇦🇺 Australia - ANU, Melbourne (work opportunities)\n\nWhich country interests you most?",
-                bn: "চমৎকার প্রশ্ন! কম্পিউটার সায়েন্সের জন্য শীর্ষ দেশগুলো হলো:\n\n🇺🇸 USA - MIT, Stanford, CMU (উচ্চ খরচ, দুর্দান্ত রিটার্ন)\n🇨🇦 Canada - UofT, UBC, Waterloo (সাশ্রয়ী, ভালো ইমিগ্রেশন)\n🇬🇧 UK - Oxford, Cambridge, Imperial (১ বছরের মাস্টার্স)\n🇩🇪 Germany - TUM, RWTH (কম টিউশন, শক্তিশালী ইঞ্জিনিয়ারিং)\n🇦🇺 Australia - ANU, Melbourne (চাকরির সুযোগ)\n\nকোন দেশে আপনার আগ্রহ বেশি?"
-            },
-            cost: {
-                en: "Cost breakdown for Canada (per year):\n\n📚 Tuition: CAD 15,000-35,000\n🏠 Living: CAD 10,000-15,000\n✈️ Visa + Insurance: CAD 2,000\n\n💰 Total: ~CAD 30,000-50,000/year\n\nTip: You can work 20hrs/week (earn ~CAD 12,000/year) to offset costs. Want scholarship options?",
-                bn: "কানাডার খরচ বিবরণী (প্রতি বছর):\n\n📚 টিউশন: CAD 15,000-35,000\n🏠 থাকা-খাওয়া: CAD 10,000-15,000\n✈️ ভিসা + বীমা: CAD 2,000\n\n💰 মোট: ~CAD 30,000-50,000/বছর\n\nটিপ: আপনি সপ্তাহে ২০ ঘণ্টা কাজ করতে পারবেন (বছরে ~CAD 12,000 আয়)। বৃত্তির অপশন চান?"
-            }
-        };
-
-        // ==================== UTILS ====================
-        const storage = {
-            get: (key) => {
-                try {
-                    const item = localStorage.getItem(key);
-                    return item ? JSON.parse(item) : null;
-                } catch {
-                    return null;
-                }
-            },
-            set: (key, value) => {
-                try {
-                    localStorage.setItem(key, JSON.stringify(value));
-                } catch (e) {
-                    console.error('Storage error:', e);
-                }
-            },
-            remove: (key) => localStorage.removeItem(key)
-        };
-
-        const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-        // ==================== AUTH COMPONENT ====================
-        const AuthModal = ({ onClose, onLogin }) => {
-            const [mode, setMode] = useState('login'); // login, register, otp
-            const [authMethod, setAuthMethod] = useState('email'); // email, phone, google
-            const [formData, setFormData] = useState({
-                email: '',
-                phone: '',
-                password: '',
-                name: '',
-                otp: ''
-            });
-            const [loading, setLoading] = useState(false);
-            const [error, setError] = useState('');
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                setError('');
-
-                try {
-                    // Simulate API delay
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-
-                    if (authMethod === 'google') {
-                        // Simulate Google OAuth
-                        const user = {
-                            id: generateId(),
-                            name: 'Google User',
-                            email: 'user@gmail.com',
-                            method: 'google',
-                            avatar: 'https://ui-avatars.com/api/?name=Google+User&background=667eea&color=fff',
-                            tier: 'free',
-                            createdAt: Date.now()
-                        };
-                        storage.set('user', user);
-                        onLogin(user);
-                        return;
-                    }
-
-                    if (authMethod === 'phone' && mode === 'login') {
-                        // Send OTP
-                        setMode('otp');
-                        setLoading(false);
-                        return;
-                    }
-
-                    if (mode === 'otp') {
-                        // Verify OTP
-                        if (formData.otp !== '1234') {
-                            setError('Invalid OTP. Use 1234 for demo.');
-                            setLoading(false);
-                            return;
-                        }
-                    }
-
-                    // Create user
-                    const user = {
-                        id: generateId(),
-                        name: formData.name || formData.email.split('@')[0],
-                        email: formData.email || `${formData.phone}@phone.local`,
-                        phone: formData.phone,
-                        method: authMethod,
-                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || 'User')}&background=667eea&color=fff`,
-                        tier: 'free',
-                        createdAt: Date.now()
-                    };
-
-                    storage.set('user', user);
-                    onLogin(user);
-                } catch (err) {
-                    setError('Authentication failed. Please try again.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-8 relative">
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                            <i className="fas fa-times"></i>
-                        </button>
-
-                        <h2 className="text-3xl font-bold gradient-text mb-2">
-                            {mode === 'otp' ? 'Enter OTP' : mode === 'register' ? 'Create Account' : 'Welcome Back'}
-                        </h2>
-                        <p className="text-gray-600 mb-6">
-                            {mode === 'otp' ? 'We sent a code to your phone' : 'Sign in to continue your journey'}
-                        </p>
-
-                        {mode !== 'otp' && (
-                            <div className="flex gap-2 mb-6">
-                                <button
-                                    onClick={() => setAuthMethod('email')}
-                                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
-                                        authMethod === 'email' 
-                                            ? 'gradient-bg text-white' 
-                                            : 'bg-gray-100 text-gray-700'
-                                    }`}
-                                >
-                                    <i className="fas fa-envelope mr-2"></i>Email
-                                </button>
-                                <button
-                                    onClick={() => setAuthMethod('phone')}
-                                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
-                                        authMethod === 'phone' 
-                                            ? 'gradient-bg text-white' 
-                                            : 'bg-gray-100 text-gray-700'
-                                    }`}
-                                >
-                                    <i className="fas fa-phone mr-2"></i>Phone
-                                </button>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {mode === 'otp' ? (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        OTP Code (use 1234)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.otp}
-                                        onChange={(e) => setFormData({...formData, otp: e.target.value})}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        placeholder="1234"
-                                        maxLength="6"
-                                        required
-                                    />
-                                </div>
-                            ) : (
-                                <>
-                                    {mode === 'register' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Full Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                                placeholder="Enter your name"
-                                                required
-                                            />
-                                        </div>
-                                    )}
-
-                                    {authMethod === 'email' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Email Address
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                                placeholder="your@email.com"
-                                                required
-                                            />
-                                        </div>
-                                    )}
-
-                                    {authMethod === 'phone' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                value={formData.phone}
-                                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                                placeholder="+880 1XXXXXXXXX"
-                                                required
-                                            />
-                                        </div>
-                                    )}
-
-                                    {authMethod === 'email' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                value={formData.password}
-                                                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                                placeholder="••••••••"
-                                                required
-                                            />
-                                        </div>
-                                    )}
-                                </>
-                            )}
-
-                            {error && (
-                                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
-                                    {error}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50"
-                            >
-                                {loading ? (
-                                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                                ) : null}
-                                {loading ? 'Processing...' : mode === 'otp' ? 'Verify OTP' : mode === 'register' ? 'Create Account' : 'Sign In'}
-                            </button>
-
-                            {mode !== 'otp' && authMethod !== 'google' && (
-                                <>
-                                    <div className="relative my-6">
-                                        <div className="absolute inset-0 flex items-center">
-                                            <div className="w-full border-t border-gray-300"></div>
-                                        </div>
-                                        <div className="relative flex justify-center text-sm">
-                                            <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setAuthMethod('google');
-                                            handleSubmit(new Event('submit'));
-                                        }}
-                                        className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center"
-                                    >
-                                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                                        </svg>
-                                        Continue with Google
-                                    </button>
-                                </>
-                            )}
-                        </form>
-
-                        {mode !== 'otp' && (
-                            <p className="text-center text-sm text-gray-600 mt-6">
-                                {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
-                                <button
-                                    onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-                                    className="text-purple-600 font-semibold hover:underline"
-                                >
-                                    {mode === 'login' ? 'Sign up' : 'Sign in'}
-                                </button>
-                            </p>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // ==================== PAYMENT COMPONENT ====================
-        const PaymentModal = ({ tier, onClose, onSuccess }) => {
-            const [method, setMethod] = useState('bkash');
-            const [phone, setPhone] = useState('');
-            const [loading, setLoading] = useState(false);
-
-            const handlePayment = async (e) => {
-                e.preventDefault();
-                setLoading(true);
-
-                // Simulate payment processing
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                const payment = {
-                    id: generateId(),
-                    tier: tier.id,
-                    amount: typeof tier.price === 'number' ? tier.price : 100,
-                    method,
-                    phone,
-                    status: 'completed',
-                    timestamp: Date.now()
-                };
-
-                // Save payment
-                const payments = storage.get('payments') || [];
-                payments.push(payment);
-                storage.set('payments', payments);
-
-                // Update user tier
-                const user = storage.get('user');
-                if (user) {
-                    user.tier = tier.id;
-                    storage.set('user', user);
-                }
-
-                setLoading(false);
-                onSuccess(payment);
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-8 relative">
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                            <i className="fas fa-times"></i>
-                        </button>
-
-                        <div className="text-center mb-6">
-                            <div className="text-4xl mb-3">{tier.icon}</div>
-                            <h3 className="text-2xl font-bold text-gray-900">{tier.name}</h3>
-                            <p className="text-3xl font-bold gradient-text mt-2">
-                                {tier.currency}{tier.price}
-                            </p>
-                        </div>
-
-                        <form onSubmit={handlePayment} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-3">
-                                    Select Payment Method
-                                </label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setMethod('bkash')}
-                                        className={`p-4 rounded-lg border-2 transition ${
-                                            method === 'bkash' 
-                                                ? 'border-pink-500 bg-pink-50' 
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <div className="text-2xl mb-1">💳</div>
-                                        <div className="text-xs font-semibold text-pink-600">bKash</div>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setMethod('nagad')}
-                                        className={`p-4 rounded-lg border-2 transition ${
-                                            method === 'nagad' 
-                                                ? 'border-orange-500 bg-orange-50' 
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <div className="text-2xl mb-1">📱</div>
-                                        <div className="text-xs font-semibold text-orange-600">Nagad</div>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setMethod('stripe')}
-                                        className={`p-4 rounded-lg border-2 transition ${
-                                            method === 'stripe' 
-                                                ? 'border-blue-500 bg-blue-50' 
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <div className="text-2xl mb-1">💳</div>
-                                        <div className="text-xs font-semibold text-blue-600">Card</div>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {(method === 'bkash' || method === 'nagad') && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        {method === 'bkash' ? 'bKash' : 'Nagad'} Number
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        placeholder="+880 1XXXXXXXXX"
-                                        required
-                                    />
-                                </div>
-                            )}
-
-                            {method === 'stripe' && (
-                                <div className="space-y-3">
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                                        placeholder="Card Number (4242 4242 4242 4242)"
-                                        required
-                                    />
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <input
-                                            type="text"
-                                            className="px-4 py-3 border border-gray-300 rounded-lg"
-                                            placeholder="MM/YY"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            className="px-4 py-3 border border-gray-300 rounded-lg"
-                                            placeholder="CVC"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50 mt-6"
-                            >
-                                {loading ? (
-                                    <>
-                                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                                        Processing Payment...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fas fa-lock mr-2"></i>
-                                        Pay {tier.currency}{tier.price}
-                                    </>
-                                )}
-                            </button>
-                        </form>
-
-                        <p className="text-xs text-gray-500 text-center mt-4">
-                            <i className="fas fa-shield-alt mr-1"></i>
-                            Secure payment processing
-                        </p>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==================== CHAT COMPONENT ====================
-        const ChatInterface = ({ user, language, onShowPricing }) => {
-            const [messages, setMessages] = useState([]);
-            const [input, setInput] = useState('');
-            const [typing, setTyping] = useState(false);
-            const messagesEndRef = useRef(null);
-            const [conversationId, setConversationId] = useState(null);
-
-            useEffect(() => {
-                // Load or create conversation
-                const conversations = storage.get('conversations') || [];
-                const activeConv = conversations.find(c => c.active);
-                
-                if (activeConv) {
-                    setConversationId(activeConv.id);
-                    setMessages(activeConv.messages);
-                } else {
-                    // Start new conversation
-                    const newConv = {
-                        id: generateId(),
-                        userId: user?.id || 'guest',
-                        messages: [{
-                            id: generateId(),
-                            role: 'assistant',
-                            content: AI_RESPONSES.greeting[language],
-                            timestamp: Date.now()
-                        }],
-                        active: true,
-                        createdAt: Date.now()
-                    };
-                    conversations.push(newConv);
-                    storage.set('conversations', conversations);
-                    setConversationId(newConv.id);
-                    setMessages(newConv.messages);
-                }
-            }, []);
-
-            useEffect(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, [messages]);
-
-            const saveConversation = (newMessages) => {
-                if (!conversationId) return;
-                
-                const conversations = storage.get('conversations') || [];
-                const convIndex = conversations.findIndex(c => c.id === conversationId);
-                
-                if (convIndex >= 0) {
-                    conversations[convIndex].messages = newMessages;
-                    conversations[convIndex].updatedAt = Date.now();
-                    storage.set('conversations', conversations);
-                }
-            };
-
-            const getAIResponse = (userMessage) => {
-                const lower = userMessage.toLowerCase();
-                
-                if (lower.includes('country') || lower.includes('দেশ')) {
-                    return AI_RESPONSES.countries[language];
-                } else if (lower.includes('cost') || lower.includes('খরচ')) {
-                    return AI_RESPONSES.cost[language];
-                } else {
-                    return language === 'bn' 
-                        ? `ধন্যবাদ! আমি আপনার প্রশ্ন বুঝেছি। আরও বিস্তারিত সাহায্যের জন্য, দয়া করে আমাদের পেইড সার্ভিস দেখুন। 🎓`
-                        : `Thank you! I understand your question. For more detailed assistance, please check our paid services. 🎓`;
-                }
-            };
-
-            const handleSend = async (text = input) => {
-                if (!text.trim()) return;
-
-                const userMessage = {
-                    id: generateId(),
-                    role: 'user',
-                    content: text,
-                    timestamp: Date.now()
-                };
-
-                const newMessages = [...messages, userMessage];
-                setMessages(newMessages);
-                setInput('');
-                setTyping(true);
-                saveConversation(newMessages);
-
-                // Simulate AI thinking
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                const aiMessage = {
-                    id: generateId(),
-                    role: 'assistant',
-                    content: getAIResponse(text),
-                    timestamp: Date.now()
-                };
-
-                const finalMessages = [...newMessages, aiMessage];
-                setMessages(finalMessages);
-                setTyping(false);
-                saveConversation(finalMessages);
-            };
-
-            return (
-                <div className="flex flex-col h-full">
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                        {messages.map((msg) => (
-                            <div
-                                key={msg.id}
-                                className={`chat-message flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`max-w-[80%] ${msg.role === 'user' ? 'order-2' : 'order-1'}`}>
-                                    <div className={`rounded-2xl px-4 py-3 ${
-                                        msg.role === 'user' 
-                                            ? 'gradient-bg text-white' 
-                                            : 'bg-gray-100 text-gray-900'
-                                    }`}>
-                                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                                    </div>
-                                    <div className={`text-xs text-gray-400 mt-1 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
-                                </div>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                    msg.role === 'user' ? 'order-1 ml-2 gradient-bg' : 'order-2 mr-2 bg-purple-100'
-                                }`}>
-                                    {msg.role === 'user' ? (
-                                        <i className="fas fa-user text-white text-sm"></i>
-                                    ) : (
-                                        <i className="fas fa-robot text-purple-600 text-sm"></i>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        {typing && (
-                            <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
-                                    <i className="fas fa-robot text-purple-600 text-sm"></i>
-                                </div>
-                                <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                                    <div className="typing-indicator">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    {/* Common Questions */}
-                    <div className="px-6 py-3 border-t">
-                        <details className="group">
-                            <summary className="cursor-pointer text-sm text-gray-600 hover:text-purple-600 transition flex items-center justify-between">
-                                <span><i className="fas fa-lightbulb mr-2"></i>Common Questions</span>
-                                <i className="fas fa-chevron-down group-open:rotate-180 transition"></i>
-                            </summary>
-                            <div className="mt-3 space-y-2">
-                                {COMMON_QUESTIONS.map((q, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleSend(q[language])}
-                                        className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-purple-50 rounded-lg text-sm transition"
-                                    >
-                                        {q[language]}
-                                    </button>
-                                ))}
-                            </div>
-                        </details>
-                    </div>
-
-                    {/* Input */}
-                    <div className="p-6 border-t bg-white">
-                        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-3">
-                            <input
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder={language === 'bn' ? 'আপনার প্রশ্ন লিখুন...' : 'Ask about universities, visas, scholarships...'}
-                                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            />
-                            <button
-                                type="submit"
-                                disabled={!input.trim()}
-                                className="px-6 py-3 gradient-bg text-white rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50"
-                            >
-                                <i className="fas fa-paper-plane"></i>
-                            </button>
-                        </form>
-                        <p className="text-xs text-gray-400 mt-2 text-center">
-                            Free tier includes basic AI guidance. 
-                            <button onClick={onShowPricing} className="text-purple-600 hover:underline ml-1">
-                                Upgrade for advanced features
-                            </button>
-                        </p>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==================== DASHBOARD COMPONENT ====================
-        const Dashboard = ({ user, onLogout }) => {
-            const [conversations, setConversations] = useState([]);
-            const [payments, setPayments] = useState([]);
-            const [activeTab, setActiveTab] = useState('conversations');
-
-            useEffect(() => {
-                const allConvs = storage.get('conversations') || [];
-                const userConvs = allConvs.filter(c => c.userId === user.id || c.userId === 'guest');
-                setConversations(userConvs);
-
-                const allPayments = storage.get('payments') || [];
-                setPayments(allPayments);
-            }, [user]);
-
-            const tabs = [
-                { id: 'conversations', name: 'Conversations', icon: 'fa-comments' },
-                { id: 'reports', name: 'My Reports', icon: 'fa-file-pdf' },
-                { id: 'progress', name: 'Progress', icon: 'fa-chart-line' },
-                { id: 'payments', name: 'Payments', icon: 'fa-credit-card' }
-            ];
-
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    {/* Header */}
-                    <div className="bg-white border-b">
-                        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full" />
-                                <div>
-                                    <h2 className="font-bold text-gray-900">{user.name}</h2>
-                                    <p className="text-sm text-gray-500">{user.email}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold uppercase">
-                                    {user.tier} Tier
-                                </span>
-                                <button
-                                    onClick={onLogout}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-900 transition"
-                                >
-                                    <i className="fas fa-sign-out-alt mr-2"></i>Logout
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="max-w-6xl mx-auto px-6 py-6">
-                        <div className="flex gap-2 mb-6 overflow-x-auto">
-                            {tabs.map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
-                                        activeTab === tab.id
-                                            ? 'gradient-bg text-white'
-                                            : 'bg-white text-gray-600 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <i className={`fas ${tab.icon} mr-2`}></i>
-                                    {tab.name}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Content */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm">
-                            {activeTab === 'conversations' && (
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-4">Your Conversations</h3>
-                                    {conversations.length === 0 ? (
-                                        <p className="text-gray-500">No conversations yet. Start chatting to see history here.</p>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {conversations.map(conv => (
-                                                <div key={conv.id} className="border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <h4 className="font-semibold">
-                                                            Conversation {new Date(conv.createdAt).toLocaleDateString()}
-                                                        </h4>
-                                                        <span className="text-sm text-gray-500">
-                                                            {conv.messages.length} messages
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 line-clamp-2">
-                                                        {conv.messages[conv.messages.length - 1]?.content}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {activeTab === 'reports' && (
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-4">My Reports</h3>
-                                    <div className="text-center py-12">
-                                        <i className="fas fa-file-pdf text-6xl text-gray-300 mb-4"></i>
-                                        <p className="text-gray-500 mb-4">No reports yet. Purchase a report to see it here.</p>
-                                        <button className="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition">
-                                            Get Entry-Level Report (৳30)
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'progress' && (
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-6">Application Progress</h3>
-                                    <div className="space-y-4">
-                                        {[
-                                            { stage: 'Profile Setup', status: 'completed', percent: 100 },
-                                            { stage: 'Country Selection', status: 'in_progress', percent: 60 },
-                                            { stage: 'University Shortlist', status: 'pending', percent: 0 },
-                                            { stage: 'SOP Writing', status: 'pending', percent: 0 },
-                                            { stage: 'Visa Application', status: 'pending', percent: 0 }
-                                        ].map((item, i) => (
-                                            <div key={i} className="border rounded-lg p-4">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="font-semibold">{item.stage}</h4>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                        item.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                        item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                                                        'bg-gray-100 text-gray-600'
-                                                    }`}>
-                                                        {item.status.replace('_', ' ').toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div 
-                                                        className="gradient-bg h-2 rounded-full transition-all"
-                                                        style={{ width: `${item.percent}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'payments' && (
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-4">Payment History</h3>
-                                    {payments.length === 0 ? (
-                                        <div className="text-center py-12">
-                                            <i className="fas fa-credit-card text-6xl text-gray-300 mb-4"></i>
-                                            <p className="text-gray-500">No payments yet.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {payments.map(payment => (
-                                                <div key={payment.id} className="border rounded-lg p-4 flex justify-between items-center">
-                                                    <div>
-                                                        <h4 className="font-semibold">
-                                                            {SERVICE_TIERS.find(t => t.id === payment.tier)?.name}
-                                                        </h4>
-                                                        <p className="text-sm text-gray-500">
-                                                            {new Date(payment.timestamp).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-bold text-lg">৳{payment.amount}</p>
-                                                        <p className="text-sm text-green-600">
-                                                            <i className="fas fa-check-circle mr-1"></i>
-                                                            Completed
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==================== ADMIN PANEL COMPONENT ====================
-        const AdminPanel = ({ onClose }) => {
-            const [activeTab, setActiveTab] = useState('leads');
-            const [allConversations, setAllConversations] = useState([]);
-            const [allPayments, setAllPayments] = useState([]);
-            const [allUsers, setAllUsers] = useState([]);
-            const [stats, setStats] = useState({
-                totalLeads: 0,
-                totalRevenue: 0,
-                activeConversations: 0,
-                conversionRate: 0
-            });
-
-            useEffect(() => {
-                // Load all data
-                const conversations = storage.get('conversations') || [];
-                const payments = storage.get('payments') || [];
-                
-                // Extract unique users from conversations
-                const userIds = [...new Set(conversations.map(c => c.userId))];
-                const users = userIds.map(id => {
-                    const savedUser = storage.get('user');
-                    return savedUser?.id === id ? savedUser : {
-                        id,
-                        name: id === 'guest' ? 'Guest User' : 'User ' + id.slice(0, 8),
-                        email: id === 'guest' ? 'guest@example.com' : id + '@user.local',
-                        tier: 'free'
-                    };
-                });
-
-                setAllConversations(conversations);
-                setAllPayments(payments);
-                setAllUsers(users);
-
-                // Calculate stats
-                const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-                const activeConvs = conversations.filter(c => c.active).length;
-                const paidUsers = payments.length;
-                const conversionRate = users.length > 0 ? ((paidUsers / users.length) * 100).toFixed(1) : 0;
-
-                setStats({
-                    totalLeads: users.length,
-                    totalRevenue,
-                    activeConversations: activeConvs,
-                    conversionRate
-                });
-            }, []);
-
-            const tabs = [
-                { id: 'leads', name: 'Lead Management', icon: 'fa-users' },
-                { id: 'payments', name: 'Payment Tracking', icon: 'fa-money-bill-wave' },
-                { id: 'conversations', name: 'Conversation Monitoring', icon: 'fa-comments' },
-                { id: 'analytics', name: 'Analytics', icon: 'fa-chart-bar' }
-            ];
-
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    {/* Admin Header */}
-                    <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
-                        <div className="max-w-7xl mx-auto px-6 py-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <i className="fas fa-shield-alt text-3xl"></i>
-                                    <div>
-                                        <h1 className="text-2xl font-bold">Admin Panel</h1>
-                                        <p className="text-purple-200 text-sm">Earth Solutions ECG - Management Dashboard</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={onClose}
-                                    className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition"
-                                >
-                                    <i className="fas fa-times mr-2"></i>Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Stats Cards */}
-                    <div className="max-w-7xl mx-auto px-6 py-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-600">Total Leads</h3>
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <i className="fas fa-users text-blue-600"></i>
-                                    </div>
-                                </div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.totalLeads}</p>
-                                <p className="text-xs text-gray-500 mt-1">All registered users</p>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-600">Total Revenue</h3>
-                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <i className="fas fa-dollar-sign text-green-600"></i>
-                                    </div>
-                                </div>
-                                <p className="text-3xl font-bold text-gray-900">৳{stats.totalRevenue.toLocaleString()}</p>
-                                <p className="text-xs text-gray-500 mt-1">From all services</p>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-600">Active Chats</h3>
-                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <i className="fas fa-comments text-purple-600"></i>
-                                    </div>
-                                </div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.activeConversations}</p>
-                                <p className="text-xs text-gray-500 mt-1">Currently active</p>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-600">Conversion Rate</h3>
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                        <i className="fas fa-chart-line text-orange-600"></i>
-                                    </div>
-                                </div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.conversionRate}%</p>
-                                <p className="text-xs text-gray-500 mt-1">Free to paid</p>
-                            </div>
-                        </div>
-
-                        {/* Tabs */}
-                        <div className="flex gap-2 mb-6 overflow-x-auto">
-                            {tabs.map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
-                                        activeTab === tab.id
-                                            ? 'bg-purple-600 text-white'
-                                            : 'bg-white text-gray-600 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <i className={`fas ${tab.icon} mr-2`}></i>
-                                    {tab.name}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Content */}
-                        <div className="bg-white rounded-xl p-6 shadow-sm">
-                            {activeTab === 'leads' && (
-                                <div>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold">All Leads</h2>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Search leads..."
-                                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                            />
-                                            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                                                <i className="fas fa-filter mr-2"></i>Filter
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="border-b">
-                                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
-                                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Tier</th>
-                                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Conversations</th>
-                                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {allUsers.map(user => {
-                                                    const userConvs = allConversations.filter(c => c.userId === user.id);
-                                                    return (
-                                                        <tr key={user.id} className="border-b hover:bg-gray-50">
-                                                            <td className="py-3 px-4">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                                                        <i className="fas fa-user text-purple-600 text-xs"></i>
-                                                                    </div>
-                                                                    <span className="font-medium">{user.name}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-3 px-4 text-gray-600">{user.email}</td>
-                                                            <td className="py-3 px-4">
-                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                                    user.tier === 'free' ? 'bg-gray-100 text-gray-700' :
-                                                                    user.tier === 'entry' ? 'bg-yellow-100 text-yellow-700' :
-                                                                    user.tier === 'structured' ? 'bg-blue-100 text-blue-700' :
-                                                                    user.tier === 'premium' ? 'bg-purple-100 text-purple-700' :
-                                                                    'bg-red-100 text-red-700'
-                                                                }`}>
-                                                                    {user.tier.toUpperCase()}
-                                                                </span>
-                                                            </td>
-                                                            <td className="py-3 px-4 text-gray-600">{userConvs.length}</td>
-                                                            <td className="py-3 px-4">
-                                                                <button className="text-purple-600 hover:text-purple-800 mr-3">
-                                                                    <i className="fas fa-eye"></i>
-                                                                </button>
-                                                                <button className="text-blue-600 hover:text-blue-800 mr-3">
-                                                                    <i className="fas fa-envelope"></i>
-                                                                </button>
-                                                                <button className="text-gray-600 hover:text-gray-800">
-                                                                    <i className="fas fa-ellipsis-v"></i>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'payments' && (
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-6">Payment Tracking</h2>
-                                    
-                                    {allPayments.length === 0 ? (
-                                        <div className="text-center py-12">
-                                            <i className="fas fa-receipt text-6xl text-gray-300 mb-4"></i>
-                                            <p className="text-gray-500">No payments recorded yet</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {allPayments.map(payment => {
-                                                const tier = SERVICE_TIERS.find(t => t.id === payment.tier);
-                                                return (
-                                                    <div key={payment.id} className="border rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                                                payment.method === 'bkash' ? 'bg-pink-100' :
-                                                                payment.method === 'nagad' ? 'bg-orange-100' :
-                                                                'bg-blue-100'
-                                                            }`}>
-                                                                <i className={`fas fa-mobile-alt ${
-                                                                    payment.method === 'bkash' ? 'text-pink-600' :
-                                                                    payment.method === 'nagad' ? 'text-orange-600' :
-                                                                    'text-blue-600'
-                                                                }`}></i>
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="font-semibold">{tier?.name}</h4>
-                                                                <p className="text-sm text-gray-500">
-                                                                    {payment.method.toUpperCase()} • {payment.phone}
-                                                                </p>
-                                                                <p className="text-xs text-gray-400">
-                                                                    {new Date(payment.timestamp).toLocaleString()}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-2xl font-bold text-gray-900">৳{payment.amount}</p>
-                                                            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold mt-2">
-                                                                <i className="fas fa-check-circle mr-1"></i>
-                                                                {payment.status.toUpperCase()}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {activeTab === 'conversations' && (
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-6">Conversation Monitoring</h2>
-                                    
-                                    <div className="space-y-3">
-                                        {allConversations.map(conv => (
-                                            <div key={conv.id} className="border rounded-lg p-4 hover:bg-gray-50 transition">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <h4 className="font-semibold flex items-center gap-2">
-                                                            Conversation {new Date(conv.createdAt).toLocaleDateString()}
-                                                            {conv.active && (
-                                                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
-                                                                    Active
-                                                                </span>
-                                                            )}
-                                                        </h4>
-                                                        <p className="text-sm text-gray-500">
-                                                            User ID: {conv.userId === 'guest' ? 'Guest' : conv.userId.slice(0, 12) + '...'}
-                                                        </p>
-                                                    </div>
-                                                    <span className="text-sm text-gray-500">
-                                                        {conv.messages.length} messages
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                                                    Last: {conv.messages[conv.messages.length - 1]?.content}
-                                                </p>
-                                                <button className="text-purple-600 hover:text-purple-800 text-sm font-semibold">
-                                                    <i className="fas fa-eye mr-1"></i>View Full Conversation
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'analytics' && (
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-6">Analytics & Insights</h2>
-                                    
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        <div className="border rounded-lg p-6">
-                                            <h3 className="font-semibold mb-4">Revenue by Service Tier</h3>
-                                            <div className="space-y-3">
-                                                {SERVICE_TIERS.filter(t => t.id !== 'free').map(tier => {
-                                                    const tierPayments = allPayments.filter(p => p.tier === tier.id);
-                                                    const tierRevenue = tierPayments.reduce((sum, p) => sum + p.amount, 0);
-                                                    const percentage = stats.totalRevenue > 0 ? ((tierRevenue / stats.totalRevenue) * 100).toFixed(1) : 0;
-                                                    
-                                                    return (
-                                                        <div key={tier.id}>
-                                                            <div className="flex justify-between text-sm mb-1">
-                                                                <span>{tier.name}</span>
-                                                                <span className="font-semibold">৳{tierRevenue}</span>
-                                                            </div>
-                                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                                <div 
-                                                                    className="gradient-bg h-2 rounded-full"
-                                                                    style={{ width: `${percentage}%` }}
-                                                                ></div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        <div className="border rounded-lg p-6">
-                                            <h3 className="font-semibold mb-4">User Distribution by Tier</h3>
-                                            <div className="space-y-3">
-                                                {['free', 'entry', 'structured', 'premium', 'elite'].map(tier => {
-                                                    const tierUsers = allUsers.filter(u => u.tier === tier);
-                                                    const percentage = allUsers.length > 0 ? ((tierUsers.length / allUsers.length) * 100).toFixed(1) : 0;
-                                                    
-                                                    return (
-                                                        <div key={tier}>
-                                                            <div className="flex justify-between text-sm mb-1">
-                                                                <span className="capitalize">{tier}</span>
-                                                                <span className="font-semibold">{tierUsers.length} users</span>
-                                                            </div>
-                                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                                <div 
-                                                                    className="gradient-bg h-2 rounded-full"
-                                                                    style={{ width: `${percentage}%` }}
-                                                                ></div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        <div className="border rounded-lg p-6">
-                                            <h3 className="font-semibold mb-4">Recent Activity</h3>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <i className="fas fa-user-plus text-blue-600"></i>
-                                                    <span className="text-gray-600">{allUsers.length} total users registered</span>
-                                                </div>
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <i className="fas fa-comments text-purple-600"></i>
-                                                    <span className="text-gray-600">{allConversations.length} conversations started</span>
-                                                </div>
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <i className="fas fa-credit-card text-green-600"></i>
-                                                    <span className="text-gray-600">{allPayments.length} payments completed</span>
-                                                </div>
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <i className="fas fa-chart-line text-orange-600"></i>
-                                                    <span className="text-gray-600">{stats.conversionRate}% conversion rate</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="border rounded-lg p-6">
-                                            <h3 className="font-semibold mb-4">Quick Actions</h3>
-                                            <div className="space-y-2">
-                                                <button className="w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition">
-                                                    <i className="fas fa-download mr-2 text-purple-600"></i>
-                                                    Export All Data
-                                                </button>
-                                                <button className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition">
-                                                    <i className="fas fa-envelope mr-2 text-blue-600"></i>
-                                                    Send Bulk Email
-                                                </button>
-                                                <button className="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition">
-                                                    <i className="fas fa-file-pdf mr-2 text-green-600"></i>
-                                                    Generate Report
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==================== MAIN APP ====================
-        const App = () => {
-            const [user, setUser] = useState(null);
-            const [language, setLanguage] = useState('en');
-            const [showAuth, setShowAuth] = useState(false);
-            const [showPricing, setShowPricing] = useState(false);
-            const [showPayment, setShowPayment] = useState(false);
-            const [selectedTier, setSelectedTier] = useState(null);
-            const [view, setView] = useState('chat'); // chat, dashboard, admin
-            const [showAdminAccess, setShowAdminAccess] = useState(false);
-
-            useEffect(() => {
-                const savedUser = storage.get('user');
-                if (savedUser) {
-                    setUser(savedUser);
-                }
-            }, []);
-
-            const handleLogin = (userData) => {
-                setUser(userData);
-                setShowAuth(false);
-            };
-
-            const handleLogout = () => {
-                // Mark all conversations as inactive
-                const conversations = storage.get('conversations') || [];
-                conversations.forEach(c => c.active = false);
-                storage.set('conversations', conversations);
-                
-                storage.remove('user');
-                setUser(null);
-                setView('chat');
-            };
-
-            const handleTierAction = (tier) => {
-                if (tier.ctaAction === 'chat') {
-                    setShowPricing(false);
-                } else if (tier.ctaAction === 'payment') {
-                    if (!user) {
-                        setShowAuth(true);
-                        return;
-                    }
-                    setSelectedTier(tier);
-                    setShowPayment(true);
-                    setShowPricing(false);
-                } else if (tier.ctaAction === 'whatsapp') {
-                    window.open(`https://wa.me/8801535778111?text=${encodeURIComponent(tier.whatsappMessage)}`, '_blank');
-                }
-            };
-
-            const handlePaymentSuccess = (payment) => {
-                setShowPayment(false);
-                alert(`Payment successful! ৳${payment.amount} paid via ${payment.method}. Your ${selectedTier.name} service is now active.`);
-            };
-
-            const startNewConversation = () => {
-                const conversations = storage.get('conversations') || [];
-                conversations.forEach(c => c.active = false);
-                storage.set('conversations', conversations);
-                window.location.reload();
-            };
-
-            return (
-                <div className="h-screen flex flex-col">
-                    {/* Header */}
-                    <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-                                <i className="fas fa-graduation-cap text-white"></i>
-                            </div>
-                            <div>
-                                <h1 className="font-bold text-xl gradient-text">Peopole AI</h1>
-                                <p className="text-sm text-gray-500">Earth Solutions Visa Zone, Dhaka</p>
-                            </div>
-                            <div className="flex items-center gap-2 ml-4">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="text-sm text-gray-600">Online</span>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            {user && view !== 'admin' && (
-                                <button
-                                    onClick={() => setView(view === 'chat' ? 'dashboard' : 'chat')}
-                                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                                >
-                                    <i className={`fas ${view === 'chat' ? 'fa-user-circle' : 'fa-comments'} mr-2`}></i>
-                                    {view === 'chat' ? 'Dashboard' : 'Chat'}
-                                </button>
-                            )}
-                            {view !== 'admin' && (
-                                <button
-                                    onClick={() => setShowAdminAccess(true)}
-                                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                                    title="Admin Access"
-                                >
-                                    <i className="fas fa-shield-alt mr-2"></i>
-                                    Admin
-                                </button>
-                            )}
-                            <button
-                                onClick={() => setShowPricing(true)}
-                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                            >
-                                <i className="fas fa-dollar-sign mr-2"></i>
-                                Pricing
-                            </button>
-                            <button
-                                onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
-                                className="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition"
-                            >
-                                {language === 'en' ? 'বাংলা' : 'English'}
-                            </button>
-                            {!user && (
-                                <button
-                                    onClick={() => setShowAuth(true)}
-                                    className="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition"
-                                >
-                                    <i className="fas fa-sign-in-alt mr-2"></i>
-                                    Sign In
-                                </button>
-                            )}
-                        </div>
-                    </header>
-
-                    {/* Main Content */}
-                    <div className="flex-1 flex overflow-hidden">
-                        {/* Sidebar */}
-                        <aside className="w-80 bg-white border-r flex flex-col">
-                            <div className="p-6 border-b">
-                                <button
-                                    onClick={startNewConversation}
-                                    className="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
-                                >
-                                    <i className="fas fa-plus mr-2"></i>
-                                    New Conversation
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold text-sm text-gray-500 uppercase mb-2">Contact</h3>
-                                        <a
-                                            href="https://wa.me/8801535778111"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-lg transition"
-                                        >
-                                            <i className="fab fa-whatsapp text-green-600 text-xl"></i>
-                                            <div className="text-sm">
-                                                <div className="font-semibold">WhatsApp Us</div>
-                                                <div className="text-gray-600">+880 1535-778111</div>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="font-semibold text-sm text-gray-500 uppercase mb-2">Location</h3>
-                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                            <i className="fas fa-map-marker-alt text-purple-600 mt-1"></i>
-                                            <div className="text-sm">
-                                                <div className="font-semibold">Office</div>
-                                                <div className="text-gray-600">Panthapath, Dhaka</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="font-semibold text-sm text-gray-500 uppercase mb-2">Quick Access</h3>
-                                        <button
-                                            onClick={() => setShowPricing(true)}
-                                            className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition text-sm"
-                                        >
-                                            <i className="fas fa-arrow-right text-purple-600 mr-2"></i>
-                                            View Service Plans & Pricing
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </aside>
-
-                        {/* Main Area */}
-                        <main className="flex-1 overflow-hidden bg-gray-50">
-                            {view === 'admin' ? (
-                                <AdminPanel onClose={() => setView('chat')} />
-                            ) : view === 'dashboard' && user ? (
-                                <Dashboard user={user} onLogout={handleLogout} />
-                            ) : (
-                                <ChatInterface 
-                                    user={user} 
-                                    language={language}
-                                    onShowPricing={() => setShowPricing(true)}
-                                />
-                            )}
-                        </main>
-                    </div>
-
-                    {/* Modals */}
-                    {showAuth && <AuthModal onClose={() => setShowAuth(false)} onLogin={handleLogin} />}
-                    
-                    {showPricing && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                            <div className="bg-white rounded-2xl max-w-5xl w-full p-8 my-8 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-                                <button onClick={() => setShowPricing(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                                    <i className="fas fa-times text-xl"></i>
-                                </button>
-
-                                <h2 className="text-4xl font-bold gradient-text text-center mb-4">
-                                    Service Plans & Pricing
-                                </h2>
-                                <p className="text-center text-gray-600 mb-8">
-                                    Choose the right support level for your study abroad journey
-                                </p>
-
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {SERVICE_TIERS.map(tier => (
-                                        <div
-                                            key={tier.id}
-                                            className="service-card border-2 border-gray-200 rounded-xl p-6 relative"
-                                        >
-                                            {tier.badge && (
-                                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                                                    <span className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-1 rounded-full text-xs font-bold">
-                                                        {tier.badge}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            
-                                            <div className="text-center mb-4">
-                                                <div className="text-4xl mb-2">{tier.icon}</div>
-                                                <h3 className="text-xl font-bold">{tier.name}</h3>
-                                                <div className="mt-3">
-                                                    <span className="text-3xl font-bold gradient-text">
-                                                        {tier.currency}{tier.price}
-                                                    </span>
-                                                    {typeof tier.price === 'number' && (
-                                                        <span className="text-gray-500 text-sm">/student</span>
-                                                    )}
-                                                </div>
-                                                <p className="text-xs text-gray-500 mt-2">{tier.aiHumanRatio}</p>
-                                            </div>
-
-                                            <p className="text-sm text-gray-600 mb-4 h-12">
-                                                {tier.description}
-                                            </p>
-
-                                            <ul className="space-y-2 mb-6">
-                                                {tier.features.map((feature, i) => (
-                                                    <li key={i} className="flex items-start text-sm">
-                                                        <i className="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
-                                                        <span>{feature}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-
-                                            <button
-                                                onClick={() => handleTierAction(tier)}
-                                                className="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
-                                            >
-                                                {tier.cta}
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {showPayment && selectedTier && (
-                        <PaymentModal
-                            tier={selectedTier}
-                            onClose={() => setShowPayment(false)}
-                            onSuccess={handlePaymentSuccess}
-                        />
-                    )}
-
-                    {/* Admin Access Modal */}
-                    {showAdminAccess && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-2xl max-w-md w-full p-8 relative">
-                                <button 
-                                    onClick={() => setShowAdminAccess(false)} 
-                                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-                                >
-                                    <i className="fas fa-times"></i>
-                                </button>
-
-                                <div className="text-center mb-6">
-                                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i className="fas fa-shield-alt text-purple-600 text-2xl"></i>
-                                    </div>
-                                    <h2 className="text-2xl font-bold gradient-text mb-2">Admin Access</h2>
-                                    <p className="text-gray-600">Enter admin password to continue</p>
-                                </div>
-
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const password = e.target.password.value;
-                                    if (password === 'admin123') {
-                                        setShowAdminAccess(false);
-                                        setView('admin');
-                                    } else {
-                                        alert('Incorrect password. Demo password: admin123');
-                                    }
-                                }} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Password (demo: admin123)
-                                        </label>
-                                        <input
-                                            type="password"
-                                            name="password"
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                            placeholder="Enter admin password"
-                                            required
-                                        />
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        className="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
-                                    >
-                                        <i className="fas fa-lock mr-2"></i>
-                                        Access Admin Panel
-                                    </button>
-                                </form>
-
-                                <p className="text-xs text-gray-500 text-center mt-4">
-                                    <i className="fas fa-info-circle mr-1"></i>
-                                    For demo purposes only. Use password: <strong>admin123</strong>
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+<div class="app">
+
+  <!-- ═══════════ STAGE SELECTION MODAL ═══════════ -->
+  <div class="stage-modal-backdrop hidden" id="stageModalBackdrop">
+    <div class="stage-modal">
+      <div class="stage-modal-header">
+        <div class="stage-modal-logo">
+          <img src="/logo.jpg" alt="Earth Solutions Logo"/>
+        </div>
+        <h2>Welcome to <span>Peopole AI</span></h2>
+        <p>Select your current academic stage to get personalised guidance</p>
+      </div>
+      <div class="stage-grid">
+        <div class="stage-card" data-stage="1">
+          <div class="stage-icon">🌱</div>
+          <div class="stage-num">Stage 1</div>
+          <div class="stage-name">Foundation</div>
+          <div class="stage-range">Pre-School – Class 5</div>
+        </div>
+        <div class="stage-card" data-stage="2">
+          <div class="stage-icon">🔍</div>
+          <div class="stage-num">Stage 2</div>
+          <div class="stage-name">Development</div>
+          <div class="stage-range">Class 6 – 8</div>
+        </div>
+        <div class="stage-card" data-stage="3">
+          <div class="stage-icon">🎯</div>
+          <div class="stage-num">Stage 3</div>
+          <div class="stage-name">Strategic</div>
+          <div class="stage-range">Class 9 – 12</div>
+        </div>
+        <div class="stage-card" data-stage="4">
+          <div class="stage-icon">🎓</div>
+          <div class="stage-num">Stage 4</div>
+          <div class="stage-name">Undergraduate</div>
+          <div class="stage-range">Bachelor's Degree</div>
+        </div>
+        <div class="stage-card" data-stage="5">
+          <div class="stage-icon">🔬</div>
+          <div class="stage-num">Stage 5</div>
+          <div class="stage-name">Master's</div>
+          <div class="stage-range">Postgraduate</div>
+        </div>
+        <div class="stage-card" data-stage="6">
+          <div class="stage-icon">🏛️</div>
+          <div class="stage-num">Stage 6</div>
+          <div class="stage-name">Doctoral</div>
+          <div class="stage-range">PhD Research</div>
+        </div>
+        <div class="stage-card wide" data-stage="7">
+          <div class="stage-icon">👨‍👩‍👧</div>
+          <div>
+            <div class="stage-num">Stage 7</div>
+            <div class="stage-name">Parent Mode</div>
+            <div class="stage-range">Education & Career Guidance for Parents</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ OVERLAY ═══════════ -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-top">
+        <div class="logo-gem">
+          <img src="/logo.jpg" alt="Earth Solutions Logo"/>
+        </div>
+        <div>
+          <div class="logo-name">Peopole AI</div>
+          <div class="logo-sub">Earth Solutions Visa Zone</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="new-btn" id="newChatBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      New Conversation
+    </button>
+
+    <div class="stage-badge-wrap" id="stageBadgeWrap" style="display:none">
+      <div class="stage-badge" id="stageBadge">—</div>
+      <button class="stage-change-btn" id="stageChangeBtn">Change</button>
+    </div>
+
+    <div class="offline-bar" id="offlineBar" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+      <span>You are offline</span>
+    </div>
+
+    <div class="chat-list" id="chatList"></div>
+
+    <div class="sidebar-footer">
+      <a class="whatsapp-btn" href="https://wa.me/8801535778111?text=Hello%20Peopole%20AI%2C%20I%20need%20academic%20guidance." target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span>WhatsApp Us</span>
+      </a>
+      <div class="contact-card">
+        <div class="contact-card-title">Contact</div>
+        <div class="contact-line">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.27a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 17z"/></svg>
+          +880 1535-778111
+        </div>
+        <div class="contact-line">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Panthapath, Dhaka
+        </div>
+        <div class="contact-line" style="margin-top:6px">
+          <a href="/pricing.html" style="color:var(--gold);text-decoration:none;font-size:12px;font-weight:600">📋 View Service Plans & Pricing →</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle sidebar">☰</button>
+      <div class="topbar-logo-wrap">
+        <img src="/logo.jpg" alt="Peopole AI Logo" class="topbar-logo"/>
+      </div>
+      <div class="topbar-info">
+        <div class="topbar-title" id="chatTitle">Peopole AI</div>
+        <div class="topbar-sub"   id="topbarSub">Earth Solutions Visa Zone, Dhaka</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="status-dot" id="statusDot" title="Online"></div>
+        <button class="pricing-btn" id="pricingBtn" onclick="openPricingModal()" title="View Pricing Plans">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span id="pricingBtnLabel">Pricing</span>
+        </button>
+        <button class="lang-btn" id="langBtn" title="Switch Language">বাংলা</button>
+        <button class="icon-btn" id="clearBtn" title="Clear conversation">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span class="clear-label"> Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="messages" id="messages"></div>
+
+    <!-- FAQ Panel -->
+    <div class="faq-area" id="faqArea">
+      <button class="faq-toggle" id="faqToggleBtn" onclick="toggleFAQ()">
+        💡 <span id="faqToggleLabel">Common Questions</span>
+        <i class="faq-arrow" id="faqArrow">▾</i>
+      </button>
+      <div class="faq-panel" id="faqPanel"></div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea
+          id="messageInput"
+          placeholder="Ask about universities, visas, scholarships, SOP writing…"
+          rows="1"
+          aria-label="Message input"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" title="Send message" aria-label="Send">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span class="send-label">Send</span>
+        </button>
+      </div>
+      <div class="disclaimer" id="disclaimerEl">Peopole AI can make mistakes. Always verify important decisions with an official consultant.</div>
+    </div>
+
+  </main>
+
+
+
+</div>
+
+<!-- ═══════════ PRICING MODAL ═══════════ -->
+<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" onclick="closePricingOnBackdrop(event)">
+  <div class="pricing-modal" id="pricingModalBox">
+    <div class="pm-header">
+      <div class="pm-title-wrap">
+        <div class="pm-icon">💰</div>
+        <div>
+          <h2 id="pmTitle">Service Plans & Pricing</h2>
+          <p id="pmSub">Earth Solutions Visa Zone — Choose what fits you</p>
+        </div>
+      </div>
+      <button class="pm-close" onclick="closePricingModal()">✕</button>
+    </div>
+
+    <div class="pm-plans">
+      <div class="pm-plan free" onclick="selectPlan('free')">
+        <div class="pm-plan-badge">🟢 FREE</div>
+        <div class="pm-plan-name">Basic Pathway</div>
+        <div class="pm-plan-price">৳0</div>
+        <div class="pm-plan-desc">Free AI guidance for every student. Ask anything, 24/7.</div>
+        <ul class="pm-features">
+          <li>✅ Unlimited AI chat</li>
+          <li>✅ Stage-based guidance</li>
+          <li>✅ Bangla + English support</li>
+          <li>✅ No registration needed</li>
+        </ul>
+        <button class="pm-cta green" onclick="closePricingModal()">Start Chatting Free →</button>
+      </div>
+
+      <div class="pm-plan entry" onclick="selectPlan('entry')">
+        <div class="pm-plan-badge">💰 ENTRY</div>
+        <div class="pm-plan-name">Entry-Level Report</div>
+        <div class="pm-plan-price">৳30 <small>/ student</small></div>
+        <div class="pm-plan-desc">AI country & university report tailored to your stage, delivered to WhatsApp.</div>
+        <ul class="pm-features">
+          <li>✅ Country suitability report</li>
+          <li>✅ University shortlist (AI)</li>
+          <li>✅ Visa requirement overview</li>
+          <li>✅ Instant PDF delivery</li>
+        </ul>
+        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+%E2%82%B930" target="_blank">Get Report — ৳30 →</a>
+      </div>
+
+      <div class="pm-plan structured" onclick="selectPlan('structured')">
+        <div class="pm-plan-badge pm-popular">🔵 POPULAR</div>
+        <div class="pm-plan-name">Structured Guidance</div>
+        <div class="pm-plan-price">৳100–৳500</div>
+        <div class="pm-plan-desc">Human consultant review + AI risk analysis for serious applicants.</div>
+        <ul class="pm-features">
+          <li>✅ AI risk analysis</li>
+          <li>✅ Human consultant review</li>
+          <li>✅ Full document checklist</li>
+          <li>✅ SOP draft review</li>
+        </ul>
+        <a class="pm-cta blue" href="https://wa.me/8801535778111?text=I+want+Structured+Guidance" target="_blank">Get Started →</a>
+      </div>
+
+      <div class="pm-plan midtier" onclick="selectPlan('midtier')">
+        <div class="pm-plan-badge">💼 PREMIUM</div>
+        <div class="pm-plan-name">Mid-Tier Mentorship</div>
+        <div class="pm-plan-price">৳500–৳20,000+</div>
+        <div class="pm-plan-desc">Matched mentor + full application support. 80% human-led.</div>
+        <ul class="pm-features">
+          <li>✅ Matched alumni mentor</li>
+          <li>✅ Full SOP writing</li>
+          <li>✅ Visa interview prep</li>
+          <li>✅ Application filing support</li>
+        </ul>
+        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+Mid-Tier+Mentorship" target="_blank">Book Consultation →</a>
+      </div>
+
+      <div class="pm-plan elite" onclick="selectPlan('elite')">
+        <div class="pm-plan-badge">🔴 ELITE</div>
+        <div class="pm-plan-name">Elite Academic Board</div>
+        <div class="pm-plan-price">Call for Details</div>
+        <div class="pm-plan-desc">Full academic board support for top institutions. 90% human expertise.</div>
+        <ul class="pm-features">
+          <li>✅ Academic board review</li>
+          <li>✅ Professor outreach</li>
+          <li>✅ Scholarship negotiation</li>
+          <li>✅ End-to-end management</li>
+        </ul>
+        <a class="pm-cta rose" href="https://wa.me/8801535778111?text=I+want+Elite+Academic+Board+service" target="_blank">📞 Call Us Now →</a>
+      </div>
+    </div>
+
+    <div class="pm-footer">
+      <div class="pm-footer-note" id="pmNote">⚠️ No visa or admission guarantee. Results depend on individual eligibility.</div>
+      <a href="/pricing.html" class="pm-full-link" target="_blank" id="pmFullLink">View Full Pricing Page →</a>
+    </div>
+  </div>
+</div>
+
+<script src="/frontend/chat.js"></script>
 </body>
 </html>
