@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0b1629"/>
+  <meta name="description" content="Peopole AI — Academic & Visa Consultant by Earth Solutions Visa Zone, Dhaka. Study abroad guidance for Bangladeshi students."/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Peopole AI"/>
+  <!-- Open Graph -->
+  <meta property="og:title"       content="Peopole AI — Earth Solutions Visa Zone"/>
+  <meta property="og:description" content="Expert academic and visa consultant for Bangladeshi students. Study in UK, Australia, Canada, Germany & more."/>
+  <meta property="og:image"       content="/logo.jpg"/>
+  <meta property="og:type"        content="website"/>
+  <link rel="manifest"        href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/logo.jpg"/>
+  <link rel="icon" type="image/jpeg" href="/logo.jpg"/>
+  <title>Peopole AI — Earth Solutions Visa Zone</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════ STAGE SELECTION MODAL ═══════════ -->
+  <div class="stage-modal-backdrop hidden" id="stageModalBackdrop">
+    <div class="stage-modal">
+      <div class="stage-modal-header">
+        <div class="stage-modal-logo">
+          <img src="/logo.jpg" alt="Earth Solutions Logo"/>
+        </div>
+        <h2>Welcome to <span>Peopole AI</span></h2>
+        <p>Select your current academic stage to get personalised guidance</p>
+      </div>
+      <div class="stage-grid">
+        <div class="stage-card" data-stage="1">
+          <div class="stage-icon">🌱</div>
+          <div class="stage-num">Stage 1</div>
+          <div class="stage-name">Foundation</div>
+          <div class="stage-range">Pre-School – Class 5</div>
+        </div>
+        <div class="stage-card" data-stage="2">
+          <div class="stage-icon">🔍</div>
+          <div class="stage-num">Stage 2</div>
+          <div class="stage-name">Development</div>
+          <div class="stage-range">Class 6 – 8</div>
+        </div>
+        <div class="stage-card" data-stage="3">
+          <div class="stage-icon">🎯</div>
+          <div class="stage-num">Stage 3</div>
+          <div class="stage-name">Strategic</div>
+          <div class="stage-range">Class 9 – 12</div>
+        </div>
+        <div class="stage-card" data-stage="4">
+          <div class="stage-icon">🎓</div>
+          <div class="stage-num">Stage 4</div>
+          <div class="stage-name">Undergraduate</div>
+          <div class="stage-range">Bachelor's Degree</div>
+        </div>
+        <div class="stage-card" data-stage="5">
+          <div class="stage-icon">🔬</div>
+          <div class="stage-num">Stage 5</div>
+          <div class="stage-name">Master's</div>
+          <div class="stage-range">Postgraduate</div>
+        </div>
+        <div class="stage-card" data-stage="6">
+          <div class="stage-icon">🏛️</div>
+          <div class="stage-num">Stage 6</div>
+          <div class="stage-name">Doctoral</div>
+          <div class="stage-range">PhD Research</div>
+        </div>
+        <div class="stage-card wide" data-stage="7">
+          <div class="stage-icon">👨‍👩‍👧</div>
+          <div>
+            <div class="stage-num">Stage 7</div>
+            <div class="stage-name">Parent Mode</div>
+            <div class="stage-range">Education & Career Guidance for Parents</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ OVERLAY ═══════════ -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-top">
+        <div class="logo-gem">
+          <img src="/logo.jpg" alt="Earth Solutions Logo"/>
+        </div>
+        <div>
+          <div class="logo-name">Peopole AI</div>
+          <div class="logo-sub">Earth Solutions Visa Zone</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="new-btn" id="newChatBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      New Conversation
+    </button>
+
+    <div class="stage-badge-wrap" id="stageBadgeWrap" style="display:none">
+      <div class="stage-badge" id="stageBadge">—</div>
+      <button class="stage-change-btn" id="stageChangeBtn">Change</button>
+    </div>
+
+    <div class="offline-bar" id="offlineBar" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+      <span>You are offline</span>
+    </div>
+
+    <div class="chat-list" id="chatList"></div>
+
+    <div class="sidebar-footer">
+      <a class="whatsapp-btn" href="https://wa.me/8801535778111?text=Hello%20Peopole%20AI%2C%20I%20need%20academic%20guidance." target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span>WhatsApp Us</span>
+      </a>
+      <div class="contact-card">
+        <div class="contact-card-title">Contact</div>
+        <div class="contact-line">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.27a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.72 17z"/></svg>
+          +880 1535-778111
+        </div>
+        <div class="contact-line">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Panthapath, Dhaka
+        </div>
+        <div class="contact-line" style="margin-top:6px">
+          <a href="/pricing.html" style="color:var(--gold);text-decoration:none;font-size:12px;font-weight:600">📋 View Service Plans & Pricing →</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle sidebar">☰</button>
+      <div class="topbar-logo-wrap">
+        <img src="/logo.jpg" alt="Peopole AI Logo" class="topbar-logo"/>
+      </div>
+      <div class="topbar-info">
+        <div class="topbar-title" id="chatTitle">Peopole AI</div>
+        <div class="topbar-sub"   id="topbarSub">Earth Solutions Visa Zone, Dhaka</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="status-dot" id="statusDot" title="Online"></div>
+        <button class="pricing-btn" id="pricingBtn" onclick="openPricingModal()" title="View Pricing Plans">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span id="pricingBtnLabel">Pricing</span>
+        </button>
+        <button class="lang-btn" id="langBtn" title="Switch Language">বাংলা</button>
+        <button class="icon-btn" id="clearBtn" title="Clear conversation">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span class="clear-label"> Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="messages" id="messages"></div>
+
+    <!-- FAQ Panel -->
+    <div class="faq-area" id="faqArea">
+      <button class="faq-toggle" id="faqToggleBtn" onclick="toggleFAQ()">
+        💡 <span id="faqToggleLabel">Common Questions</span>
+        <i class="faq-arrow" id="faqArrow">▾</i>
+      </button>
+      <div class="faq-panel" id="faqPanel"></div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea
+          id="messageInput"
+          placeholder="Ask about universities, visas, scholarships, SOP writing…"
+          rows="1"
+          aria-label="Message input"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" title="Send message" aria-label="Send">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span class="send-label">Send</span>
+        </button>
+      </div>
+      <div class="disclaimer" id="disclaimerEl">Peopole AI can make mistakes. Always verify important decisions with an official consultant.</div>
+    </div>
+
+  </main>
+
+
+
+</div>
+
+<!-- ═══════════ PRICING MODAL ═══════════ -->
+<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" onclick="closePricingOnBackdrop(event)">
+  <div class="pricing-modal" id="pricingModalBox">
+    <div class="pm-header">
+      <div class="pm-title-wrap">
+        <div class="pm-icon">💰</div>
+        <div>
+          <h2 id="pmTitle">Service Plans & Pricing</h2>
+          <p id="pmSub">Earth Solutions Visa Zone — Choose what fits you</p>
+        </div>
+      </div>
+      <button class="pm-close" onclick="closePricingModal()">✕</button>
+    </div>
+
+    <div class="pm-plans">
+      <div class="pm-plan free" onclick="selectPlan('free')">
+        <div class="pm-plan-badge">🟢 FREE</div>
+        <div class="pm-plan-name">Basic Pathway</div>
+        <div class="pm-plan-price">৳0</div>
+        <div class="pm-plan-desc">Free AI guidance for every student. Ask anything, 24/7.</div>
+        <ul class="pm-features">
+          <li>✅ Unlimited AI chat</li>
+          <li>✅ Stage-based guidance</li>
+          <li>✅ Bangla + English support</li>
+          <li>✅ No registration needed</li>
+        </ul>
+        <button class="pm-cta green" onclick="closePricingModal()">Start Chatting Free →</button>
+      </div>
+
+      <div class="pm-plan entry" onclick="selectPlan('entry')">
+        <div class="pm-plan-badge">💰 ENTRY</div>
+        <div class="pm-plan-name">Entry-Level Report</div>
+        <div class="pm-plan-price">৳30 <small>/ student</small></div>
+        <div class="pm-plan-desc">AI country & university report tailored to your stage, delivered to WhatsApp.</div>
+        <ul class="pm-features">
+          <li>✅ Country suitability report</li>
+          <li>✅ University shortlist (AI)</li>
+          <li>✅ Visa requirement overview</li>
+          <li>✅ Instant PDF delivery</li>
+        </ul>
+        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+%E2%82%B930" target="_blank">Get Report — ৳30 →</a>
+      </div>
+
+      <div class="pm-plan structured" onclick="selectPlan('structured')">
+        <div class="pm-plan-badge pm-popular">🔵 POPULAR</div>
+        <div class="pm-plan-name">Structured Guidance</div>
+        <div class="pm-plan-price">৳100–৳500</div>
+        <div class="pm-plan-desc">Human consultant review + AI risk analysis for serious applicants.</div>
+        <ul class="pm-features">
+          <li>✅ AI risk analysis</li>
+          <li>✅ Human consultant review</li>
+          <li>✅ Full document checklist</li>
+          <li>✅ SOP draft review</li>
+        </ul>
+        <a class="pm-cta blue" href="https://wa.me/8801535778111?text=I+want+Structured+Guidance" target="_blank">Get Started →</a>
+      </div>
+
+      <div class="pm-plan midtier" onclick="selectPlan('midtier')">
+        <div class="pm-plan-badge">💼 PREMIUM</div>
+        <div class="pm-plan-name">Mid-Tier Mentorship</div>
+        <div class="pm-plan-price">৳500–৳20,000+</div>
+        <div class="pm-plan-desc">Matched mentor + full application support. 80% human-led.</div>
+        <ul class="pm-features">
+          <li>✅ Matched alumni mentor</li>
+          <li>✅ Full SOP writing</li>
+          <li>✅ Visa interview prep</li>
+          <li>✅ Application filing support</li>
+        </ul>
+        <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+Mid-Tier+Mentorship" target="_blank">Book Consultation →</a>
+      </div>
+
+      <div class="pm-plan elite" onclick="selectPlan('elite')">
+        <div class="pm-plan-badge">🔴 ELITE</div>
+        <div class="pm-plan-name">Elite Academic Board</div>
+        <div class="pm-plan-price">Call for Details</div>
+        <div class="pm-plan-desc">Full academic board support for top institutions. 90% human expertise.</div>
+        <ul class="pm-features">
+          <li>✅ Academic board review</li>
+          <li>✅ Professor outreach</li>
+          <li>✅ Scholarship negotiation</li>
+          <li>✅ End-to-end management</li>
+        </ul>
+        <a class="pm-cta rose" href="https://wa.me/8801535778111?text=I+want+Elite+Academic+Board+service" target="_blank">📞 Call Us Now →</a>
+      </div>
+    </div>
+
+    <div class="pm-footer">
+      <div class="pm-footer-note" id="pmNote">⚠️ No visa or admission guarantee. Results depend on individual eligibility.</div>
+      <a href="/pricing.html" class="pm-full-link" target="_blank" id="pmFullLink">View Full Pricing Page →</a>
+    </div>
+  </div>
+</div>
+
+<script src="/frontend/chat.js"></script>
+</body>
+</html>
