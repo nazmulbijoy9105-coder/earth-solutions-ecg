@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 // frontend/chat.js — Peopole AI v9.0 PREMIUM
 // Earth Solutions Visa Zone | Hybrid FAQ+AI | EN/BN | Push | Analytics
 // Premium: Avatars • Streaming cursor • Suggested replies • Empty state • Glass UI
+=======
+// frontend/chat.js — Peopole AI v8.0
+// Earth Solutions Visa Zone | Hybrid FAQ+AI | EN/BN | Push Notifications | Analytics
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -98,7 +103,11 @@ I'm not just an information bot. I work as your **personal academic amplifier** 
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 1. FAQ QUICK CHIPS — per stage
+=======
+// 1. FAQ QUICK CHIPS — per stage (client-side instant questions)
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 const STAGE_FAQ = {
   1: {
@@ -132,13 +141,23 @@ const STAGE_FAQ = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 2. OPTIONAL AD BANNERS
+=======
+// 2. OPTIONAL AD BANNERS — commercial engagement / revenue
+//    Replace adContent with real sponsor deals or keep as internal promos
+//    Set ADS_ENABLED = false to disable completely
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 const ADS_ENABLED = true;
 const AD_SLOTS = [
   {
     id: 'promo_structured',
+<<<<<<< HEAD
     trigger: 4,
+=======
+    trigger: 4,   // show after this many AI messages
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     en: { text: '📋 **Ready for a personalised plan?** Our Structured Guidance (৳100–৳500) includes human consultant review + AI risk analysis. [Get Started →](https://wa.me/8801535778111?text=I+want+Structured+Guidance)', cta: 'Get Structured Plan' },
     bn: { text: '📋 **ব্যক্তিগতকৃত পরিকল্পনার জন্য প্রস্তুত?** আমাদের স্ট্রাকচার্ড গাইডেন্স (৳১০০–৳৫০০)-এ মানব কনসালট্যান্ট পর্যালোচনা + এআই রিস্ক বিশ্লেষণ অন্তর্ভুক্ত। [শুরু করুন →](https://wa.me/8801535778111)', cta: 'স্ট্রাকচার্ড প্ল্যান নিন' }
   },
@@ -161,6 +180,7 @@ const AD_SLOTS = [
 // ═══════════════════════════════════════════════════════════════════════════
 let lang       = 'en';
 let stage      = null;
+<<<<<<< HEAD
 let memory     = [];
 let isTyping   = false;
 let isOnline   = navigator.onLine;
@@ -168,6 +188,15 @@ let aiMsgCount   = 0;
 let userMsgCount = 0;
 
 const FREE_MSG_LIMIT = 10;
+=======
+let memory     = [];   // resets every page load — always fresh start
+let isTyping   = false;
+let isOnline   = navigator.onLine;
+let aiMsgCount   = 0;  // for ad slot triggers
+let userMsgCount = 0;  // free message limit counter
+
+const FREE_MSG_LIMIT = 10; // free messages per session — change to adjust
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 
 let userId = localStorage.getItem('ppl_uid') || (() => {
   const id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -217,11 +246,21 @@ function renderMarkdown(text) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+<<<<<<< HEAD
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+=======
+    // Standard markdown links [text](url)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    // Bare URLs in brackets [url] — e.g. [www.example.com]
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     .replace(/\[([^\]]*(?:www\.|https?:\/\/)[^\]]+)\]/g, (_, url) => {
       const href = url.startsWith('http') ? url : 'https://' + url;
       return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
     })
+<<<<<<< HEAD
+=======
+    // Plain bare URLs not already linked
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     .replace(/(?<!href=")(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
 
   const lines = html.split('\n');
@@ -244,6 +283,7 @@ function renderMarkdown(text) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 6. MESSAGE RENDERING (Premium: avatars + streaming cursor)
 // ═══════════════════════════════════════════════════════════════════════════
 function addMessage(role, text, streaming = false) {
@@ -260,6 +300,14 @@ function addMessage(role, text, streaming = false) {
   avatar.textContent = role === 'assistant' ? 'P' : (lang === 'bn' ? 'আ' : 'U');
   avatar.title = role === 'assistant' ? 'Peopole AI' : 'You';
 
+=======
+// 6. MESSAGE RENDERING
+// ═══════════════════════════════════════════════════════════════════════════
+function addMessage(role, text, streaming = false) {
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role}`;
+
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   const bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
 
@@ -279,12 +327,19 @@ function addMessage(role, text, streaming = false) {
 
   bubble.appendChild(textEl);
   bubble.appendChild(timeEl);
+<<<<<<< HEAD
   wrap.appendChild(avatar);
   wrap.appendChild(bubble);
   els.messages.appendChild(wrap);
   els.messages.scrollTop = els.messages.scrollHeight;
 
   return { wrap, textEl, bubble };
+=======
+  wrap.appendChild(bubble);
+  els.messages.appendChild(wrap);
+  els.messages.scrollTop = els.messages.scrollHeight;
+  return { wrap, textEl };
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 function addAdBanner(ad) {
@@ -303,6 +358,7 @@ function addAdBanner(ad) {
   trackEvent('ad_impression', { adId: ad.id, stage, lang });
 }
 
+<<<<<<< HEAD
 // Intelligent suggested replies under AI messages
 function addSuggestedReplies(bubbleEl, aiText) {
   const suggestions = [];
@@ -394,25 +450,39 @@ function renderEmptyState() {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 7. SEND MESSAGE (with live streaming cursor)
+=======
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. SEND MESSAGE
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 async function sendMessage() {
   const input = els.messageInput;
   const text  = input.value.trim();
   if (!text || isTyping) return;
 
+<<<<<<< HEAD
   if (!isOnline) {
     addMessage('assistant', LANG[lang].offlineMsg);
     return;
   }
 
   // Free message limit
+=======
+  if (!isOnline) { addMessage('assistant', LANG[lang].offlineMsg); return; }
+
+  // ── Free message limit check ──────────────────────────────────────────
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   if (userMsgCount >= FREE_MSG_LIMIT) {
     const limitMsg = lang === 'bn'
       ? `🔒 **আপনি বিনামূল্যে ${FREE_MSG_LIMIT}টি বার্তার সীমায় পৌঁছেছেন।**\n\nআরও সহায়তার জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন অথবা একটি পরিষেবা পরিকল্পনা বেছে নিন:\n📱 [WhatsApp করুন →](https://wa.me/8801535778111?text=আমি+আরও+সাহায্য+চাই)\n💰 [সেবা পরিকল্পনা দেখুন →](/pricing.html)`
       : `🔒 **You've reached the ${FREE_MSG_LIMIT}-message free limit for this session.**\n\nTo continue getting expert guidance, contact us or choose a service plan:\n📱 [WhatsApp Us →](https://wa.me/8801535778111?text=I+need+more+guidance)\n💰 [View Service Plans →](/pricing.html)`;
     addMessage('assistant', limitMsg);
     if (els.messageInput) els.messageInput.disabled = true;
+<<<<<<< HEAD
     if (els.sendBtn)      els.sendBtn.disabled = true;
+=======
+    if (els.sendBtn)      els.sendBtn.disabled      = true;
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     return;
   }
 
@@ -424,7 +494,11 @@ async function sendMessage() {
 
   isTyping = true;
   if (els.sendBtn) els.sendBtn.disabled = true;
+<<<<<<< HEAD
   const { wrap: typingWrap, textEl: typingEl, bubble: typingBubble } = addMessage('assistant', '', true);
+=======
+  const { wrap: typingWrap, textEl: typingEl } = addMessage('assistant', '', true);
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 
   trackEvent('message_sent', { stage, lang, messageLength: text.length });
 
@@ -466,14 +540,19 @@ async function sendMessage() {
               firstChunk = false;
             }
             fullText += token;
+<<<<<<< HEAD
             // Live streaming cursor
             typingEl.innerHTML = renderMarkdown(fullText) + '<span class="stream-cursor"></span>';
+=======
+            typingEl.innerHTML = renderMarkdown(fullText);
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
             els.messages.scrollTop = els.messages.scrollHeight;
           }
         } catch {}
       }
     }
 
+<<<<<<< HEAD
     // Final render without cursor
     if (fullText) {
       typingEl.innerHTML = renderMarkdown(fullText);
@@ -485,6 +564,12 @@ async function sendMessage() {
     } else {
       typingWrap.remove();
       addMessage('assistant', LANG[lang].errorMsg);
+=======
+    if (fullText) {
+      memory.push({ role: 'assistant', content: fullText });
+      aiMsgCount++;
+      maybeShowAd();
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     }
 
   } catch (err) {
@@ -502,6 +587,10 @@ function maybeShowAd() {
   if (!ADS_ENABLED) return;
   for (const ad of AD_SLOTS) {
     if (aiMsgCount === ad.trigger) {
+<<<<<<< HEAD
+=======
+      // Don't show if already dismissed
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
       if (!document.querySelector(`.ad-banner[data-ad-id="${ad.id}"]`)) {
         setTimeout(() => addAdBanner(ad), 800);
       }
@@ -522,12 +611,18 @@ function hideStageModal() {
   if (backdrop) backdrop.classList.add('hidden');
 }
 function selectStage(s) {
+<<<<<<< HEAD
   stage = Number(s);
   const name = LANG[lang].stageNames[stage];
+=======
+  stage = s;
+  const name = LANG[lang].stageNames[s];
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   if (els.stageBadge)     els.stageBadge.textContent = name;
   if (els.stageBadgeWrap) els.stageBadgeWrap.style.display = 'flex';
   hideStageModal();
   buildFAQPanel();
+<<<<<<< HEAD
 
   // Clear empty state and show a short confirmation
   const empty = els.messages.querySelector('.empty-state');
@@ -539,6 +634,9 @@ function selectStage(s) {
   addMessage('assistant', confirm);
 
   trackEvent('stage_selected', { stage, lang });
+=======
+  trackEvent('stage_selected', { stage: s, lang });
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -566,11 +664,16 @@ function toggleFAQ() {
   faqOpen = !faqOpen;
   const panel = els.faqPanel;
   const arrow = els.faqArrow;
+<<<<<<< HEAD
   if (panel) {
     panel.style.display = faqOpen ? 'flex' : 'none';
     panel.classList.toggle('open', faqOpen);
   }
   if (arrow) arrow.textContent = faqOpen ? '▴' : '▾';
+=======
+  if (panel) panel.style.display = faqOpen ? 'flex' : 'none';
+  if (arrow) arrow.textContent   = faqOpen ? '▴' : '▾';
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -596,6 +699,7 @@ function setLang(l) {
   if (els.messageInput) els.messageInput.placeholder = t.placeholder;
   if (stage && els.stageBadge) els.stageBadge.textContent = t.stageNames[stage];
   buildFAQPanel();
+<<<<<<< HEAD
 
   // Refresh empty state language if visible
   const empty = els.messages.querySelector('.empty-state');
@@ -604,6 +708,8 @@ function setLang(l) {
     renderEmptyState();
   }
 
+=======
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   trackEvent('language_toggle', { lang: l });
 }
 
@@ -635,6 +741,11 @@ window.selectPlan = function(planId) {
 async function initPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   if (localStorage.getItem('push_asked') === 'yes') return;
+<<<<<<< HEAD
+=======
+
+  // Ask after 30 seconds
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   setTimeout(showPushPrompt, 30000);
 }
 
@@ -666,6 +777,11 @@ async function requestPushPermission() {
     if (permission !== 'granted') return;
 
     const reg = await navigator.serviceWorker.ready;
+<<<<<<< HEAD
+=======
+
+    // Get VAPID public key from server
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     const keyRes  = await fetch('/api/push/vapid-public-key');
     const { key } = await keyRes.json();
 
@@ -701,7 +817,11 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 13. ANALYTICS
+=======
+// 13. ANALYTICS — built-in (no Google Analytics)
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 function trackEvent(name, meta) {
   try {
@@ -726,6 +846,7 @@ function trackPageview() {
 // 14. CLEAR CONVERSATION
 // ═══════════════════════════════════════════════════════════════════════════
 function clearConversation() {
+<<<<<<< HEAD
   if (els.messages) {
     els.messages.innerHTML = '';
     memory = [];
@@ -735,6 +856,10 @@ function clearConversation() {
     if (els.sendBtn) els.sendBtn.disabled = false;
   }
   renderEmptyState();
+=======
+  if (els.messages) { els.messages.innerHTML = ''; memory = []; aiMsgCount = 0; }
+  addMessage('assistant', LANG[lang].welcomeMsg);
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -760,18 +885,27 @@ function autoResize() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 17. ONLINE / OFFLINE
+=======
+// 17. ONLINE/OFFLINE
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 function updateOnlineStatus() {
   isOnline = navigator.onLine;
   if (els.offlineBar) els.offlineBar.style.display = isOnline ? 'none' : 'flex';
   if (els.statusDot) {
+<<<<<<< HEAD
     els.statusDot.classList.toggle('offline', !isOnline);
+=======
+    els.statusDot.style.background = isOnline ? 'var(--teal, #1ec8b0)' : '#e05c7a';
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     els.statusDot.title = isOnline ? 'Online' : 'Offline';
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+<<<<<<< HEAD
 // 18. INIT
 // ═══════════════════════════════════════════════════════════════════════════
 function init() {
@@ -826,3 +960,63 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+=======
+// 18. EVENT BINDING
+// ═══════════════════════════════════════════════════════════════════════════
+function bindEvents() {
+  document.querySelectorAll('.stage-card').forEach(card => {
+    card.addEventListener('click', () => selectStage(parseInt(card.dataset.stage)));
+  });
+  if (els.stageChangeBtn) els.stageChangeBtn.addEventListener('click', showStageModal);
+  if (els.newChatBtn) els.newChatBtn.addEventListener('click', () => { clearConversation(); closeSidebar(); });
+  if (els.menuBtn)    els.menuBtn.addEventListener('click', toggleSidebar);
+  if (els.overlay)    els.overlay.addEventListener('click', closeSidebar);
+  if (els.langBtn)    els.langBtn.addEventListener('click', () => setLang(lang === 'en' ? 'bn' : 'en'));
+  if (els.clearBtn)   els.clearBtn.addEventListener('click', clearConversation);
+  if (els.sendBtn)    els.sendBtn.addEventListener('click', sendMessage);
+  if (els.messageInput) {
+    els.messageInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    els.messageInput.addEventListener('input', autoResize);
+  }
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  // Close stage modal on backdrop click
+  const backdrop = els.stageModalBackdrop;
+  if (backdrop) backdrop.addEventListener('click', e => { if (e.target === backdrop) hideStageModal(); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 19. SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════════════════════════════════════════
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('[SW] Registered:', reg.scope);
+    }).catch(e => console.warn('[SW] Registration failed:', e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 20. INIT
+// ═══════════════════════════════════════════════════════════════════════════
+function init() {
+  registerSW();
+  bindEvents();
+  updateOnlineStatus();
+  setLang('en');
+  buildFAQPanel();
+  // Always start fresh — clear any browser-restored content
+  if (els.messages) els.messages.innerHTML = '';
+  memory       = [];
+  aiMsgCount   = 0;
+  userMsgCount = 0;
+  addMessage('assistant', LANG.en.welcomeMsg);
+  setTimeout(showStageModal, 500);
+  trackPageview();
+  initPush();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+>>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
