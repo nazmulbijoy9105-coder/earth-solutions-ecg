@@ -903,20 +903,128 @@ app.post('/api/push/unsubscribe', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 // L. ADMIN AUTH MIDDLEWARE
 // ─────────────────────────────────────────────────────────────────────────
-function adminAuth(req, res, next) {
-  const token = req.headers['x-admin-token'] || req.query.token;
-  const pw    = process.env.ADMIN_PASSWORD || 'earthsolutions2025';
-  if (token === pw) return next();
-  res.status(401).json({ error: 'Unauthorized' });
+const ADMIN_SESSION_TTL = 8 * 60 * 60 * 1000;
+const adminSessions = new Map();
+
+function getAdminPassword() {
+  const pw = process.env.ADMIN_PASSWORD;
+
+  if (!pw || pw.length < 12) {
+    throw new Error(
+      'ADMIN_PASSWORD must be configured and contain at least 12 characters'
+    );
+  }
+
+  return pw;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// M. ADMIN ENDPOINTS
-// ─────────────────────────────────────────────────────────────────────────
+function extractAdminBearer(req) {
+  const header = req.headers.authorization || '';
+
+  if (!header.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = header.slice(7).trim();
+
+  return token || null;
+}
+
+function adminAuth(req, res, next) {
+  const token = extractAdminBearer(req);
+
+  if (!token) {
+    return res.status(401).json({
+      error: 'Unauthorized'
+    });
+  }
+
+  const session = adminSessions.get(token);
+
+  if (!session) {
+    return res.status(401).json({
+      error: 'Invalid admin session'
+    });
+  }
+
+  if (Date.now() >= session.expiresAt) {
+    adminSessions.delete(token);
+
+    return res.status(401).json({
+      error: 'Admin session expired'
+    });
+  }
+
+  req.adminSession = session;
+
+  next();
+}
+
+app.locals.adminAuth = adminAuth;
+
 app.post('/api/admin/login', (req, res) => {
-  const pw = process.env.ADMIN_PASSWORD || 'earthsolutions2025';
-  if (req.body.password === pw) res.json({ success: true, token: pw });
-  else res.status(401).json({ error: 'Wrong password' });
+  let configuredPassword;
+
+  try {
+    configuredPassword = getAdminPassword();
+  } catch (_) {
+    return res.status(503).json({
+      error: 'Admin authentication is not configured'
+    });
+  }
+
+  const supplied =
+    typeof req.body?.password === 'string'
+      ? req.body.password
+      : '';
+
+  const expectedBuffer =
+    Buffer.from(configuredPassword, 'utf8');
+
+  const suppliedBuffer =
+    Buffer.from(supplied, 'utf8');
+
+  const valid =
+    expectedBuffer.length === suppliedBuffer.length &&
+    crypto.timingSafeEqual(
+      expectedBuffer,
+      suppliedBuffer
+    );
+
+  if (!valid) {
+    return res.status(401).json({
+      error: 'Wrong password'
+    });
+  }
+
+  const token =
+    crypto.randomBytes(32).toString('base64url');
+
+  const expiresAt =
+    Date.now() + ADMIN_SESSION_TTL;
+
+  adminSessions.set(token, {
+    createdAt: Date.now(),
+    expiresAt
+  });
+
+  return res.json({
+    success: true,
+    token,
+    expiresAt
+  });
+});
+
+app.post('/api/admin/logout', adminAuth, (req, res) => {
+  const token = extractAdminBearer(req);
+
+  if (token) {
+    adminSessions.delete(token);
+  }
+
+  return res.json({
+    success: true
+  });
 });
 
 app.get('/api/admin/stats', adminAuth, (req, res) => {
@@ -1116,6 +1224,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅  Peopole AI v8.0 running → http://localhost:${PORT}`);
   console.log(`🔐  Admin panel → http://localhost:${PORT}/admin`);
-  console.log(`🔑  Admin password: ${process.env.ADMIN_PASSWORD || 'earthsolutions2025'}`);
-  console.log(`📢  Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? '⚠ VAPID keys not set' : '✓ Configured'}`);
+console.log(`📢  Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? '⚠ VAPID keys not set' : '✓ Configured'}`);
 });

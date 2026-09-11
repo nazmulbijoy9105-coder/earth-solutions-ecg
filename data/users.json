@@ -4,37 +4,37 @@
       "id": "u1",
       "name": "Admin User",
       "email": "admin@earth.com",
-      "password": "admin123",
       "role": "admin",
       "createdAt": "2024-11-15",
-      "status": "active"
+      "status": "active",
+      "passwordHash": "scrypt:VBVIFjWReDDP1YsYviO+wA==:McUSQkkvxzByBOb5NfIyx9jmvuCINChN0VbftyAyPWBB50aEuuGtmNqzMl1SJ/jYlbC/p5FAhTj8d+O9QapwCw=="
     },
     {
       "id": "u2",
       "name": "Sarah Chen",
       "email": "sarah@earth.com",
-      "password": "user123",
       "role": "user",
       "createdAt": "2025-01-08",
-      "status": "active"
+      "status": "active",
+      "passwordHash": "scrypt:G0FWa4sLNi3svjZm1ywY1w==:Y4XOCfl3K4CxE+VmTB4N41xTUa8vIV87LD59w2cESg6oGgx52ghYnI8aA77lHSgVrhW3jiKzyOBNLNNRKBaEMw=="
     },
     {
       "id": "u3",
       "name": "James Rivera",
       "email": "james@earth.com",
-      "password": "user123",
       "role": "user",
       "createdAt": "2025-02-20",
-      "status": "active"
+      "status": "active",
+      "passwordHash": "scrypt:QsduAjGyM7MJXg5FXDtXwQ==:ozp7A8sYrpPw70Iz2BAD0Tiu4xwL3ot1gXuWsTGaWTED//+Kc3dRhyyj5kb2IIpusdV58fAV94g7BAEiXsq47w=="
     },
     {
       "id": "u4",
       "name": "Aisha Patel",
       "email": "aisha@earth.com",
-      "password": "user123",
       "role": "user",
       "createdAt": "2025-03-05",
-      "status": "pending"
+      "status": "pending",
+      "passwordHash": "scrypt:Vlt3v8Cv3fgDE/CqOoVd4Q==:P0RCdtZCQS45T5jd8oE2wuj9w7wlFTSGmb1BnGgxBHWS4v2kIEzrmLs4vaiilaFFhgi9kc0aO5dH5mLXsLt6+g=="
     }
   ]
 }
