@@ -1108,12 +1108,6 @@ app.post('/api/chat', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 // O. SPA CATCH-ALL
 // ─────────────────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-// ─── USER AUTH ROUTES ──────────────────────────────────────────────────
-const userRoutes = require('./user-routes');
-userRoutes(app, adminAuth);
-=======
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 app.get('*', (req, res) => {
   logPageview(req.path, req.headers.referer || '');
   res.sendFile(path.join(__dirname, 'index.html'));
