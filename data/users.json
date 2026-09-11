@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Admin User",
+      "email": "admin@earth.com",
+      "password": "admin123",
+      "role": "admin",
+      "createdAt": "2024-11-15",
+      "status": "active"
+    },
+    {
+      "id": "u2",
+      "name": "Sarah Chen",
+      "email": "sarah@earth.com",
+      "password": "user123",
+      "role": "user",
+      "createdAt": "2025-01-08",
+      "status": "active"
+    },
+    {
+      "id": "u3",
+      "name": "James Rivera",
+      "email": "james@earth.com",
+      "password": "user123",
+      "role": "user",
+      "createdAt": "2025-02-20",
+      "status": "active"
+    },
+    {
+      "id": "u4",
+      "name": "Aisha Patel",
+      "email": "aisha@earth.com",
+      "password": "user123",
+      "role": "user",
+      "createdAt": "2025-03-05",
+      "status": "pending"
+    }
+  ]
+}
