@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-// frontend/chat.js — Peopole AI v9.0 PREMIUM
-// Earth Solutions Visa Zone | Hybrid FAQ+AI | EN/BN | Push | Analytics
-// Premium: Avatars • Streaming cursor • Suggested replies • Empty state • Glass UI
-=======
-// frontend/chat.js — Peopole AI v8.0
-// Earth Solutions Visa Zone | Hybrid FAQ+AI | EN/BN | Push Notifications | Analytics
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -103,11 +95,6 @@ I'm not just an information bot. I work as your **personal academic amplifier** 
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 1. FAQ QUICK CHIPS — per stage
-=======
-// 1. FAQ QUICK CHIPS — per stage (client-side instant questions)
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 const STAGE_FAQ = {
   1: {
@@ -141,23 +128,11 @@ const STAGE_FAQ = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 2. OPTIONAL AD BANNERS
-=======
-// 2. OPTIONAL AD BANNERS — commercial engagement / revenue
-//    Replace adContent with real sponsor deals or keep as internal promos
-//    Set ADS_ENABLED = false to disable completely
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 const ADS_ENABLED = true;
 const AD_SLOTS = [
   {
     id: 'promo_structured',
-<<<<<<< HEAD
-    trigger: 4,
-=======
-    trigger: 4,   // show after this many AI messages
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     en: { text: '📋 **Ready for a personalised plan?** Our Structured Guidance (৳100–৳500) includes human consultant review + AI risk analysis. [Get Started →](https://wa.me/8801535778111?text=I+want+Structured+Guidance)', cta: 'Get Structured Plan' },
     bn: { text: '📋 **ব্যক্তিগতকৃত পরিকল্পনার জন্য প্রস্তুত?** আমাদের স্ট্রাকচার্ড গাইডেন্স (৳১০০–৳৫০০)-এ মানব কনসালট্যান্ট পর্যালোচনা + এআই রিস্ক বিশ্লেষণ অন্তর্ভুক্ত। [শুরু করুন →](https://wa.me/8801535778111)', cta: 'স্ট্রাকচার্ড প্ল্যান নিন' }
   },
@@ -180,23 +155,6 @@ const AD_SLOTS = [
 // ═══════════════════════════════════════════════════════════════════════════
 let lang       = 'en';
 let stage      = null;
-<<<<<<< HEAD
-let memory     = [];
-let isTyping   = false;
-let isOnline   = navigator.onLine;
-let aiMsgCount   = 0;
-let userMsgCount = 0;
-
-const FREE_MSG_LIMIT = 10;
-=======
-let memory     = [];   // resets every page load — always fresh start
-let isTyping   = false;
-let isOnline   = navigator.onLine;
-let aiMsgCount   = 0;  // for ad slot triggers
-let userMsgCount = 0;  // free message limit counter
-
-const FREE_MSG_LIMIT = 10; // free messages per session — change to adjust
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 
 let userId = localStorage.getItem('ppl_uid') || (() => {
   const id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -246,21 +204,10 @@ function renderMarkdown(text) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-<<<<<<< HEAD
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-=======
-    // Standard markdown links [text](url)
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-    // Bare URLs in brackets [url] — e.g. [www.example.com]
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     .replace(/\[([^\]]*(?:www\.|https?:\/\/)[^\]]+)\]/g, (_, url) => {
       const href = url.startsWith('http') ? url : 'https://' + url;
       return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
     })
-<<<<<<< HEAD
-=======
-    // Plain bare URLs not already linked
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     .replace(/(?<!href=")(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
 
   const lines = html.split('\n');
@@ -283,31 +230,6 @@ function renderMarkdown(text) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 6. MESSAGE RENDERING (Premium: avatars + streaming cursor)
-// ═══════════════════════════════════════════════════════════════════════════
-function addMessage(role, text, streaming = false) {
-  // Remove empty state if present
-  const empty = els.messages.querySelector('.empty-state');
-  if (empty) empty.remove();
-
-  const wrap = document.createElement('div');
-  wrap.className = `msg ${role}`;
-
-  // Avatar
-  const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar';
-  avatar.textContent = role === 'assistant' ? 'P' : (lang === 'bn' ? 'আ' : 'U');
-  avatar.title = role === 'assistant' ? 'Peopole AI' : 'You';
-
-=======
-// 6. MESSAGE RENDERING
-// ═══════════════════════════════════════════════════════════════════════════
-function addMessage(role, text, streaming = false) {
-  const wrap = document.createElement('div');
-  wrap.className = `msg ${role}`;
-
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   const bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
 
@@ -327,19 +249,6 @@ function addMessage(role, text, streaming = false) {
 
   bubble.appendChild(textEl);
   bubble.appendChild(timeEl);
-<<<<<<< HEAD
-  wrap.appendChild(avatar);
-  wrap.appendChild(bubble);
-  els.messages.appendChild(wrap);
-  els.messages.scrollTop = els.messages.scrollHeight;
-
-  return { wrap, textEl, bubble };
-=======
-  wrap.appendChild(bubble);
-  els.messages.appendChild(wrap);
-  els.messages.scrollTop = els.messages.scrollHeight;
-  return { wrap, textEl };
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 function addAdBanner(ad) {
@@ -358,131 +267,18 @@ function addAdBanner(ad) {
   trackEvent('ad_impression', { adId: ad.id, stage, lang });
 }
 
-<<<<<<< HEAD
-// Intelligent suggested replies under AI messages
-function addSuggestedReplies(bubbleEl, aiText) {
-  const suggestions = [];
-  const lower = (aiText || '').toLowerCase();
-
-  if (lower.includes('country') || lower.includes('দেশ') || lower.includes('canada') || lower.includes('uk') || lower.includes('australia') || lower.includes('germany')) {
-    suggestions.push(lang === 'bn' ? 'কানাডা vs যুক্তরাজ্য — কোনটা ভালো?' : 'Canada vs UK — which is better for me?');
-    suggestions.push(lang === 'bn' ? 'খরচের তুলনা দেখাও' : 'Show me a cost comparison');
-  }
-  if (lower.includes('ielts') || lower.includes('আইইএলটিএস') || lower.includes('toefl') || lower.includes('pte')) {
-    suggestions.push(lang === 'bn' ? 'আমার স্কোর দিয়ে কোন দেশে যাওয়া যাবে?' : 'Which countries accept my IELTS score?');
-  }
-  if (lower.includes('sop') || lower.includes('এসওপি') || lower.includes('statement of purpose')) {
-    suggestions.push(lang === 'bn' ? 'এসওপি এর খসড়া লিখে দাও' : 'Help me draft an SOP outline');
-  }
-  if (lower.includes('scholarship') || lower.includes('বৃত্তি') || lower.includes('funding')) {
-    suggestions.push(lang === 'bn' ? 'ফুলি ফান্ডেড অপশনগুলো বলো' : 'Show fully-funded options');
-  }
-  if (lower.includes('visa') || lower.includes('ভিসা')) {
-    suggestions.push(lang === 'bn' ? 'ভিসা রিজেকশনের কারণ কী?' : 'What are common visa rejection reasons?');
-  }
-
-  // Always useful forward paths
-  suggestions.push(lang === 'bn' ? 'পরবর্তী ধাপ কী?' : 'What should be my next step?');
-  suggestions.push(lang === 'bn' ? 'হোয়াটসঅ্যাপে কথা বলি' : 'Talk on WhatsApp');
-
-  if (!suggestions.length) return;
-
-  // Remove existing suggested replies in this bubble
-  const old = bubbleEl.querySelector('.suggested-replies');
-  if (old) old.remove();
-
-  const container = document.createElement('div');
-  container.className = 'suggested-replies';
-  suggestions.slice(0, 3).forEach(s => {
-    const chip = document.createElement('button');
-    chip.className = 'suggested-chip';
-    chip.textContent = s;
-    chip.onclick = () => {
-      if (els.messageInput) {
-        els.messageInput.value = s;
-        sendMessage();
-      }
-    };
-    container.appendChild(chip);
-  });
-  bubbleEl.appendChild(container);
-}
-
-// Beautiful empty / welcome state
-function renderEmptyState() {
-  if (!els.messages || els.messages.children.length > 0) return;
-
-  const div = document.createElement('div');
-  div.className = 'empty-state';
-  div.innerHTML = `
-    <div class="empty-logo"><img src="/logo.jpg" alt="Peopole AI"/></div>
-    <div class="empty-title">${LANG[lang].chatTitle}</div>
-    <div class="empty-sub">${lang === 'bn'
-      ? 'আপনার একাডেমিক যাত্রার ব্যক্তিগত গাইড। স্টেজ বেছে নিন বা সরাসরি প্রশ্ন করুন।'
-      : 'Your personal academic amplifier. Select a stage or ask anything.'}</div>
-    <div class="empty-stages" id="emptyStages"></div>
-  `;
-  els.messages.appendChild(div);
-
-  const stagesContainer = div.querySelector('#emptyStages');
-  const stageData = [
-    { id: 1, icon: '🌱', name: lang === 'bn' ? 'ফাউন্ডেশন' : 'Foundation', range: 'Pre–Class 5' },
-    { id: 2, icon: '🔍', name: lang === 'bn' ? 'ডেভেলপমেন্ট' : 'Development', range: 'Class 6–8' },
-    { id: 3, icon: '🎯', name: lang === 'bn' ? 'স্ট্র্যাটেজিক' : 'Strategic', range: 'Class 9–12' },
-    { id: 4, icon: '🎓', name: lang === 'bn' ? 'আন্ডারগ্র্যাড' : 'Undergraduate', range: 'Bachelor\'s' },
-    { id: 5, icon: '🔬', name: lang === 'bn' ? 'মাস্টার্স' : 'Master\'s', range: 'Postgraduate' },
-    { id: 6, icon: '🏛️', name: lang === 'bn' ? 'ডক্টরাল' : 'Doctoral', range: 'PhD' },
-    { id: 7, icon: '👨‍👩‍👧', name: lang === 'bn' ? 'পেরেন্ট মোড' : 'Parent Mode', range: 'For Parents' }
-  ];
-
-  stageData.forEach(s => {
-    const card = document.createElement('div');
-    card.className = 'empty-stage-card';
-    card.innerHTML = `
-      <div class="empty-stage-icon">${s.icon}</div>
-      <div class="empty-stage-name">${s.name}</div>
-      <div class="empty-stage-range">${s.range}</div>
-    `;
-    card.onclick = () => selectStage(s.id);
-    stagesContainer.appendChild(card);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 7. SEND MESSAGE (with live streaming cursor)
-=======
-// ═══════════════════════════════════════════════════════════════════════════
-// 7. SEND MESSAGE
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 async function sendMessage() {
   const input = els.messageInput;
   const text  = input.value.trim();
   if (!text || isTyping) return;
 
-<<<<<<< HEAD
-  if (!isOnline) {
-    addMessage('assistant', LANG[lang].offlineMsg);
-    return;
-  }
-
-  // Free message limit
-=======
-  if (!isOnline) { addMessage('assistant', LANG[lang].offlineMsg); return; }
-
-  // ── Free message limit check ──────────────────────────────────────────
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   if (userMsgCount >= FREE_MSG_LIMIT) {
     const limitMsg = lang === 'bn'
       ? `🔒 **আপনি বিনামূল্যে ${FREE_MSG_LIMIT}টি বার্তার সীমায় পৌঁছেছেন।**\n\nআরও সহায়তার জন্য আমাদের হোয়াটসঅ্যাপে যোগাযোগ করুন অথবা একটি পরিষেবা পরিকল্পনা বেছে নিন:\n📱 [WhatsApp করুন →](https://wa.me/8801535778111?text=আমি+আরও+সাহায্য+চাই)\n💰 [সেবা পরিকল্পনা দেখুন →](/pricing.html)`
       : `🔒 **You've reached the ${FREE_MSG_LIMIT}-message free limit for this session.**\n\nTo continue getting expert guidance, contact us or choose a service plan:\n📱 [WhatsApp Us →](https://wa.me/8801535778111?text=I+need+more+guidance)\n💰 [View Service Plans →](/pricing.html)`;
     addMessage('assistant', limitMsg);
     if (els.messageInput) els.messageInput.disabled = true;
-<<<<<<< HEAD
-    if (els.sendBtn)      els.sendBtn.disabled = true;
-=======
-    if (els.sendBtn)      els.sendBtn.disabled      = true;
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     return;
   }
 
@@ -494,11 +290,6 @@ async function sendMessage() {
 
   isTyping = true;
   if (els.sendBtn) els.sendBtn.disabled = true;
-<<<<<<< HEAD
-  const { wrap: typingWrap, textEl: typingEl, bubble: typingBubble } = addMessage('assistant', '', true);
-=======
-  const { wrap: typingWrap, textEl: typingEl } = addMessage('assistant', '', true);
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 
   trackEvent('message_sent', { stage, lang, messageLength: text.length });
 
@@ -540,36 +331,12 @@ async function sendMessage() {
               firstChunk = false;
             }
             fullText += token;
-<<<<<<< HEAD
-            // Live streaming cursor
-            typingEl.innerHTML = renderMarkdown(fullText) + '<span class="stream-cursor"></span>';
-=======
-            typingEl.innerHTML = renderMarkdown(fullText);
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
             els.messages.scrollTop = els.messages.scrollHeight;
           }
         } catch {}
       }
     }
 
-<<<<<<< HEAD
-    // Final render without cursor
-    if (fullText) {
-      typingEl.innerHTML = renderMarkdown(fullText);
-      memory.push({ role: 'assistant', content: fullText });
-      aiMsgCount++;
-      maybeShowAd();
-      // Intelligent suggested replies
-      addSuggestedReplies(typingBubble, fullText);
-    } else {
-      typingWrap.remove();
-      addMessage('assistant', LANG[lang].errorMsg);
-=======
-    if (fullText) {
-      memory.push({ role: 'assistant', content: fullText });
-      aiMsgCount++;
-      maybeShowAd();
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     }
 
   } catch (err) {
@@ -587,10 +354,6 @@ function maybeShowAd() {
   if (!ADS_ENABLED) return;
   for (const ad of AD_SLOTS) {
     if (aiMsgCount === ad.trigger) {
-<<<<<<< HEAD
-=======
-      // Don't show if already dismissed
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
       if (!document.querySelector(`.ad-banner[data-ad-id="${ad.id}"]`)) {
         setTimeout(() => addAdBanner(ad), 800);
       }
@@ -611,32 +374,10 @@ function hideStageModal() {
   if (backdrop) backdrop.classList.add('hidden');
 }
 function selectStage(s) {
-<<<<<<< HEAD
-  stage = Number(s);
-  const name = LANG[lang].stageNames[stage];
-=======
-  stage = s;
-  const name = LANG[lang].stageNames[s];
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   if (els.stageBadge)     els.stageBadge.textContent = name;
   if (els.stageBadgeWrap) els.stageBadgeWrap.style.display = 'flex';
   hideStageModal();
   buildFAQPanel();
-<<<<<<< HEAD
-
-  // Clear empty state and show a short confirmation
-  const empty = els.messages.querySelector('.empty-state');
-  if (empty) empty.remove();
-
-  const confirm = lang === 'bn'
-    ? `✅ **${name}** নির্বাচিত হয়েছে। এখন আপনার প্রশ্ন জিজ্ঞাসা করুন বা নিচের সাধারণ প্রশ্নগুলো ব্যবহার করুন।`
-    : `✅ **${name}** selected. Ask me anything or use the common questions below.`;
-  addMessage('assistant', confirm);
-
-  trackEvent('stage_selected', { stage, lang });
-=======
-  trackEvent('stage_selected', { stage: s, lang });
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -664,16 +405,6 @@ function toggleFAQ() {
   faqOpen = !faqOpen;
   const panel = els.faqPanel;
   const arrow = els.faqArrow;
-<<<<<<< HEAD
-  if (panel) {
-    panel.style.display = faqOpen ? 'flex' : 'none';
-    panel.classList.toggle('open', faqOpen);
-  }
-  if (arrow) arrow.textContent = faqOpen ? '▴' : '▾';
-=======
-  if (panel) panel.style.display = faqOpen ? 'flex' : 'none';
-  if (arrow) arrow.textContent   = faqOpen ? '▴' : '▾';
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -699,17 +430,6 @@ function setLang(l) {
   if (els.messageInput) els.messageInput.placeholder = t.placeholder;
   if (stage && els.stageBadge) els.stageBadge.textContent = t.stageNames[stage];
   buildFAQPanel();
-<<<<<<< HEAD
-
-  // Refresh empty state language if visible
-  const empty = els.messages.querySelector('.empty-state');
-  if (empty) {
-    els.messages.innerHTML = '';
-    renderEmptyState();
-  }
-
-=======
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   trackEvent('language_toggle', { lang: l });
 }
 
@@ -741,11 +461,6 @@ window.selectPlan = function(planId) {
 async function initPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   if (localStorage.getItem('push_asked') === 'yes') return;
-<<<<<<< HEAD
-=======
-
-  // Ask after 30 seconds
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
   setTimeout(showPushPrompt, 30000);
 }
 
@@ -777,11 +492,6 @@ async function requestPushPermission() {
     if (permission !== 'granted') return;
 
     const reg = await navigator.serviceWorker.ready;
-<<<<<<< HEAD
-=======
-
-    // Get VAPID public key from server
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     const keyRes  = await fetch('/api/push/vapid-public-key');
     const { key } = await keyRes.json();
 
@@ -817,11 +527,6 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 13. ANALYTICS
-=======
-// 13. ANALYTICS — built-in (no Google Analytics)
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 function trackEvent(name, meta) {
   try {
@@ -846,20 +551,6 @@ function trackPageview() {
 // 14. CLEAR CONVERSATION
 // ═══════════════════════════════════════════════════════════════════════════
 function clearConversation() {
-<<<<<<< HEAD
-  if (els.messages) {
-    els.messages.innerHTML = '';
-    memory = [];
-    aiMsgCount = 0;
-    userMsgCount = 0;
-    if (els.messageInput) els.messageInput.disabled = false;
-    if (els.sendBtn) els.sendBtn.disabled = false;
-  }
-  renderEmptyState();
-=======
-  if (els.messages) { els.messages.innerHTML = ''; memory = []; aiMsgCount = 0; }
-  addMessage('assistant', LANG[lang].welcomeMsg);
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -885,138 +576,13 @@ function autoResize() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 17. ONLINE / OFFLINE
-=======
-// 17. ONLINE/OFFLINE
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
 // ═══════════════════════════════════════════════════════════════════════════
 function updateOnlineStatus() {
   isOnline = navigator.onLine;
   if (els.offlineBar) els.offlineBar.style.display = isOnline ? 'none' : 'flex';
   if (els.statusDot) {
-<<<<<<< HEAD
-    els.statusDot.classList.toggle('offline', !isOnline);
-=======
-    els.statusDot.style.background = isOnline ? 'var(--teal, #1ec8b0)' : '#e05c7a';
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
     els.statusDot.title = isOnline ? 'Online' : 'Offline';
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// 18. INIT
-// ═══════════════════════════════════════════════════════════════════════════
-function init() {
-  // Stage cards
-  document.querySelectorAll('.stage-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const s = card.getAttribute('data-stage');
-      if (s) selectStage(s);
-    });
-  });
-
-  // Buttons
-  if (els.sendBtn)      els.sendBtn.addEventListener('click', sendMessage);
-  if (els.langBtn)      els.langBtn.addEventListener('click', () => setLang(lang === 'en' ? 'bn' : 'en'));
-  if (els.clearBtn)     els.clearBtn.addEventListener('click', clearConversation);
-  if (els.newChatBtn)   els.newChatBtn.addEventListener('click', () => {
-    clearConversation();
-    stage = null;
-    if (els.stageBadgeWrap) els.stageBadgeWrap.style.display = 'none';
-    showStageModal();
-  });
-  if (els.stageChangeBtn) els.stageChangeBtn.addEventListener('click', showStageModal);
-  if (els.menuBtn)      els.menuBtn.addEventListener('click', toggleSidebar);
-  if (els.overlay)      els.overlay.addEventListener('click', closeSidebar);
-
-  // Textarea
-  if (els.messageInput) {
-    els.messageInput.addEventListener('input', autoResize);
-    els.messageInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-  }
-
-  // Online status
-  window.addEventListener('online',  updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  updateOnlineStatus();
-
-  // Initial empty state + stage modal
-  renderEmptyState();
-  showStageModal();
-
-  // Analytics + Push
-  trackPageview();
-  initPush();
-
-  // Focus
-  if (els.messageInput) els.messageInput.focus();
-}
-
-document.addEventListener('DOMContentLoaded', init);
-=======
-// 18. EVENT BINDING
-// ═══════════════════════════════════════════════════════════════════════════
-function bindEvents() {
-  document.querySelectorAll('.stage-card').forEach(card => {
-    card.addEventListener('click', () => selectStage(parseInt(card.dataset.stage)));
-  });
-  if (els.stageChangeBtn) els.stageChangeBtn.addEventListener('click', showStageModal);
-  if (els.newChatBtn) els.newChatBtn.addEventListener('click', () => { clearConversation(); closeSidebar(); });
-  if (els.menuBtn)    els.menuBtn.addEventListener('click', toggleSidebar);
-  if (els.overlay)    els.overlay.addEventListener('click', closeSidebar);
-  if (els.langBtn)    els.langBtn.addEventListener('click', () => setLang(lang === 'en' ? 'bn' : 'en'));
-  if (els.clearBtn)   els.clearBtn.addEventListener('click', clearConversation);
-  if (els.sendBtn)    els.sendBtn.addEventListener('click', sendMessage);
-  if (els.messageInput) {
-    els.messageInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-    els.messageInput.addEventListener('input', autoResize);
-  }
-  window.addEventListener('online',  updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  // Close stage modal on backdrop click
-  const backdrop = els.stageModalBackdrop;
-  if (backdrop) backdrop.addEventListener('click', e => { if (e.target === backdrop) hideStageModal(); });
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 19. SERVICE WORKER REGISTRATION
-// ═══════════════════════════════════════════════════════════════════════════
-function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('[SW] Registered:', reg.scope);
-    }).catch(e => console.warn('[SW] Registration failed:', e));
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 20. INIT
-// ═══════════════════════════════════════════════════════════════════════════
-function init() {
-  registerSW();
-  bindEvents();
-  updateOnlineStatus();
-  setLang('en');
-  buildFAQPanel();
-  // Always start fresh — clear any browser-restored content
-  if (els.messages) els.messages.innerHTML = '';
-  memory       = [];
-  aiMsgCount   = 0;
-  userMsgCount = 0;
-  addMessage('assistant', LANG.en.welcomeMsg);
-  setTimeout(showStageModal, 500);
-  trackPageview();
-  initPush();
-}
-
-document.addEventListener('DOMContentLoaded', init);
->>>>>>> 22f5670fdef2868f2e49c846d90b78f680c7637a
