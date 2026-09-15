@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "gen-vapid": "npx web-push generate-vapid-keys"
+    "gen-vapid": "npx web-push generate-vapid-keys",
+    "migrate": "node-pg-migrate --envPath .env.local"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -18,5 +19,9 @@
   },
   "engines": {
     "node": "24.x"
+  },
+  "devDependencies": {
+    "node-pg-migrate": "^9.0.0",
+    "pg": "^8.23.0"
   }
 }
