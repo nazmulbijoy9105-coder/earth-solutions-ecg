@@ -20,9 +20,6 @@ node server.js
 
 ## Default Accounts
 
-| Role  | Email             | Password |
-|-------|-------------------|----------|
-| Admin | admin@earth.com   | admin123 |
-| User  | sarah@earth.com   | user123  |
+Demo credentials are no longer provided. Configure production authentication through the server environment and create user accounts through the supported admin workflow.
 
-## NOT changed: server.js (2 lines only), frontend/chat.js, api/chat.js, sw.js, manifest.json, package.json, logo.jpg, pricing.html
+## P0-07 security hardening changed: server.js, .env.example, and this instruction file. Other application files were intentionally left unchanged.

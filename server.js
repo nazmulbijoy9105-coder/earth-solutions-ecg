@@ -17,6 +17,63 @@ const fs        = require('fs');
 const webpush   = require('web-push');
 
 const app  = express();
+
+// P0-07 security hardening
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 300;
+const rateLimitBuckets = new Map();
+
+function securityHeaders(req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains'
+    );
+  }
+
+  next();
+}
+
+function requestRateLimit(req, res, next) {
+  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+
+  const now = Date.now();
+  let bucket = rateLimitBuckets.get(clientIp);
+
+  if (!bucket || now - bucket.windowStart >= RATE_LIMIT_WINDOW_MS) {
+    bucket = {
+      windowStart: now,
+      count: 0
+    };
+  }
+
+  bucket.count += 1;
+  rateLimitBuckets.set(clientIp, bucket);
+
+  if (bucket.count > RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((RATE_LIMIT_WINDOW_MS - (now - bucket.windowStart)) / 1000)
+    );
+
+    res.setHeader('Retry-After', String(retryAfter));
+    return res.status(429).json({
+      error: 'Too many requests. Please try again later.'
+    });
+  }
+
+  next();
+}
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use(securityHeaders);
+app.use('/api', requestRateLimit);
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '2mb' }));
@@ -844,12 +901,25 @@ app.use(express.static(path.join(__dirname), {
 // ─────────────────────────────────────────────────────────────────────────
 // I. CORS + OPTIONS
 // ─────────────────────────────────────────────────────────────────────────
-function setCORS(res) {
-  res.setHeader('Access-Control-Allow-Origin',  process.env.ALLOWED_ORIGIN || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token');
+function setCORS(res, req) {
+  const allowedOrigin = process.env.ALLOWED_ORIGIN;
+
+  if (allowedOrigin && req && req.headers.origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
+
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PATCH, DELETE, OPTIONS'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, x-admin-token'
+  );
 }
-app.options('/api/*', (req, res) => { setCORS(res); res.sendStatus(200); });
+
+app.options('/api/*', (req, res) => { setCORS(res, req); res.sendStatus(204); });
 
 // ─────────────────────────────────────────────────────────────────────────
 // J. ANALYTICS ENDPOINTS (built-in, no 3rd party)
@@ -876,7 +946,7 @@ app.get('/api/push/vapid-public-key', (req, res) => {
 
 // Save push subscription
 app.post('/api/push/subscribe', (req, res) => {
-  setCORS(res);
+  setCORS(res, req);
   const { subscription, userId, stage, lang } = req.body;
   if (!subscription || !subscription.endpoint) return res.status(400).json({ error: 'Invalid subscription' });
 
@@ -903,20 +973,165 @@ app.post('/api/push/unsubscribe', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 // L. ADMIN AUTH MIDDLEWARE
 // ─────────────────────────────────────────────────────────────────────────
-function adminAuth(req, res, next) {
-  const token = req.headers['x-admin-token'] || req.query.token;
-  const pw    = process.env.ADMIN_PASSWORD || 'earthsolutions2025';
-  if (token === pw) return next();
-  res.status(401).json({ error: 'Unauthorized' });
+const ADMIN_SESSION_TTL = 8 * 60 * 60 * 1000;
+const adminSessions = new Map();
+
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const ADMIN_LOGIN_MAX_ATTEMPTS = 10;
+const adminLoginBuckets = new Map();
+
+function adminLoginRateLimit(req, res, next) {
+  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+
+  const now = Date.now();
+  let bucket = adminLoginBuckets.get(clientIp);
+
+  if (!bucket || now - bucket.windowStart >= ADMIN_LOGIN_WINDOW_MS) {
+    bucket = {
+      windowStart: now,
+      count: 0
+    };
+  }
+
+  bucket.count += 1;
+  adminLoginBuckets.set(clientIp, bucket);
+
+  if (bucket.count > ADMIN_LOGIN_MAX_ATTEMPTS) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil(
+        (ADMIN_LOGIN_WINDOW_MS - (now - bucket.windowStart)) / 1000
+      )
+    );
+
+    res.setHeader('Retry-After', String(retryAfter));
+    return res.status(429).json({
+      error: 'Too many login attempts. Please try again later.'
+    });
+  }
+
+  next();
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// M. ADMIN ENDPOINTS
-// ─────────────────────────────────────────────────────────────────────────
-app.post('/api/admin/login', (req, res) => {
-  const pw = process.env.ADMIN_PASSWORD || 'earthsolutions2025';
-  if (req.body.password === pw) res.json({ success: true, token: pw });
-  else res.status(401).json({ error: 'Wrong password' });
+function getAdminPassword() {
+  const pw = process.env.ADMIN_PASSWORD;
+
+  if (!pw || pw.length < 12) {
+    throw new Error(
+      'ADMIN_PASSWORD must be configured and contain at least 12 characters'
+    );
+  }
+
+  return pw;
+}
+
+function extractAdminBearer(req) {
+  const header = req.headers.authorization || '';
+
+  if (!header.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = header.slice(7).trim();
+
+  return token || null;
+}
+
+function adminAuth(req, res, next) {
+  const token = extractAdminBearer(req);
+
+  if (!token) {
+    return res.status(401).json({
+      error: 'Unauthorized'
+    });
+  }
+
+  const session = adminSessions.get(token);
+
+  if (!session) {
+    return res.status(401).json({
+      error: 'Invalid admin session'
+    });
+  }
+
+  if (Date.now() >= session.expiresAt) {
+    adminSessions.delete(token);
+
+    return res.status(401).json({
+      error: 'Admin session expired'
+    });
+  }
+
+  req.adminSession = session;
+
+  next();
+}
+
+app.locals.adminAuth = adminAuth;
+
+app.post('/api/admin/login', adminLoginRateLimit, (req, res) => {
+  let configuredPassword;
+
+  try {
+    configuredPassword = getAdminPassword();
+  } catch (_) {
+    return res.status(503).json({
+      error: 'Admin authentication is not configured'
+    });
+  }
+
+  const supplied =
+    typeof req.body?.password === 'string'
+      ? req.body.password
+      : '';
+
+  const expectedBuffer =
+    Buffer.from(configuredPassword, 'utf8');
+
+  const suppliedBuffer =
+    Buffer.from(supplied, 'utf8');
+
+  const valid =
+    expectedBuffer.length === suppliedBuffer.length &&
+    crypto.timingSafeEqual(
+      expectedBuffer,
+      suppliedBuffer
+    );
+
+  if (!valid) {
+    return res.status(401).json({
+      error: 'Wrong password'
+    });
+  }
+
+  const token =
+    crypto.randomBytes(32).toString('base64url');
+
+  const expiresAt =
+    Date.now() + ADMIN_SESSION_TTL;
+
+  adminSessions.set(token, {
+    createdAt: Date.now(),
+    expiresAt
+  });
+
+  return res.json({
+    success: true,
+    token,
+    expiresAt
+  });
+});
+
+app.post('/api/admin/logout', adminAuth, (req, res) => {
+  const token = extractAdminBearer(req);
+
+  if (token) {
+    adminSessions.delete(token);
+  }
+
+  return res.json({
+    success: true
+  });
 });
 
 app.get('/api/admin/stats', adminAuth, (req, res) => {
@@ -1001,7 +1216,7 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html'))
 //    Flow: FAQ match → Groq AI → Fallback
 // ─────────────────────────────────────────────────────────────────────────
 app.post('/api/chat', async (req, res) => {
-  setCORS(res);
+  setCORS(res, req);
   res.setHeader('Content-Type',  'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection',    'keep-alive');
@@ -1116,6 +1331,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅  Peopole AI v8.0 running → http://localhost:${PORT}`);
   console.log(`🔐  Admin panel → http://localhost:${PORT}/admin`);
-  console.log(`🔑  Admin password: ${process.env.ADMIN_PASSWORD || 'earthsolutions2025'}`);
-  console.log(`📢  Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? '⚠ VAPID keys not set' : '✓ Configured'}`);
+console.log(`📢  Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? '⚠ VAPID keys not set' : '✓ Configured'}`);
 });
