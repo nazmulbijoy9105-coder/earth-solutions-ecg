@@ -704,22 +704,10 @@ function urlBase64ToUint8Array(base64String) {
 // 13. ANALYTICS
 // ═══════════════════════════════════════════════════════════════════════════
 function trackEvent(name, meta) {
-  try {
-    fetch('/api/analytics/event', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ name, meta })
-    }).catch(() => {});
-  } catch {}
+  // no-op: analytics stubs optional; avoid client dependency
 }
 function trackPageview() {
-  try {
-    fetch('/api/analytics/pageview', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ path: location.pathname, referrer: document.referrer })
-    }).catch(() => {});
-  } catch {}
+  // no-op: analytics stubs optional; avoid client dependency
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -819,7 +807,7 @@ function init() {
 
   // Analytics + Push
   trackPageview();
-  initPush();
+  // initPush(); // disabled until push fully configured on Vercel
 
   // Focus
   if (els.messageInput) els.messageInput.focus();
