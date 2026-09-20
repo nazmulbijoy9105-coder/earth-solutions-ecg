@@ -169,11 +169,25 @@ let userMsgCount = 0;
 
 const FREE_MSG_LIMIT = 10;
 
-let userId = localStorage.getItem('ppl_uid') || (() => {
-  const id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+function getAnonymousUserId() {
+  const existing = localStorage.getItem('ppl_uid');
+
+  if (existing && /^anon_[A-Za-z0-9_-]{16,100}$/.test(existing)) {
+    return existing;
+  }
+
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+
+  const id = 'anon_' + Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
   localStorage.setItem('ppl_uid', id);
   return id;
-})();
+}
+
+const userId = getAnonymousUserId();
 let pushSubscription = null;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -217,12 +231,12 @@ function renderMarkdown(text) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\[([^\]]*(?:www\.|https?:\/\/)[^\]]+)\]/g, (_, url) => {
       const href = url.startsWith('http') ? url : 'https://' + url;
-      return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     })
-    .replace(/(?<!href=")(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    .replace(/(?<!href=")(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
 
   const lines = html.split('\n');
   const out   = [];
@@ -440,38 +454,97 @@ async function sendMessage() {
       })
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (response.status === 429 || response.status === 403) {
+      typingWrap.remove();
 
-    const reader  = response.body.getReader();
+      let message = LANG[lang].errorMsg;
+
+      try {
+        const data = await response.clone().json();
+        if (data && typeof data.error === 'string' && data.error.trim()) {
+          message = data.error;
+        }
+      } catch {
+        // Preserve the localized fallback when the response is not JSON.
+      }
+
+      addMessage('assistant', message);
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Chat response body is unavailable');
+    }
+
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let fullText  = '';
+    let fullText = '';
     let firstChunk = true;
+    let sseBuffer = '';
+
+    const processSSE = rawEvent => {
+      const payload = rawEvent
+        .split('\n')
+        .filter(line => line.startsWith('data:'))
+        .map(line => line.slice(5).trim())
+        .join('\n')
+        .trim();
+
+      if (!payload || payload === '[DONE]') return;
+
+      const parsed = JSON.parse(payload);
+
+      if (parsed.error) {
+        throw new Error(parsed.error);
+      }
+
+      const token = parsed.choices?.[0]?.delta?.content || '';
+
+      if (!token) return;
+
+      if (firstChunk) {
+        typingEl.classList.remove('typing');
+        typingEl.innerHTML = '';
+        firstChunk = false;
+      }
+
+      fullText += token;
+
+      // Live streaming cursor
+      typingEl.innerHTML =
+        renderMarkdown(fullText) +
+        '<span class="stream-cursor"></span>';
+
+      els.messages.scrollTop = els.messages.scrollHeight;
+    };
 
     while (true) {
       const { done, value } = await reader.read();
+
       if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split('\n')) {
-        if (!line.startsWith('data:')) continue;
-        const raw = line.slice(5).trim();
-        if (!raw || raw === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed.error) throw new Error(parsed.error);
-          const token = parsed.choices?.[0]?.delta?.content || '';
-          if (token) {
-            if (firstChunk) {
-              typingEl.classList.remove('typing');
-              typingEl.innerHTML = '';
-              firstChunk = false;
-            }
-            fullText += token;
-            // Live streaming cursor
-            typingEl.innerHTML = renderMarkdown(fullText) + '<span class="stream-cursor"></span>';
-            els.messages.scrollTop = els.messages.scrollHeight;
-          }
-        } catch {}
+
+      sseBuffer += decoder.decode(value, { stream: true });
+
+      const events = sseBuffer.split('\n\n');
+      sseBuffer = events.pop() || '';
+
+      for (const event of events) {
+        if (!event.trim()) continue;
+        processSSE(event);
       }
+    }
+
+    // Flush any incomplete UTF-8 sequence.
+    sseBuffer += decoder.decode();
+
+    // Process final SSE event if the server closed without a trailing
+    // blank line.
+    if (sseBuffer.trim()) {
+      processSSE(sseBuffer);
     }
 
     // Final render without cursor
@@ -666,10 +739,15 @@ async function requestPushPermission() {
     if (permission !== 'granted') return;
 
     const reg = await navigator.serviceWorker.ready;
-    const keyRes  = await fetch('/api/push/vapid-public-key');
+    const keyRes = await fetch('/api/push/vapid-public-key');
+
+    if (!keyRes.ok) {
+      throw new Error(`VAPID public-key request failed: HTTP ${keyRes.status}`);
+    }
+
     const { key } = await keyRes.json();
 
-    if (!key || key.startsWith('REPLACE')) {
+    if (!key || typeof key !== 'string' || key.startsWith('REPLACE')) {
       console.warn('[Push] VAPID not configured on server');
       return;
     }
@@ -681,11 +759,17 @@ async function requestPushPermission() {
 
     pushSubscription = sub;
 
-    await fetch('/api/push/subscribe', {
+    const pushResponse = await fetch('/api/push/subscribe', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ subscription: sub, userId, stage, lang })
     });
+
+    if (!pushResponse.ok) {
+      throw new Error(
+        `Push subscription failed: HTTP ${pushResponse.status}`
+      );
+    }
 
     trackEvent('push_granted', { stage, lang });
   } catch (e) {
