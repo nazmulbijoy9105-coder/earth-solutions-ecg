@@ -1859,3 +1859,144 @@ button,
     font-size: 16px;
   }
 }
+
+/* =========================================
+   PREMIUM ENTERPRISE UI OVERHAUL
+   ========================================= */
+
+/* 1. Typography & Base Polish */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  background: #09090b; /* Deep rich black background */
+}
+
+/* 2. App Layout & Glassmorphism */
+.app {
+  background: #09090b;
+}
+.sidebar {
+  background: rgba(9, 9, 11, 0.85); /* Deep enterprise dark bg */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+.main {
+  background: #0f0f11;
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* 3. Sidebar Elements */
+.logo-name {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #ffffff, #a1a1aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.new-btn {
+  background: linear-gradient(180deg, #2563eb, #1d4ed8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+.new-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+.chat-item {
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+.chat-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.chat-item.active {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* 4. Topbar & Inputs */
+.topbar {
+  background: rgba(15, 15, 17, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.input-wrap {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+.input-wrap:focus-within {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.send-btn {
+  background: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+.send-btn:hover {
+  background: #1d4ed8;
+}
+
+/* 5. Pricing Modal & Stage Cards */
+.pricing-modal, .stage-modal {
+  background: #131316;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.pm-plan, .stage-card {
+  background: #1c1c1f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+.pm-plan:hover, .stage-card:hover {
+  border-color: rgba(37, 99, 235, 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* 6. Hero Intro Overlay */
+.hero-intro-overlay {
+  background: radial-gradient(circle at center, #18181b 0%, #000000 100%);
+}
+.hero-intro-btn {
+  background: #ffffff;
+  color: #000000;
+  border-radius: 100px;
+  padding: 14px 40px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+.hero-intro-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.3);
+}
+
+/* 7. Custom Enterprise Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
