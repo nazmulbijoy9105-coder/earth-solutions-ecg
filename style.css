@@ -1732,6 +1732,55 @@ button,
   }
 }
 
+/* ===== Hero Intro Overlay Styles ===== */
+.hero-intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+.hero-intro-content {
+  text-align: center;
+  padding: 20px;
+}
+.hero-intro-img {
+  max-width: 90%;
+  width: 600px;
+  height: auto;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+}
+.hero-intro-btn {
+  margin-top: 25px;
+  padding: 12px 35px;
+  font-size: 18px;
+  font-weight: bold;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.hero-intro-btn:hover {
+  background: #1d4ed8;
+}
+.hero-intro-overlay.hidden {
+  display: none;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 /* ===== Hero Banner Styles ===== */
 .hero-banner {
   width: 100%;
