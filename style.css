@@ -1181,3 +1181,175 @@ button,
     padding: 10px;
   }
 }
+
+/* ==================================================
+   CHAT PDF EXPORT
+   Browser-native A4 / Save-as-PDF rendering
+   ================================================== */
+
+.chat-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  background: var(--navy2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.chat-pdf-btn:hover {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.chat-pdf-btn:disabled {
+  opacity: .55;
+  cursor: wait;
+  transform: none;
+}
+
+.chat-pdf-label {
+  line-height: 1;
+}
+
+#peopole-chat-pdf-export {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #111827 !important;
+  }
+
+  body > *:not(#peopole-chat-pdf-export) {
+    display: none !important;
+  }
+
+  #peopole-chat-pdf-export {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #111827 !important;
+    font-family:
+      'Noto Sans Bengali',
+      'Plus Jakarta Sans',
+      system-ui,
+      sans-serif !important;
+    font-size: 10.5pt !important;
+    line-height: 1.6 !important;
+  }
+
+  #peopole-chat-pdf-export h1 {
+    margin: 0 0 4mm !important;
+    font-family:
+      'Noto Sans Bengali',
+      'Plus Jakarta Sans',
+      system-ui,
+      sans-serif !important;
+    font-size: 18pt !important;
+    line-height: 1.25 !important;
+    color: #0f172a !important;
+  }
+
+  #peopole-chat-pdf-export .chat-pdf-meta {
+    margin-bottom: 8mm !important;
+    padding-bottom: 4mm !important;
+    border-bottom: 1px solid #dbe2ea !important;
+    color: #64748b !important;
+    font-size: 8.5pt !important;
+  }
+
+  #peopole-chat-pdf-export .chat-pdf-body {
+    width: 100% !important;
+  }
+
+  #peopole-chat-pdf-export .msg {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #peopole-chat-pdf-export .msg,
+  #peopole-chat-pdf-export .msg * {
+    color: #111827 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #peopole-chat-pdf-export .msg + .msg {
+    margin-top: 6mm !important;
+  }
+
+  #peopole-chat-pdf-export button,
+  #peopole-chat-pdf-export input,
+  #peopole-chat-pdf-export textarea,
+  #peopole-chat-pdf-export .actions,
+  #peopole-chat-pdf-export .copy-btn,
+  #peopole-chat-pdf-export .feedback,
+  #peopole-chat-pdf-export .msg-actions {
+    display: none !important;
+  }
+
+  #peopole-chat-pdf-export a {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+
+  #peopole-chat-pdf-export pre,
+  #peopole-chat-pdf-export code {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #peopole-chat-pdf-export img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  #peopole-chat-pdf-export table {
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  #peopole-chat-pdf-export th,
+  #peopole-chat-pdf-export td {
+    border: 1px solid #dbe2ea !important;
+    padding: 4px 6px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-pdf-btn {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .chat-pdf-label {
+    display: none;
+  }
+}
