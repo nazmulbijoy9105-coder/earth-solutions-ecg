@@ -1353,3 +1353,381 @@ button,
     display: none;
   }
 }
+
+/* ==========================================================
+   ENTERPRISE CHAT PDF DOCUMENT
+   Dedicated A4 document renderer
+   ========================================================== */
+
+.chat-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  background: var(--navy2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.chat-pdf-btn:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+#peopole-chat-pdf-document {
+  display: none;
+}
+
+@media print {
+
+  @page {
+    size: A4;
+    margin: 15mm 16mm 17mm;
+  }
+
+  html,
+  body {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body > *:not(#peopole-chat-pdf-document) {
+    display: none !important;
+  }
+
+  #peopole-chat-pdf-document {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #fff !important;
+    color: #172033 !important;
+
+    font-family:
+      "Noto Sans Bengali",
+      "Noto Sans",
+      "Plus Jakarta Sans",
+      Arial,
+      sans-serif !important;
+
+    font-size: 9.7pt !important;
+    line-height: 1.62 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .pdf-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+
+    padding-bottom: 5mm !important;
+    margin-bottom: 8mm !important;
+
+    border-bottom: 1.2px solid #cbd5e1 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .pdf-logo {
+    color: #0f172a !important;
+    font-size: 15pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+  }
+
+  .pdf-brand-sub {
+    margin-top: 1mm !important;
+    color: #64748b !important;
+    font-size: 8pt !important;
+  }
+
+  .pdf-document-type {
+    color: #8b6a1e !important;
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .pdf-cover {
+    margin-bottom: 10mm !important;
+    padding-bottom: 8mm !important;
+
+    border-bottom: 1px solid #e2e8f0 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .pdf-kicker {
+    margin-bottom: 2mm !important;
+    color: #a07a20 !important;
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+  }
+
+  .pdf-cover h1 {
+    margin: 0 0 3mm !important;
+    color: #0f172a !important;
+    font-family:
+      "Noto Sans Bengali",
+      "Noto Sans",
+      Arial,
+      sans-serif !important;
+    font-size: 20pt !important;
+    line-height: 1.3 !important;
+    font-weight: 800 !important;
+  }
+
+  .pdf-description {
+    max-width: 150mm !important;
+    margin: 0 0 7mm !important;
+    color: #475569 !important;
+    font-size: 9pt !important;
+  }
+
+  .pdf-meta-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4mm !important;
+  }
+
+  .pdf-meta-item {
+    padding: 3.5mm !important;
+    border: 1px solid #dbe3ec !important;
+    border-radius: 2mm !important;
+    background: #f8fafc !important;
+  }
+
+  .pdf-meta-item span {
+    display: block !important;
+    margin-bottom: 1mm !important;
+    color: #64748b !important;
+    font-size: 7.5pt !important;
+  }
+
+  .pdf-meta-item strong {
+    display: block !important;
+    color: #172033 !important;
+    font-size: 8.5pt !important;
+    font-weight: 700 !important;
+  }
+
+  .pdf-section-heading {
+    margin-bottom: 5mm !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    font-weight: 800 !important;
+
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .pdf-section-heading span {
+    display: inline-block !important;
+    padding-bottom: 2mm !important;
+    border-bottom: 2px solid #c39a35 !important;
+  }
+
+  .pdf-message {
+    position: relative !important;
+
+    margin-bottom: 6mm !important;
+    padding: 5mm 6mm !important;
+
+    border: 1px solid #dbe3ec !important;
+    border-radius: 2.5mm !important;
+
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .pdf-message-user {
+    background: #f8fafc !important;
+    border-left: 3px solid #64748b !important;
+  }
+
+  .pdf-message-assistant {
+    background: #fff !important;
+    border-left: 3px solid #b58a27 !important;
+  }
+
+  .pdf-message-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+
+    margin-bottom: 3mm !important;
+    padding-bottom: 2mm !important;
+
+    border-bottom: 1px solid #e5eaf0 !important;
+
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .pdf-message-role {
+    color: #172033 !important;
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .04em !important;
+  }
+
+  .pdf-message-number {
+    color: #94a3b8 !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+  }
+
+  .pdf-message-content {
+    color: #1e293b !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .pdf-message-content p {
+    margin: 0 0 3mm !important;
+  }
+
+  .pdf-message-content p:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .pdf-message-content h1,
+  .pdf-message-content h2,
+  .pdf-message-content h3,
+  .pdf-message-content h4 {
+    color: #0f172a !important;
+    margin-top: 4mm !important;
+    margin-bottom: 2mm !important;
+
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .pdf-message-content ul,
+  .pdf-message-content ol {
+    margin: 2mm 0 3mm 6mm !important;
+    padding-left: 5mm !important;
+  }
+
+  .pdf-message-content li {
+    margin-bottom: 1.2mm !important;
+  }
+
+  .pdf-message-content blockquote {
+    margin: 3mm 0 !important;
+    padding: 3mm 4mm !important;
+
+    border-left: 2px solid #c39a35 !important;
+    background: #f8fafc !important;
+
+    color: #475569 !important;
+  }
+
+  .pdf-message-content pre {
+    margin: 3mm 0 !important;
+    padding: 4mm !important;
+
+    border: 1px solid #dbe3ec !important;
+    border-radius: 2mm !important;
+    background: #f1f5f9 !important;
+
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    font-family: "Courier New", monospace !important;
+    font-size: 8pt !important;
+    line-height: 1.5 !important;
+
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .pdf-message-content code {
+    font-family: "Courier New", monospace !important;
+    font-size: .9em !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .pdf-message-content table {
+    width: 100% !important;
+    margin: 3mm 0 !important;
+    border-collapse: collapse !important;
+    font-size: 8.5pt !important;
+  }
+
+  .pdf-message-content th,
+  .pdf-message-content td {
+    padding: 2.5mm 2mm !important;
+    border: 1px solid #cbd5e1 !important;
+    vertical-align: top !important;
+    color: #1e293b !important;
+    background: #fff !important;
+  }
+
+  .pdf-message-content th {
+    background: #f1f5f9 !important;
+    font-weight: 800 !important;
+  }
+
+  .pdf-message-content img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .pdf-message-content a {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+
+  .pdf-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+
+    margin-top: 10mm !important;
+    padding-top: 4mm !important;
+
+    border-top: 1px solid #cbd5e1 !important;
+
+    color: #64748b !important;
+    font-size: 7.5pt !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .pdf-message-content *,
+  .pdf-message-content .msg-actions,
+  .pdf-message-content button,
+  .pdf-message-content input,
+  .pdf-message-content textarea {
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-pdf-btn {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .chat-pdf-label {
+    display: none;
+  }
+}
