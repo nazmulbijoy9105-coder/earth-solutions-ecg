@@ -19,14 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-  <!-- Full Screen Hero Intro Overlay -->
-  <div id="heroIntroModal" class="hero-intro-overlay">
-    <div class="hero-intro-content">
-      <img src="https://z-cdn-media.chatglm.cn/files/1e9b6d8f-f1d1-468b-9438-9a0815bcde65.jpeg?auth_key=1889955497-f019e87a8ee34f77b43283ef5e6671de-0-dae6f3ba5b1d1105fa5d6955cf707b4c" alt="P.E.O.P.O.L.E Intro" class="hero-intro-img" />
-      <button id="closeHeroIntro" class="hero-intro-btn">Enter Chat &rarr;</button>
-    </div>
-  </div>
-<div class="app">
+  <div class="app">
 
   <!-- ═══════════ STAGE SELECTION MODAL ═══════════ -->
   <div class="stage-modal-backdrop hidden" id="stageModalBackdrop">
@@ -296,14 +289,4 @@
 
 <script src="/frontend/chat.js"></script>
   <script src="/frontend/chat-pdf.js"></script>
-<script>
-  document.getElementById("closeHeroIntro")?.addEventListener("click", function() {
-    document.getElementById("heroIntroModal").classList.add("hidden");
-  });
-  
-  // Also close if image is clicked
-  document.querySelector(".hero-intro-img")?.addEventListener("click", function() {
-    document.getElementById("heroIntroModal").classList.add("hidden");
-  });
-</script>
 </body>
