@@ -9,12 +9,12 @@
   <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --navy:#0b1629;--navy2:#111f3a;--navy3:#172544;
-    --gold:#d4a843;--gold2:#f0c96a;
+    --navy:#f7f9fc;--navy2:#ffffff;--navy3:#f1f5f9;
+    --gold:#b88924;--gold2:#d4a843;
     --teal:#1ec8b0;--green:#25d366;
     --rose:#e05c7a;--blue:#3b82f6;--purple:#8b5cf6;
-    --text:#e8edf5;--text2:#8fa3c0;
-    --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+    --text:#0f172a;--text2:#475569;
+    --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.14);
     --r:16px;
     --font-d:'Cormorant Garamond',serif;--font-b:'Plus Jakarta Sans',sans-serif;
   }
@@ -216,7 +216,72 @@
     .wa-float{bottom:16px;right:16px;padding:13px;border-radius:50%}
     .wa-float span{display:none}
   }
-  </style>
+
+
+/* PRICING-LIGHT-RESPONSIVE-HARDENING */
+
+img,
+svg {
+  max-width: 100%;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+@media (max-width: 900px) {
+  .plans,
+  .steps,
+  .ratio-grid {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .plans,
+  .steps,
+  .ratio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .plan-cta-row button,
+  .plan-cta-row a {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .price-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .price-table {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 420px) {
+  .price-table {
+    font-size: 11px;
+  }
+}
+</style>
 </head>
 <body>
 
