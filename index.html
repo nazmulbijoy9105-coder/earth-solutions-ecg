@@ -135,6 +135,17 @@
 
   <!-- ═══════════ MAIN ═══════════ -->
   <main class="main">
+  <!-- Hero Banner Section -->
+  <section class="hero-banner" id="heroBanner">
+    <div class="hero-banner-container">
+      <img 
+        src="https://z-cdn-media.chatglm.cn/files/1e9b6d8f-f1d1-468b-9438-9a0815bcde65.jpeg?auth_key=1889955136-171386ffe9b34e2e9c105a61691d97e1-0-3d8532d3530bdc5817877b3f85aa5d61" 
+        alt="P.E.O.P.O.L.E - AI Academic & Visa Companion" 
+        class="hero-banner-img"
+      />
+      <button class="hero-banner-close" id="closeHeroBtn" title="Dismiss">&times;</button>
+    </div>
+  </section>
 
     <!-- Topbar -->
     <header class="topbar">
@@ -289,4 +300,16 @@
 
 <script src="/frontend/chat.js"></script>
   <script src="/frontend/chat-pdf.js"></script>
+<script>
+  document.getElementById("closeHeroIntro")?.addEventListener("click", function() {
+    document.getElementById("heroIntroModal").classList.add("hidden");
+  });
+  
+  // Also close if image is clicked
+  document.querySelector(".hero-intro-img")?.addEventListener("click", function() {
+    document.getElementById("heroIntroModal").classList.add("hidden");
+  document.getElementById("closeHeroBtn")?.addEventListener("click", function() {
+    document.getElementById("heroBanner").style.display = "none";
+  });
+</script>
 </body>
