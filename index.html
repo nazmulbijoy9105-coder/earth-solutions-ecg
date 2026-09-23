@@ -18,7 +18,304 @@
   <link rel="stylesheet" href="/style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
-<body>
+<body class="homepage-active">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PEOPOLE AI — PREMIUM ENTERPRISE HOMEPAGE
+     Presentation layer only. Existing chat application remains intact.
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="peopole-homepage" id="peopoleHomepage" aria-labelledby="homeHeroTitle">
+
+  <header class="home-nav" id="homeNav">
+    <a class="home-brand" href="#peopoleHomepage" aria-label="Peopole AI home">
+      <span class="home-brand-mark">
+        <img src="/logo.jpg" alt="" />
+      </span>
+      <span class="home-brand-copy">
+        <strong>Peopole AI</strong>
+        <small>Earth Solutions Visa Zone</small>
+      </span>
+    </a>
+
+    <nav class="home-nav-links" aria-label="Main navigation">
+      <a href="#homeFramework">P.E.O.P.O.L.E.</a>
+      <a href="#homeApproach">How It Works</a>
+      <a href="#homeParents">For Parents</a>
+    </nav>
+
+    <div class="home-nav-actions">
+      <button type="button" class="home-lang-btn" id="homeLangBtn">বাংলা</button>
+      <button type="button" class="home-nav-advisor" id="homeAdvisorBtn">
+        Talk to an Advisor
+      </button>
+      <button type="button" class="home-nav-primary" id="homeJourneyBtn">
+        Start Your Journey
+        <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="home-menu-btn"
+      id="homeMenuBtn"
+      aria-label="Open navigation"
+      aria-expanded="false"
+      aria-controls="homeMobileNav"
+    >
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <div class="home-mobile-nav" id="homeMobileNav" aria-hidden="true">
+    <a href="#homeFramework">P.E.O.P.O.L.E.</a>
+    <a href="#homeApproach">How It Works</a>
+    <a href="#homeParents">For Parents</a>
+    <button type="button" id="homeMobileJourney">Start Your Journey ↗</button>
+    <button type="button" id="homeMobileAdvisor">Talk to an Advisor</button>
+  </div>
+
+  <main class="home-main">
+
+    <!-- HERO -->
+    <section class="home-hero" id="homeHero">
+      <div class="home-hero-grid">
+
+        <div class="home-hero-copy">
+          <div class="home-eyebrow">
+            <span class="home-eyebrow-line"></span>
+            <span>AI × HUMAN EXPERTISE</span>
+          </div>
+
+          <h1 id="homeHeroTitle">
+            Your Education.<br />
+            Your Future.<br />
+            <em>Intelligently Planned.</em>
+          </h1>
+
+          <p class="home-hero-description">
+            AI-powered academic, career and international-study guidance,
+            combined with human expertise from Earth Solutions Visa Zone.
+          </p>
+
+          <div class="home-hero-actions">
+            <button type="button" class="home-cta-primary" id="homeHeroJourney">
+              <span>Start Your Journey</span>
+              <span class="home-cta-arrow" aria-hidden="true">↗</span>
+            </button>
+
+            <button type="button" class="home-cta-secondary" id="homeHeroAdvisor">
+              Talk to an Advisor
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <button type="button" class="home-scroll-link" id="homeFrameworkLink">
+            <span class="home-scroll-icon" aria-hidden="true">↓</span>
+            <span>Explore P.E.O.P.O.L.E.</span>
+          </button>
+        </div>
+
+        <div class="home-hero-visual" aria-label="Peopole AI intelligence framework">
+          <div class="home-visual-orbit orbit-one"></div>
+          <div class="home-visual-orbit orbit-two"></div>
+
+          <div class="home-visual-core">
+            <span class="home-core-kicker">PEOPOLE</span>
+            <strong>AI</strong>
+            <span class="home-core-rule"></span>
+            <small>EDUCATION INTELLIGENCE</small>
+          </div>
+
+          <div class="home-visual-label label-top">
+            <span>01</span>
+            PROFILE
+          </div>
+
+          <div class="home-visual-label label-right">
+            <span>02</span>
+            PATHWAY
+          </div>
+
+          <div class="home-visual-label label-bottom">
+            <span>03</span>
+            OUTCOME
+          </div>
+
+          <div class="home-visual-coordinate">
+            <span>23.8103° N</span>
+            <span>90.4125° E</span>
+            <small>DHAKA · BANGLADESH</small>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="home-hero-meta" aria-label="Platform capabilities">
+        <div>
+          <span>01</span>
+          <strong>ACADEMIC INTELLIGENCE</strong>
+        </div>
+        <div>
+          <span>02</span>
+          <strong>GLOBAL PATHWAYS</strong>
+        </div>
+        <div>
+          <span>03</span>
+          <strong>CAREER DIRECTION</strong>
+        </div>
+        <div>
+          <span>04</span>
+          <strong>HUMAN GUIDANCE</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPROACH INTRO -->
+    <section class="home-approach" id="homeApproach">
+      <div class="home-section-index">01 / APPROACH</div>
+
+      <div class="home-approach-content">
+        <p class="home-section-kicker">NOT JUST A DESTINATION</p>
+        <h2>
+          The right pathway begins
+          <span>with the right questions.</span>
+        </h2>
+        <p>
+          Peopole AI brings together personal context, academic trajectory,
+          opportunity analysis and long-term outcomes before recommending
+          a pathway.
+        </p>
+      </div>
+
+      <div class="home-approach-note">
+        <span>BUILT AROUND THE PERSON</span>
+        <strong>Not the application.</strong>
+      </div>
+    </section>
+
+    <!-- PEOPOLE FRAMEWORK -->
+    <section class="home-framework" id="homeFramework" aria-labelledby="homeFrameworkTitle">
+      <div class="home-framework-heading">
+        <div>
+          <div class="home-section-index">02 / FRAMEWORK</div>
+          <p class="home-section-kicker">THE INTELLIGENCE BEHIND YOUR PATHWAY</p>
+        </div>
+
+        <h2 id="homeFrameworkTitle">
+          Seven dimensions.<br />
+          <em>One connected picture.</em>
+        </h2>
+
+        <p>
+          Every recommendation begins with the person — not the destination.
+        </p>
+      </div>
+
+      <div class="home-framework-list">
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">P</div>
+          <div class="home-framework-number">01</div>
+          <div class="home-framework-name">PERSONAL</div>
+          <div class="home-framework-description">
+            Your individual profile, interests, strengths and ambitions.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">E</div>
+          <div class="home-framework-number">02</div>
+          <div class="home-framework-name">EDUCATION</div>
+          <div class="home-framework-description">
+            Your academic background, progression and learning trajectory.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">O</div>
+          <div class="home-framework-number">03</div>
+          <div class="home-framework-name">OPPORTUNITY</div>
+          <div class="home-framework-description">
+            Realistic academic and career opportunities aligned with your profile.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">P</div>
+          <div class="home-framework-number">04</div>
+          <div class="home-framework-name">PATHWAY</div>
+          <div class="home-framework-description">
+            A structured route from your current position toward your target.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">O</div>
+          <div class="home-framework-number">05</div>
+          <div class="home-framework-name">OVERSEAS</div>
+          <div class="home-framework-description">
+            International education possibilities, destinations and pathways.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">L</div>
+          <div class="home-framework-number">06</div>
+          <div class="home-framework-name">LIFE</div>
+          <div class="home-framework-description">
+            Long-term lifestyle, career direction and personal goals.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+        <article class="home-framework-row">
+          <div class="home-framework-letter">E</div>
+          <div class="home-framework-number">07</div>
+          <div class="home-framework-name">EMPLOYABILITY</div>
+          <div class="home-framework-description">
+            Connecting education choices to professional outcomes and future career value.
+          </div>
+          <div class="home-framework-mark">+</div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- PARENTS / FINAL CTA BRIDGE -->
+    <section class="home-final-bridge" id="homeParents">
+      <div class="home-section-index">03 / NEXT STEP</div>
+      <div>
+        <p class="home-section-kicker">FROM POSSIBILITY TO PATHWAY</p>
+        <h2>Start with where you are.<br /><em>Build toward where you want to go.</em></h2>
+      </div>
+      <div class="home-final-actions">
+        <button type="button" class="home-cta-primary" id="homeFinalJourney">
+          Start Your Journey <span aria-hidden="true">↗</span>
+        </button>
+        <button type="button" class="home-cta-secondary" id="homeFinalAdvisor">
+          Talk to an Advisor <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="home-footer">
+    <div>
+      <strong>PEOPOLE AI</strong>
+      <span>Earth Solutions Visa Zone</span>
+    </div>
+    <span>Dhaka · Bangladesh</span>
+    <span>AI guidance with human expertise.</span>
+  </footer>
+
+</section>
+
 <div class="app">
 
   <!-- ═══════════ STAGE SELECTION MODAL ═══════════ -->
@@ -287,6 +584,7 @@
   </div>
 </div>
 
+<script src="/frontend/homepage.js"></script>
 <script src="/frontend/chat.js"></script>
   <script src="/frontend/chat-pdf.js"></script>
 </body>
