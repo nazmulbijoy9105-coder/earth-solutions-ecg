@@ -2772,7 +2772,6 @@ body:not(.homepage-active) > .peopole-homepage {
   .home-nav-primary,
   .home-cta-primary,
   .home-framework-row,
-  .home-framework-mark,
   .home-menu-btn span {
     transition: none !important;
   }
