@@ -2998,3 +2998,10 @@ body:not(.homepage-active) > .peopole-homepage {
 @media (max-width: 420px) {
   .home-framework-row { grid-template-columns: 52px 27px 1fr 2.6rem; }
 }
+
+/* HEADING BALANCE — 2026-09-24 */
+.peopole-homepage h1,.peopole-homepage h2 { text-wrap: balance; }
+@media (min-width: 1101px) {
+  .home-framework-heading { grid-template-columns: minmax(0,1fr) minmax(240px,300px); gap: 28px 60px; }
+  .home-framework-heading > div { grid-column: 1 / -1; }
+}

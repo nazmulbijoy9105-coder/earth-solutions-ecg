@@ -1271,7 +1271,7 @@ app.post('/api/chat', async (req, res) => {
         messages:    [{ role: 'system', content: buildSystemPrompt(stage, lang) }, ...contextMessages],
         stream:      true,
         temperature: 0.65,
-        max_tokens:  1024,
+        max_tokens:  4096,
         top_p:       0.9
       })
     });
