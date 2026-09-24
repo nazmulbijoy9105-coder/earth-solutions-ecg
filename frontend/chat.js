@@ -520,7 +520,17 @@ async function sendMessage() {
         throw new Error(parsed.error);
       }
 
-      const token = parsed.choices?.[0]?.delta?.content || '';
+      const finishReason = parsed.choices?.[0]?.finish_reason;
+      const tokenNow = parsed.choices?.[0]?.delta?.content || '';
+      if (finishReason === 'length') {
+        if (firstChunk) { typingEl.classList.remove('typing'); typingEl.innerHTML = ''; firstChunk = false; }
+        fullText += tokenNow + (lang === 'bn'
+          ? '\n\n*উত্তরটি মাঝপথে থেমে গেছে। "আরও বলুন" লিখে চালিয়ে যান।*'
+          : '\n\n*This answer was cut short. Ask me to continue.*');
+        typingEl.innerHTML = renderMarkdown(fullText);
+        return;
+      }
+      const token = tokenNow;
 
       if (!token) return;
 

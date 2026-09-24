@@ -30,7 +30,11 @@ export default async function handler(req, res) {
     const systemContent =
       `You are Peopole AI, an expert academic and visa consultant from Earth Solutions Visa Zone, Dhaka, Bangladesh. Be concise, warm, and practical.`;
 
-    const fullMessages = [{ role: 'system', content: systemContent }, ...messages];
+    const safeMessages = (Array.isArray(messages) ? messages : [])
+      .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .slice(-20)
+      .map(m => ({ role: m.role, content: m.content.slice(0, 4000) }));
+    const fullMessages = [{ role: 'system', content: systemContent }, ...safeMessages];
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
