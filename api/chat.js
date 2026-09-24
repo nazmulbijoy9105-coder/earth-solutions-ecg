@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     if (!process.env.GROQ_API_KEY) throw new Error('GROQ_API_KEY not set');
 
-    const systemContent = system ||
+    const systemContent =
       `You are Peopole AI, an expert academic and visa consultant from Earth Solutions Visa Zone, Dhaka, Bangladesh. Be concise, warm, and practical.`;
 
     const fullMessages = [{ role: 'system', content: systemContent }, ...messages];
@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       throw new Error(`Groq API error ${response.status}: ${errText}`);
     }
 
+    let sseBuf = '';
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
@@ -59,7 +60,10 @@ export default async function handler(req, res) {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split('\n')) {
+      sseBuf += chunk;
+      const sseLines = sseBuf.split('\n');
+      sseBuf = sseLines.pop();
+      for (const line of sseLines) {
         if (!line.startsWith('data:')) continue;
         const payload = line.slice(5).trim();
         if (!payload) continue;

@@ -242,8 +242,26 @@ function renderMarkdown(text) {
   const out   = [];
   let inList  = false;
 
-  for (const line of lines) {
+  const mdIsRow = t => t.startsWith('|');
+  const mdIsSep = t => /^[\s:|-]+$/.test(t) && t.includes('-');
+  const mdCells = t => t.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.trim();
+    if (mdIsRow(trimmed) && i + 1 < lines.length && mdIsSep(lines[i + 1].trim())) {
+      if (inList) { out.push('</ul>'); inList = false; }
+      const head = mdCells(trimmed);
+      const rows = [];
+      i += 2;
+      while (i < lines.length && mdIsRow(lines[i].trim())) { rows.push(mdCells(lines[i].trim())); i++; }
+      i--;
+      out.push('<div class="md-table-wrap"><table class="md-table"><thead><tr>' +
+        head.map(c => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>' +
+        rows.map(r => '<tr>' + r.map(c => '<td>' + c + '</td>').join('') + '</tr>').join('') +
+        '</tbody></table></div>');
+      continue;
+    }
     if (/^[•\-\*]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)) {
       if (!inList) { out.push('<ul>'); inList = true; }
       out.push('<li>' + trimmed.replace(/^[•\-\*]\s|^\d+\.\s/, '') + '</li>');

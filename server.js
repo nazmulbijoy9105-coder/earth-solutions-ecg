@@ -391,7 +391,7 @@ Which subject or university are you aiming for?`,
 **Language:** German B2/C1 OR English-medium programmes available
 **IELTS (English):** 6.0–6.5
 **APS Certificate:** Mandatory for Bangladeshi students (verification of academic credentials)
-**Blocked Account:** €11,208/year (~BDT 13 lakh) to show proof of funds
+**Blocked Account:** €11,904/year to show proof of funds
 **Cost:** Only semester admin fees (€150–350) + living ~€800–1,000/month
 
 Great for Engineering, Medicine, and Natural Sciences!`,
@@ -711,7 +711,7 @@ VISA BY COUNTRY — full detail:
 🇬🇧 Student Visa: CAS number; 28-day bank statement rule; IHS surcharge ≈ £776/yr
 🇨🇦 Study Permit: LOA from DLI; SOP for IRCC; CAD 10,000+ funds proof
 🇺🇸 F-1: DS-160; SEVIS fee USD 350; embassy interview coaching critical
-🇩🇪 National Visa D: APS certificate mandatory for Bangladeshis; blocked account €11,208
+🇩🇪 National Visa D: APS certificate mandatory for Bangladeshis; blocked account €11,904
 
 FINANCES IN BDT:
 🇩🇪 ৳15–25 lakh/yr (near-free tuition) | 🇲🇾 ৳8–15 lakh/yr | 🇦🇺 ৳40–70 lakh/yr | 🇨🇦 ৳35–60 lakh/yr | 🇬🇧 ৳35–65 lakh/yr
@@ -1279,6 +1279,7 @@ app.post('/api/chat', async (req, res) => {
     if (!groqRes.ok) throw new Error(`Groq ${groqRes.status}: ${await groqRes.text()}`);
 
     let fullReply = '';
+    let sseBuf = '';
     const reader  = groqRes.body.getReader();
     const decoder = new TextDecoder();
 
@@ -1286,7 +1287,10 @@ app.post('/api/chat', async (req, res) => {
       const { done: d, value } = await reader.read();
       if (d) break;
       const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split('\n')) {
+      sseBuf += chunk;
+      const sseLines = sseBuf.split('\n');
+      sseBuf = sseLines.pop();
+      for (const line of sseLines) {
         if (!line.startsWith('data:')) continue;
         const raw = line.slice(5).trim();
         if (!raw || raw === '[DONE]') continue;
