@@ -86,6 +86,19 @@
       if (element) element.addEventListener("click", openAdvisor);
     });
 
+    document.querySelectorAll(".home-framework-disclosure").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const targetId = button.getAttribute("aria-controls");
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (!target) return;
+
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", String(!expanded));
+        target.hidden = expanded;
+        button.classList.toggle("is-expanded", !expanded);
+      });
+    });
+
     const frameworkLink = document.getElementById("homeFrameworkLink");
 
     if (frameworkLink) {
