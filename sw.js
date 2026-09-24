@@ -1,5 +1,5 @@
 // sw.js — Peopole AI v8.0 | Service Worker + Push Notifications
-const CACHE_NAME  = 'peopole-ai-v14';
+const CACHE_NAME  = 'peopole-ai-v15';
 const OFFLINE_URL = '/index.html';
 
 const CACHE_STATIC = [
