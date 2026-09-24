@@ -2402,15 +2402,7 @@ body:not(.homepage-active) > .peopole-homepage {
   line-height: 1.65;
 }
 
-.home-framework-mark {
-  color: var(--home-gold);
-  font-size: 17px;
-  transition: transform .25s ease;
-}
 
-.home-framework-row:hover .home-framework-mark {
-  transform: rotate(45deg);
-}
 
 .home-final-bridge {
   display: grid;
@@ -2717,17 +2709,6 @@ body:not(.homepage-active) > .peopole-homepage {
     font-size: 11px;
   }
 
-  .home-framework-mark {
-    grid-column: 4;
-    grid-row: 1;
-  }
-
-  .home-footer {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 25px 20px;
-  }
-}
 
 @media (max-width: 420px) {
   .home-hero {
@@ -2791,7 +2772,6 @@ body:not(.homepage-active) > .peopole-homepage {
   .home-nav-primary,
   .home-cta-primary,
   .home-framework-row,
-  .home-framework-mark,
   .home-menu-btn span {
     transition: none !important;
   }
@@ -3003,7 +2983,9 @@ body:not(.homepage-active) > .peopole-homepage {
 .peopole-homepage h1,.peopole-homepage h2 { text-wrap: balance; }
 @media (min-width: 1101px) {
   .home-framework-heading { grid-template-columns: minmax(0,1fr) minmax(240px,300px); gap: 28px 60px; }
-  .home-framework-heading > div { grid-column: 1 / -1; }
+  .home-framework-heading > div,
+  .home-framework-heading > h2,
+  .home-framework-heading > p { grid-column: 1 / -1; }
 }
 
 
