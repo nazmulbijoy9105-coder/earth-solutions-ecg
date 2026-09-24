@@ -1,5 +1,5 @@
 // sw.js — Peopole AI v8.0 | Service Worker + Push Notifications
-const CACHE_NAME  = 'peopole-ai-v9';
+const CACHE_NAME  = 'peopole-ai-v10';
 const OFFLINE_URL = '/index.html';
 
 const CACHE_STATIC = [
@@ -7,6 +7,8 @@ const CACHE_STATIC = [
   '/index.html',
   '/style.css',
   '/frontend/chat.js',
+  '/frontend/homepage.js',
+  '/frontend/chat-pdf.js',
   '/pricing.html',
   '/logo.jpg',
   '/manifest.json'

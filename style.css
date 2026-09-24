@@ -1767,6 +1767,7 @@ body:not(.homepage-active) > .peopole-homepage {
     var(--home-ivory);
   color: var(--home-ink);
   overflow: hidden;
+  overflow: clip;
   font-family: var(--font-b, "Plus Jakarta Sans", sans-serif);
 }
 
@@ -2800,7 +2801,6 @@ body:not(.homepage-active) > .peopole-homepage {
   }
 }
 
-\n
 
 /* ================================================================
    FUNNEL ARCHITECTURE HARDENING — 2026-09-24
