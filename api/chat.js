@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         messages: fullMessages,
         stream: true,
         temperature: 0.7,
-        max_tokens: 1024
+        max_tokens: 4096
       })
     });
 
