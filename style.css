@@ -6,7 +6,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Core Palette */
+  /* Core Palette — Dark Navy + Gold */
   --navy:        #070e1c;
   --navy2:       #0d1730;
   --navy3:       #131f3d;
@@ -1661,7 +1661,7 @@ button,
     margin-bottom: 2mm !important;
 
     break-after: avoid !important;
-    page-break-after: avoid !important;
+    page-after: avoid !important;
   }
 
   .pdf-message-content ul,
@@ -2533,7 +2533,7 @@ body:not(.homepage-active) > .peopole-homepage {
 }
 
 /* ================================================================
-   RESPONSIVE
+   RESPONSIVE — Homepage
    ================================================================ */
 
 @media (max-width: 1100px) {
@@ -2823,7 +2823,7 @@ body:not(.homepage-active) > .peopole-homepage {
 }
 
 /* ================================================================
-   FUNNEL ARCHITECTURE HARDENING — 2026-09-24
+   FUNNEL ARCHITECTURE HARDENING
    ================================================================ */
 
 .stage-modal-intro {
@@ -2912,11 +2912,10 @@ body:not(.homepage-active) > .peopole-homepage {
 }
 
 /* ================================================================
-   PREMIUM PASS — 2026-09-24
+   PREMIUM PASS — Homepage legibility
    ================================================================ */
 .peopole-homepage { --home-gold-text: #7d5f26; }
 
-/* Legibility: gold text was ~2.5:1 contrast; microtype was 5-9px */
 .home-eyebrow,.home-section-kicker,.home-section-index,.home-framework-number,
 .home-hero-meta span,.home-approach-note span,.home-visual-label span,
 .home-core-kicker,.home-visual-coordinate small { color: var(--home-gold-text); }
@@ -3018,7 +3017,7 @@ body:not(.homepage-active) > .peopole-homepage {
   .home-framework-row { grid-template-columns: 52px 27px 1fr 2.6rem; }
 }
 
-/* HEADING BALANCE — 2026-09-24 */
+/* HEADING BALANCE */
 .peopole-homepage h1,.peopole-homepage h2 { text-wrap: balance; }
 @media (min-width: 1101px) {
   .home-framework-heading { grid-template-columns: minmax(0,1fr) minmax(240px,300px); gap: 28px 60px; }
@@ -3028,34 +3027,11 @@ body:not(.homepage-active) > .peopole-homepage {
 }
 
 /* ================================================================
-   LIGHT WORKSPACE, TABLES, HOMEPAGE SCROLL — 2026-09-24
+   HOMEPAGE SCROLL FIX
+   body{height:100%;overflow:hidden} is for the chat shell;
+   the homepage must scroll
    ================================================================ */
-
-/* body{height:100%;overflow:hidden} is for the chat shell; the homepage must scroll */
 body.homepage-active { height: auto; min-height: 100%; overflow: visible; }
-
-/* Light workspace: same token names, new values (ivory / ink / bronze) */
-:root {
-  color-scheme: light;
-  --navy: #f4f0e8;  --navy2: #faf8f3;  --navy3: #fffdfa;  --navy4: #ece6d8;
-  --gold: #8a6a2b;  --gold2: #a88338;  --gold3: #6f531f;
-  --teal: #0f8f7c;  --teal2: #0b7565;
-  --rose: #c23a5b;  --blue: #2563eb;   --purple: #7c3aed;
-  --text: #151515;  --text2: #5f5d56;  --text3: #7a776e;
-  --border: rgba(21,21,21,.08);
-  --border2: rgba(21,21,21,.14);
-  --border-gold: rgba(138,106,43,.35);
-  --glass: rgba(250,248,243,.86);
-  --glass2: rgba(255,253,250,.82);
-  --shadow-sm: 0 1px 3px rgba(21,21,21,.08);
-  --shadow-md: 0 8px 24px rgba(21,21,21,.08);
-  --shadow-lg: 0 16px 48px rgba(21,21,21,.12);
-  --shadow-gold: 0 0 0 1px rgba(138,106,43,.16), 0 8px 24px rgba(21,21,21,.08);
-  --glow-gold: 0 0 0 1px rgba(138,106,43,.22);
-}
-body::before { display: none; }
-::-webkit-scrollbar-thumb { background: rgba(21,21,21,.2); }
-::-webkit-scrollbar-thumb:hover { background: rgba(21,21,21,.32); }
 
 /* Markdown tables in chat bubbles */
 .md-table-wrap { margin: .7em 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -3064,12 +3040,6 @@ body::before { display: none; }
 .md-table th { color: var(--text); font-weight: 700; border-bottom-color: var(--text3); }
 .md-table td { color: var(--text2); }
 .md-table td:first-child { color: var(--text); font-weight: 600; }
-
-/* LIGHT WORKSPACE PASS 2 — contrast: bronze and teal darkened so ivory button text passes 4.5:1 */
-:root { --gold: #7f6126; --gold2: #94742f; --gold3: #6a501f; --teal: #0b7565; --teal2: #085a4d; }
-
-/* LIGHT WORKSPACE PASS 3 — gold2 darkened: ivory text on the light end of the gold gradient is now about 4.9:1 */
-:root { --gold2: #8a6b2a; }
 
 /* ================================================================
    MOBILE CHAT BAR OPTIMIZATION — Premium Pill Design
