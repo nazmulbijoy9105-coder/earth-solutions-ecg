@@ -16,6 +16,8 @@ const path      = require('path');
 const fs        = require('fs');
 const crypto    = require('crypto');
 const webpush   = require('web-push');
+const proxyNeonAuth = require('./lib/auth-proxy.cjs');
+const { requireNeonAuth } = require('./lib/neon-auth.cjs');
 
 const app  = express();
 
@@ -229,6 +231,15 @@ function setCORS(res, req) {
 }
 
 app.options('/api/*', (req, res) => { setCORS(res, req); res.sendStatus(204); });
+
+// Same-origin proxy keeps Managed Better Auth session cookies first-party.
+// The upstream Neon origin is never exposed to the browser as a cookie domain.
+app.all('/api/neon-auth/*', (req, res) => proxyNeonAuth(req, res, req.params[0]));
+
+app.get('/api/auth/me', requireNeonAuth, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ user: req.auth });
+});
 
 // ─────────────────────────────────────────────────────────────────────────
 // J. ANALYTICS ENDPOINTS (built-in, no 3rd party)
