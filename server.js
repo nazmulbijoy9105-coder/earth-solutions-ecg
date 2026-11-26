@@ -97,66 +97,27 @@ try {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// B. DISK PERSISTENCE
-// ─────────────────────────────────────────────────────────────────────────
-const DATA_DIR       = path.join(__dirname, 'data');
-const DATA_FILE      = path.join(DATA_DIR, 'inquiries.json');
-const PUSH_FILE      = path.join(DATA_DIR, 'push_subscriptions.json');
-const ANALYTICS_FILE = path.join(DATA_DIR, 'analytics.json');
+// B. DURABLE PERSISTENCE — Neon PostgreSQL
+const persistence = require('./lib/persistence.cjs');
+const { isDatabaseConfigured, healthCheck: databaseHealthCheck, closePool } = require('./lib/db.cjs');
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-function ensureFile(file, defaultVal) {
-  if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(defaultVal, null, 2));
-}
-ensureFile(DATA_FILE,      { inquiries: [], stats: { total: 0, byStage: {}, byLang: { en: 0, bn: 0 }, daily: {}, sources: { faq: 0, ai: 0, fallback: 0 } } });
-ensureFile(PUSH_FILE,      { subscriptions: [] });
-ensureFile(ANALYTICS_FILE, { events: [], pageviews: {} });
-
-function readJSON(file, fallback) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return fallback; }
-}
-function writeJSON(file, data) {
-  try { fs.writeFileSync(file, JSON.stringify(data, null, 2)); }
-  catch (e) { console.error('[IO] Write error:', e.message); }
+async function logInquiry(input) {
+  if (!isDatabaseConfigured()) return false;
+  await persistence.createInquiry(input);
+  return true;
 }
 
-function logInquiry({ userId, stage, lang, firstMessage, ip, source }) {
-  const data  = readJSON(DATA_FILE, { inquiries: [], stats: { total: 0, byStage: {}, byLang: { en: 0, bn: 0 }, daily: {}, sources: { faq: 0, ai: 0, fallback: 0 } } });
-  const today = new Date().toISOString().slice(0, 10);
-  data.inquiries.unshift({
-    id: Date.now().toString(), userId: userId || 'anon',
-    stage: stage || 'unknown', lang: lang || 'en',
-    source: source || 'ai',
-    preview: (firstMessage || '').slice(0, 150),
-    time: new Date().toISOString(),
-    ip: (ip || 'unknown').split(',')[0].trim()
-  });
-  if (data.inquiries.length > 2000) data.inquiries = data.inquiries.slice(0, 2000);
-  data.stats.total                    = (data.stats.total || 0) + 1;
-  data.stats.byStage[stage]           = (data.stats.byStage[stage] || 0) + 1;
-  data.stats.byLang[lang || 'en']     = (data.stats.byLang[lang || 'en'] || 0) + 1;
-  data.stats.daily[today]             = (data.stats.daily[today] || 0) + 1;
-  if (!data.stats.sources) data.stats.sources = { faq: 0, ai: 0, fallback: 0 };
-  data.stats.sources[source || 'ai']  = (data.stats.sources[source || 'ai'] || 0) + 1;
-  writeJSON(DATA_FILE, data);
+// Analytics is best-effort for public page loads; durable records are written
+// only when DATABASE_URL is configured. Health checks expose missing storage.
+async function logPageview(pagePath, referrer) {
+  if (!isDatabaseConfigured()) return false;
+  await persistence.logPageview(pagePath, referrer);
+  return true;
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// C. ANALYTICS — built-in (no Google Analytics / no 3rd party required)
-//    Also provides optional ad slot revenue data
-// ─────────────────────────────────────────────────────────────────────────
-function logPageview(path, referrer) {
-  const data = readJSON(ANALYTICS_FILE, { events: [], pageviews: {} });
-  data.pageviews[path] = (data.pageviews[path] || 0) + 1;
-  if (data.events.length < 10000) data.events.push({ type: 'pageview', path, referrer, time: new Date().toISOString() });
-  writeJSON(ANALYTICS_FILE, data);
-}
-function logEvent(name, meta) {
-  const data = readJSON(ANALYTICS_FILE, { events: [], pageviews: {} });
-  if (data.events.length < 10000) data.events.push({ type: 'event', name, meta, time: new Date().toISOString() });
-  writeJSON(ANALYTICS_FILE, data);
+async function logEvent(name, meta) {
+  if (!isDatabaseConfigured()) return false;
+  await persistence.logEvent(name, meta);
+  return true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
