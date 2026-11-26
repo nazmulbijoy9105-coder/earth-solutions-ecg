@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ user }));
   } catch (error) {
-    res.statusCode = error?.name === 'AuthConfigurationError' || error?.name === 'AuthProviderUnavailableError' ? 503 : 401;
+    res.statusCode = error instanceof neonAuth.AuthConfigurationError || error instanceof neonAuth.AuthProviderUnavailableError ? 503 : 401;
     return res.end(JSON.stringify({ error: res.statusCode === 503 ? 'Authentication service unavailable' : 'Invalid or expired session' }));
   }
 }
