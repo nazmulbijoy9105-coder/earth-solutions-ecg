@@ -1,10 +1,10 @@
-import persistence from '../../lib/persistence.cjs';
-import database from '../../lib/db.cjs';
+const persistence = require('../../lib/persistence.cjs');
+const database = require('../../lib/db.cjs');
 
 const validUuid = value => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
 const validGuestId = value => typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     res.statusCode = 405;
