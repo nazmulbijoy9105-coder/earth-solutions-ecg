@@ -219,6 +219,9 @@ app.use((req, res, next) => {
   let requestedPath;
   try {
     requestedPath = decodeURIComponent(req.path).replace(/\\/g, '/');
+    // Reject residual escapes to prevent a second decoder (e.g. serve-static)
+    // from turning a double-encoded private path into a protected path.
+    if (requestedPath.includes('%')) return res.sendStatus(400);
   } catch {
     return res.sendStatus(400);
   }
