@@ -67,7 +67,7 @@ async function main() {
         );
       }
       for (const row of inquiries.rows) {
-        await target.query(
+        await targetClient.query(
           `INSERT INTO app_inquiries
             (legacy_id,auth_user_id,anonymous_id,stage,lang,source,preview,ip_fingerprint,created_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -77,7 +77,7 @@ async function main() {
         );
       }
       for (const row of analytics.rows) {
-        await target.query(
+        await targetClient.query(
           `INSERT INTO app_analytics_events
             (source_fingerprint,auth_user_id,anonymous_id,event_type,path,referrer_origin,event_name,metadata,created_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)
@@ -87,7 +87,7 @@ async function main() {
         );
       }
       for (const row of subscriptions.rows) {
-        await target.query(
+        await targetClient.query(
           `INSERT INTO app_push_subscriptions
             (auth_user_id,anonymous_id,endpoint,subscription,stage,lang,created_at,last_seen_at)
            VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7,$8)
