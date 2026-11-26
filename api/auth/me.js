@@ -1,6 +1,6 @@
-import neonAuth from '../../lib/neon-auth.cjs';
+const neonAuth = require('../../lib/neon-auth.cjs');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'GET') {
     res.statusCode = 405;
