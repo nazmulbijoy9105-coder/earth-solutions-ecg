@@ -193,6 +193,48 @@ const { SERVER_FAQS, matchFAQ, buildSystemPrompt, FALLBACKS, getFallback } = req
 // ─────────────────────────────────────────────────────────────────────────
 // H. STATIC FILES
 // ─────────────────────────────────────────────────────────────────────────
+// The project root contains server code, private JSON stores and deployment
+// metadata. Never let express.static serve those paths.
+const PRIVATE_STATIC_PATHS = [
+  '/data',
+  '/api',
+  '/lib',
+  '/migrations',
+  '/node_modules',
+  '/.git',
+  '/.github'
+];
+const PRIVATE_STATIC_FILES = new Set([
+  '/server.js',
+  '/user-routes.js',
+  '/package.json',
+  '/package-lock.json',
+  '/vercel.json',
+  '/.env',
+  '/.env.local',
+  '/.env.production'
+]);
+
+app.use((req, res, next) => {
+  let requestedPath;
+  try {
+    requestedPath = decodeURIComponent(req.path).replace(/\\/g, '/');
+  } catch {
+    return res.sendStatus(400);
+  }
+
+  const normalizedPath = path.posix.normalize('/' + requestedPath.replace(/^\\/+/, ''));
+  const isPrivateDirectory = PRIVATE_STATIC_PATHS.some(
+    privatePath => normalizedPath === privatePath || normalizedPath.startsWith(privatePath + '/')
+  );
+
+  if (isPrivateDirectory || PRIVATE_STATIC_FILES.has(normalizedPath)) {
+    return res.sendStatus(404);
+  }
+
+  return next();
+});
+
 app.use(express.static(path.join(__dirname), {
   index: false,
   setHeaders(res, filePath) {
