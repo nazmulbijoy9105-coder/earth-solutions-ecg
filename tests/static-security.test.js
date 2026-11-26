@@ -63,10 +63,11 @@ after(async () => {
   if (child.exitCode === null) child.kill('SIGKILL');
 });
 
-test('public homepage remains available', async () => {
-  const response = await fetch(`${baseUrl}/index.html`);
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get('content-type') || '', /text\/html/);
+test('public homepage and allowlisted assets remain available', async () => {
+  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/pricing.html', '/admin.html', '/logo.jpg', '/manifest.json', '/sw.js']) {
+    const response = await fetch(`${baseUrl}${pathname}`);
+    assert.equal(response.status, 200, `${pathname} should be publicly available`);
+  }
 });
 
 test('private data and server implementation files are not served', async () => {
@@ -84,7 +85,7 @@ test('private data and server implementation files are not served', async () => 
     '/lib/ai-core.js',
     '/package.json',
     '/package-lock.json',
-    '/vercel.json'
+    '/vercel.json',\n    '/frontend/auth-client.js',\n    '/migrations/1789504075584_init-schema.js'
   ];
 
   for (const pathname of privatePaths) {
