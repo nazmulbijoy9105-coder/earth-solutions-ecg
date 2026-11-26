@@ -127,26 +127,25 @@ Login → Switch to Dashboard → Navigate tabs:
 
 ---
 
-## 🎮 Demo Credentials & Testing
+## Testing
 
-### Test Authentication
-- **Phone OTP:** Use code `1234` for any phone number
-- **Google OAuth:** Simulated - creates a demo Google user
-- **Email/Password:** Any email/password combination works (demo mode)
+There are no production demo credentials or simulated payment approvals.
 
-### Test Payments
-- **bKash/Nagad:** Any phone number works
-- **Stripe Card:** Use `4242 4242 4242 4242` (standard test card)
-- **CVC:** Any 3 digits
-- **Expiry:** Any future date (MM/YY format)
+Run locally:
+```bash
+npm ci
+npm audit
+npm test
+```
 
-### Test Conversations
-1. Ask: "What are the best countries for Computer Science?"
-2. Ask: "How much does it cost to study in Canada?"
-3. Ask: "What IELTS score do I need for USA?"
-4. Toggle language to বাংলা and repeat questions
+The current automated suite covers static-file isolation, Neon JWT signature/claim verification with test keys, same-origin auth proxy behavior, Vercel API guardrails, and database-missing readiness behavior.
 
----
+Not yet covered by automated live integration tests:
+- Real Neon Auth sign-up, OTP delivery, sign-in and password reset through Resend.
+- Actual `node-pg-migrate up` execution against a fresh disposable Neon branch.
+- End-to-end browser sign-in/session restoration.
+- bKash/Nagad sandbox payments, callbacks, refunds and reconciliation.
+- Backup restore, load testing and penetration testing.
 
 ## 🚧 Features NOT Yet Implemented
 
