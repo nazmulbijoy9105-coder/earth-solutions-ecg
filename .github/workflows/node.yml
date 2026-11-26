@@ -28,5 +28,9 @@ jobs:
       - name: Check server syntax
         run: node --check server.js
 
+      - name: Dependency security audit (informational)
+        continue-on-error: true
+        run: npm audit
+
       - name: Run tests
         run: npm test
