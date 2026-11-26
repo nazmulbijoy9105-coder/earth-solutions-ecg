@@ -391,6 +391,11 @@ app.post('/api/chat', async (req, res) => {
 
   if (isDatabaseConfigured()) {
     try {
+      const rateLimit = await persistence.consumeChatRateLimit({ userId: safeUserId, ip });
+      if (!rateLimit.allowed) {
+        res.setHeader('Retry-After', String(rateLimit.retryAfter));
+        return res.status(429).json({ error: 'Too many chat requests. Please wait before trying again.' });
+      }
       const ownedConversationId = await persistence.getOrCreateConversation({
         conversationId,
         anonymousId: safeUserId,
