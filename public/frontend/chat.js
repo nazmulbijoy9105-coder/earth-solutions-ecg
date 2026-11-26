@@ -188,6 +188,18 @@ function getAnonymousUserId() {
 }
 
 const userId = getAnonymousUserId();
+
+function getConversationId() {
+  const existing = localStorage.getItem('ppl_conversation_id');
+  if (existing && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing)) {
+    return existing;
+  }
+  const id = crypto.randomUUID();
+  localStorage.setItem('ppl_conversation_id', id);
+  return id;
+}
+
+let conversationId = getConversationId();
 let pushSubscription = null;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -461,11 +473,14 @@ async function sendMessage() {
   trackEvent('message_sent', { stage, lang, messageLength: text.length });
 
   try {
-    const response = await fetch('/api/chat', {
+    const messageId = crypto.randomUUID();
+  const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId,
+        conversationId,
+        messageId,
         messages: memory.slice(-20),
         stage,
         lang
@@ -826,6 +841,8 @@ function trackPageview() {
 // 14. CLEAR CONVERSATION
 // ═══════════════════════════════════════════════════════════════════════════
 function clearConversation() {
+  conversationId = crypto.randomUUID();
+  localStorage.setItem('ppl_conversation_id', conversationId);
   if (els.messages) {
     els.messages.innerHTML = '';
     memory = [];
@@ -874,6 +891,32 @@ function updateOnlineStatus() {
 // ═══════════════════════════════════════════════════════════════════════════
 // 18. INIT
 // ═══════════════════════════════════════════════════════════════════════════
+async function restoreConversation() {
+  try {
+    const response = await fetch('/api/chat/history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, conversationId }),
+      cache: 'no-store',
+    });
+    if (!response.ok) return;
+    const result = await response.json();
+    const messages = Array.isArray(result.messages) ? result.messages : [];
+    memory = [];
+    userMsgCount = 0;
+    aiMsgCount = 0;
+    for (const message of messages) {
+      if (!message || !['user', 'assistant'].includes(message.role) || typeof message.content !== 'string') continue;
+      memory.push({ role: message.role, content: message.content });
+      if (message.role === 'user') userMsgCount++;
+      else aiMsgCount++;
+      addMessage(message.role, message.content);
+    }
+  } catch {
+    // Guest chat remains available if history storage is temporarily offline.
+  }
+}
+
 function init() {
   // Stage cards
   document.querySelectorAll('.stage-card').forEach(card => {
@@ -915,6 +958,7 @@ function init() {
 
   // Initial empty state + stage modal
   renderEmptyState();
+  restoreConversation();
   showStageModal();
 
   // Analytics + Push
