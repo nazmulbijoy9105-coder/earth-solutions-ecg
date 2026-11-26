@@ -49,6 +49,10 @@ jobs:
           node --check scripts/import-legacy-json.js
           node --check public/frontend/chat.js
           node --check "api/neon-auth/[...path].js"
+          node --check api/chat.js
+          node --check api/chat/history.js
+          node --check api/auth/me.js
+          node --check api/health.js
           node --check public/frontend/neon-auth.js
 
       - name: Validate legacy import dry-run
