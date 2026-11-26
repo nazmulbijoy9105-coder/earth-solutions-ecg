@@ -64,7 +64,7 @@ after(async () => {
 });
 
 test('public homepage and allowlisted assets remain available', async () => {
-  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/pricing.html', '/admin.html', '/logo.jpg', '/manifest.json', '/sw.js']) {
+  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/pricing.html', '/admin.html', '/admin', '/logo.jpg', '/manifest.json', '/sw.js']) {
     const response = await fetch(`${baseUrl}${pathname}`);
     assert.equal(response.status, 200, `${pathname} should be publicly available`);
   }
@@ -101,4 +101,16 @@ test('Express API routes still reach their handlers', async () => {
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(typeof body.key, 'string');
+});
+
+
+test('production health fails closed without PostgreSQL and legacy admin login is retired', async () => {
+  const health = await fetch(`${baseUrl}/api/health`);
+  assert.equal(health.status, 503);
+  const login = await fetch(`${baseUrl}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: 'legacy-password' }),
+  });
+  assert.equal(login.status, 410);
 });
