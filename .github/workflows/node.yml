@@ -45,7 +45,9 @@ jobs:
           node --check lib/auth-proxy.cjs
           node --check lib/neon-auth.cjs
           node --check lib/db.cjs
+          node --check lib/persistence.cjs
           node --check scripts/import-legacy-json.js
+          node --check public/frontend/chat.js
           node --check "api/neon-auth/[...path].js"
           node --check public/frontend/neon-auth.js
 
