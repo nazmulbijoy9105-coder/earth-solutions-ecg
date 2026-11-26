@@ -44,3 +44,42 @@ test('Vercel chat endpoints reject invalid guest identities before opening a str
   await historyModule.default({ method: 'POST', body: { userId: 'bad', conversationId: 'bad' }, headers: {} }, historyRes);
   assert.equal(historyRes.statusCode, 400);
 });
+
+
+test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async () => {
+  const previousFetch = global.fetch;
+  const previousOrigin = process.env.ALLOWED_ORIGIN;
+  const previousBase = process.env.NEON_AUTH_BASE_URL;
+  let called = false;
+  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
+  process.env.NEON_AUTH_BASE_URL = 'https://neon.example.test/peopole_ai/auth';
+  global.fetch = async (url, options) => {
+    called = true;
+    assert.equal(String(url), 'https://neon.example.test/peopole_ai/auth/get-session');
+    assert.equal(options.headers.get('Origin'), 'https://app.example.test');
+    return new Response(JSON.stringify({ session: null }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'set-cookie': 'auth=abc; Path=/; HttpOnly; Secure' },
+    });
+  };
+  try {
+    const module = await import('../api/neon-auth/[...path].js');
+    const res = responseMock();
+    await module.default({
+      method: 'GET',
+      headers: { origin: 'https://app.example.test' },
+      url: '/api/neon-auth/get-session',
+      query: { path: ['get-session'] },
+    }, res);
+    assert.equal(called, true);
+    assert.equal(res.statusCode, 200);
+    assert.match(String(res.headers['set-cookie'] || res.headers['Set-Cookie']), /Path=\\/api\\/neon-auth/);
+    assert.equal(res.headers['cache-control'], 'no-store');
+  } finally {
+    global.fetch = previousFetch;
+    if (previousOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousOrigin;
+    if (previousBase === undefined) delete process.env.NEON_AUTH_BASE_URL;
+    else process.env.NEON_AUTH_BASE_URL = previousBase;
+  }
+});
