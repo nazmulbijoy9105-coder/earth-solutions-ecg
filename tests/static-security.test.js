@@ -85,8 +85,10 @@ test('private data and server implementation files are not served', async () => 
     '/lib/ai-core.js',
     '/package.json',
     '/package-lock.json',
-    '/vercel.json',\n    '/frontend/auth-client.js',\n    '/migrations/1789504075584_init-schema.js'
-  ];
+    '/vercel.json',
+    '/frontend/auth-client.js',
+    '/migrations/1789504075584_init-schema.js'
+  ];;
 
   for (const pathname of privatePaths) {
     const response = await fetch(`${baseUrl}${pathname}`);
