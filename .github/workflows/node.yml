@@ -40,12 +40,17 @@ jobs:
       - name: Verify migration CLI loads
         run: npx node-pg-migrate --help
 
-      - name: Check Neon Auth integration syntax
+      - name: Check Neon Auth and database integration syntax
         run: |
           node --check lib/auth-proxy.cjs
           node --check lib/neon-auth.cjs
+          node --check lib/db.cjs
+          node --check scripts/import-legacy-json.js
           node --check "api/neon-auth/[...path].js"
           node --check public/frontend/neon-auth.js
+
+      - name: Validate legacy import dry-run
+        run: node scripts/import-legacy-json.js
 
       - name: Run tests
         run: npm test
