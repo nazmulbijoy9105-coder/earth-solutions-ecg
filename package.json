@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "gen-vapid": "npx web-push generate-vapid-keys",
-    "migrate": "node-pg-migrate up --envPath .env.local --migrations-dir migrations --use-glob",
+    "migrate": "node-pg-migrate up --envPath .env.local --migrations-dir migrations",
     "test": "node --test"
   },
   "dependencies": {
