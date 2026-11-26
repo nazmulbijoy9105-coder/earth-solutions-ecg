@@ -13,11 +13,9 @@
 
 const express   = require('express');
 const path      = require('path');
-const fs        = require('fs');
-const crypto    = require('crypto');
 const webpush   = require('web-push');
 const proxyNeonAuth = require('./lib/auth-proxy.cjs');
-const { requireNeonAuth } = require('./lib/neon-auth.cjs');
+const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
 
 const app  = express();
 
@@ -203,296 +201,159 @@ app.get('/api/auth/me', requireNeonAuth, (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────
-// J. ANALYTICS ENDPOINTS (built-in, no 3rd party)
-// ─────────────────────────────────────────────────────────────────────────
-app.post('/api/analytics/pageview', (req, res) => {
-  const { path: p, referrer } = req.body;
-  if (p) logPageview(p, referrer);
-  res.json({ ok: true });
+// J. HEALTH + ANALYTICS ENDPOINTS
+app.get('/api/health', async (req, res) => {
+  if (!isDatabaseConfigured()) {
+    return res.status(503).json({ status: 'degraded', database: 'not_configured' });
+  }
+  try {
+    await databaseHealthCheck();
+    return res.json({ status: 'ok', database: 'ok' });
+  } catch {
+    return res.status(503).json({ status: 'degraded', database: 'unavailable' });
+  }
 });
-app.post('/api/analytics/event', (req, res) => {
-  const { name, meta } = req.body;
-  if (name) logEvent(name, meta);
-  res.json({ ok: true });
+
+app.post('/api/analytics/pageview', async (req, res) => {
+  const { path: pagePath, referrer, userId } = req.body || {};
+  if (!pagePath) return res.status(400).json({ error: 'path is required' });
+  try {
+    await logPageview(pagePath, referrer, userId);
+    return res.json({ ok: true });
+  } catch {
+    return res.status(503).json({ error: 'Analytics storage unavailable' });
+  }
+});
+
+app.post('/api/analytics/event', async (req, res) => {
+  const { name, meta, userId } = req.body || {};
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  try {
+    await persistence.logEvent(name, meta, { userId });
+    return res.json({ ok: true });
+  } catch {
+    return res.status(503).json({ error: 'Analytics storage unavailable' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────
 // K. PUSH NOTIFICATION ENDPOINTS
 // ─────────────────────────────────────────────────────────────────────────
-
-// Return VAPID public key to frontend
 app.get('/api/push/vapid-public-key', (req, res) => {
   res.json({ key: VAPID_PUBLIC });
 });
 
-// Save push subscription
-app.post('/api/push/subscribe', (req, res) => {
+app.post('/api/push/subscribe', async (req, res) => {
   setCORS(res, req);
-  const { subscription, userId, stage, lang } = req.body;
-  if (!subscription || !subscription.endpoint) return res.status(400).json({ error: 'Invalid subscription' });
-
-  const data = readJSON(PUSH_FILE, { subscriptions: [] });
-  const exists = data.subscriptions.find(s => s.endpoint === subscription.endpoint);
-  if (!exists) {
-    data.subscriptions.push({ subscription, userId: userId || 'anon', stage, lang, createdAt: new Date().toISOString() });
-    if (data.subscriptions.length > 5000) data.subscriptions = data.subscriptions.slice(-5000);
-    writeJSON(PUSH_FILE, data);
-    logEvent('push_subscribe', { userId, stage, lang });
+  const { subscription, userId, stage, lang } = req.body || {};
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Invalid subscription' });
   }
-  res.json({ ok: true });
-});
-
-// Unsubscribe
-app.post('/api/push/unsubscribe', (req, res) => {
-  const { endpoint } = req.body;
-  const data = readJSON(PUSH_FILE, { subscriptions: [] });
-  data.subscriptions = data.subscriptions.filter(s => s.endpoint !== endpoint);
-  writeJSON(PUSH_FILE, data);
-  res.json({ ok: true });
-});
-
-// ─────────────────────────────────────────────────────────────────────────
-// L. ADMIN AUTH MIDDLEWARE
-// ─────────────────────────────────────────────────────────────────────────
-const ADMIN_SESSION_TTL = 8 * 60 * 60 * 1000;
-const adminSessions = new Map();
-
-const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;
-const ADMIN_LOGIN_MAX_ATTEMPTS = 10;
-const adminLoginBuckets = new Map();
-
-function adminLoginRateLimit(req, res, next) {
-  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-
-  const now = Date.now();
-  let bucket = adminLoginBuckets.get(clientIp);
-
-  if (!bucket || now - bucket.windowStart >= ADMIN_LOGIN_WINDOW_MS) {
-    bucket = {
-      windowStart: now,
-      count: 0
-    };
-  }
-
-  bucket.count += 1;
-  adminLoginBuckets.set(clientIp, bucket);
-
-  if (bucket.count > ADMIN_LOGIN_MAX_ATTEMPTS) {
-    const retryAfter = Math.max(
-      1,
-      Math.ceil(
-        (ADMIN_LOGIN_WINDOW_MS - (now - bucket.windowStart)) / 1000
-      )
-    );
-
-    res.setHeader('Retry-After', String(retryAfter));
-    return res.status(429).json({
-      error: 'Too many login attempts. Please try again later.'
-    });
-  }
-
-  next();
-}
-
-function getAdminPassword() {
-  const pw = process.env.ADMIN_PASSWORD;
-
-  if (!pw || pw.length < 12) {
-    throw new Error(
-      'ADMIN_PASSWORD must be configured and contain at least 12 characters'
-    );
-  }
-
-  return pw;
-}
-
-function extractAdminBearer(req) {
-  const header = req.headers.authorization || '';
-
-  if (!header.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = header.slice(7).trim();
-
-  return token || null;
-}
-
-function adminAuth(req, res, next) {
-  const token = extractAdminBearer(req);
-
-  if (!token) {
-    return res.status(401).json({
-      error: 'Unauthorized'
-    });
-  }
-
-  const session = adminSessions.get(token);
-
-  if (!session) {
-    return res.status(401).json({
-      error: 'Invalid admin session'
-    });
-  }
-
-  if (Date.now() >= session.expiresAt) {
-    adminSessions.delete(token);
-
-    return res.status(401).json({
-      error: 'Admin session expired'
-    });
-  }
-
-  req.adminSession = session;
-
-  next();
-}
-
-app.locals.adminAuth = adminAuth;
-
-app.post('/api/admin/login', adminLoginRateLimit, (req, res) => {
-  let configuredPassword;
-
   try {
-    configuredPassword = getAdminPassword();
-  } catch (_) {
-    return res.status(503).json({
-      error: 'Admin authentication is not configured'
-    });
+    await persistence.savePushSubscription({ subscription, userId, stage, lang });
+    await logEvent('push_subscribe', { stage, lang });
+    return res.json({ ok: true });
+  } catch {
+    return res.status(503).json({ error: 'Push subscription storage unavailable' });
   }
+});
 
-  const supplied =
-    typeof req.body?.password === 'string'
-      ? req.body.password
-      : '';
-
-  const expectedBuffer =
-    Buffer.from(configuredPassword, 'utf8');
-
-  const suppliedBuffer =
-    Buffer.from(supplied, 'utf8');
-
-  const valid =
-    expectedBuffer.length === suppliedBuffer.length &&
-    crypto.timingSafeEqual(
-      expectedBuffer,
-      suppliedBuffer
-    );
-
-  if (!valid) {
-    return res.status(401).json({
-      error: 'Wrong password'
-    });
+app.post('/api/push/unsubscribe', async (req, res) => {
+  const { endpoint, userId } = req.body || {};
+  try {
+    await persistence.removePushSubscription({ endpoint, userId });
+    return res.json({ ok: true });
+  } catch {
+    return res.status(503).json({ error: 'Push subscription storage unavailable' });
   }
-
-  const token =
-    crypto.randomBytes(32).toString('base64url');
-
-  const expiresAt =
-    Date.now() + ADMIN_SESSION_TTL;
-
-  adminSessions.set(token, {
-    createdAt: Date.now(),
-    expiresAt
-  });
-
-  return res.json({
-    success: true,
-    token,
-    expiresAt
-  });
 });
-
-app.post('/api/admin/logout', adminAuth, (req, res) => {
-  const token = extractAdminBearer(req);
-
-  if (token) {
-    adminSessions.delete(token);
-  }
-
-  return res.json({
-    success: true
-  });
-});
-
-app.get('/api/admin/stats', adminAuth, (req, res) => {
-  const data = readJSON(DATA_FILE, { inquiries: [], stats: {} });
-  const STAGE_NAMES = { 1:'🌱 Foundation', 2:'🔍 Development', 3:'🎯 Strategic', 4:'🎓 Undergraduate', 5:'🔬 Masters', 6:'🏛️ Doctoral', 7:'👨‍👩‍👧 Parent' };
-  const daily = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    daily.push({ date: key.slice(5), count: data.stats.daily?.[key] || 0 });
-  }
-  const stageBreakdown = Object.entries(data.stats.byStage || {}).map(([id, count]) => ({ id, name: STAGE_NAMES[id] || `Stage ${id}`, count })).sort((a, b) => b.count - a.count);
-  const analytics = readJSON(ANALYTICS_FILE, { events: [], pageviews: {} });
-  const push = readJSON(PUSH_FILE, { subscriptions: [] });
-  res.json({
-    total:  data.stats.total || 0,
-    today:  data.stats.daily?.[new Date().toISOString().slice(0,10)] || 0,
-    totalEn: data.stats.byLang?.en || 0,
-    totalBn: data.stats.byLang?.bn || 0,
-    sources: data.stats.sources || {},
-    stageBreakdown, daily,
-    totalPageviews: Object.values(analytics.pageviews).reduce((a, b) => a + b, 0),
-    pushSubscribers: push.subscriptions.length,
-    recentCount: data.inquiries.length
-  });
-});
-
-app.get('/api/admin/inquiries', adminAuth, (req, res) => {
-  const data  = readJSON(DATA_FILE, { inquiries: [] });
-  const page  = parseInt(req.query.page)  || 1;
-  const limit = parseInt(req.query.limit) || 25;
-  let list = data.inquiries;
-  if (req.query.stage && req.query.stage !== 'all') list = list.filter(i => String(i.stage) === req.query.stage);
-  if (req.query.lang  && req.query.lang  !== 'all') list = list.filter(i => i.lang === req.query.lang);
-  if (req.query.source && req.query.source !== 'all') list = list.filter(i => i.source === req.query.source);
-  res.json({ inquiries: list.slice((page-1)*limit, page*limit), total: list.length, page, pages: Math.ceil(list.length / limit) });
-});
-
-app.get('/api/admin/analytics', adminAuth, (req, res) => {
-  const data = readJSON(ANALYTICS_FILE, { events: [], pageviews: {} });
-  res.json(data);
-});
-
-app.get('/api/admin/sessions', adminAuth, (req, res) => {
-  res.json({ activeSessions: sessions.size, ids: [...sessions.keys()].slice(0, 50) });
-});
-
-// Admin: send push notification to all subscribers
-app.post('/api/admin/push/broadcast', adminAuth, async (req, res) => {
-  const { title, body, url } = req.body;
-  if (!title || !body) return res.status(400).json({ error: 'title and body required' });
-  const data    = readJSON(PUSH_FILE, { subscriptions: [] });
-  const payload = JSON.stringify({ title, body, url: url || '/', icon: '/logo.jpg', badge: '/logo.jpg' });
-  let sent = 0, failed = 0;
-  const toRemove = [];
-  for (const sub of data.subscriptions) {
-    try {
-      await webpush.sendNotification(sub.subscription, payload);
-      sent++;
-    } catch (e) {
-      failed++;
-      if (e.statusCode === 410 || e.statusCode === 404) toRemove.push(sub.subscription.endpoint);
-    }
-  }
-  if (toRemove.length) {
-    data.subscriptions = data.subscriptions.filter(s => !toRemove.includes(s.endpoint));
-    writeJSON(PUSH_FILE, data);
-  }
-  logEvent('push_broadcast', { title, sent, failed });
-  res.json({ ok: true, sent, failed, removed: toRemove.length });
-});
-
-app.post('/api/admin/reset', adminAuth, (req, res) => {
-  writeJSON(DATA_FILE, { inquiries: [], stats: { total: 0, byStage: {}, byLang: { en: 0, bn: 0 }, daily: {}, sources: { faq: 0, ai: 0, fallback: 0 } } });
-  res.json({ success: true });
-});
-
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // ─────────────────────────────────────────────────────────────────────────
+// L. ADMIN API — Neon Auth identity + database-backed application role.
+// No password-only admin sessions or process-local admin tokens remain.
+// ─────────────────────────────────────────────────────────────────────────
+const adminOnly = [requireNeonAuth, requireAppAdmin];
+
+app.post('/api/admin/login', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(410).json({ error: 'Password-based admin login has been retired. Sign in with verified Neon Auth.' });
+});
+
+app.post('/api/admin/logout', (req, res) => {
+  return res.status(410).json({ error: 'Use Neon Auth sign-out.' });
+});
+
+app.get('/api/admin/stats', ...adminOnly, async (req, res) => {
+  try {
+    const stats = await persistence.getAdminStats();
+    const stageNames = { 1:'🌱 Foundation', 2:'🔍 Development', 3:'🎯 Strategic', 4:'🎓 Undergraduate', 5:'🔬 Masters', 6:'🏛️ Doctoral', 7:'👨‍👩‍👧 Parent' };
+    stats.stageBreakdown = stats.stageBreakdown.map(item => ({
+      ...item,
+      name: stageNames[item.id] || `Stage ${item.id}`,
+    }));
+    return res.json(stats);
+  } catch {
+    return res.status(503).json({ error: 'Admin data is unavailable' });
+  }
+});
+
+app.get('/api/admin/inquiries', ...adminOnly, async (req, res) => {
+  try {
+    const result = await persistence.listInquiries(req.query);
+    return res.json(result);
+  } catch {
+    return res.status(503).json({ error: 'Inquiry data is unavailable' });
+  }
+});
+
+app.get('/api/admin/analytics', ...adminOnly, async (req, res) => {
+  try {
+    return res.json(await persistence.getAnalytics({ limit: req.query.limit }));
+  } catch {
+    return res.status(503).json({ error: 'Analytics data is unavailable' });
+  }
+});
+
+app.get('/api/admin/sessions', ...adminOnly, async (req, res) => {
+  try {
+    return res.json({ activeSessions: await persistence.getRecentConversationCount() });
+  } catch {
+    return res.status(503).json({ error: 'Session data is unavailable' });
+  }
+});
+
+app.post('/api/admin/push/broadcast', ...adminOnly, async (req, res) => {
+  const { title, body, url } = req.body || {};
+  if (!title || !body) return res.status(400).json({ error: 'title and body required' });
+  try {
+    const subscriptions = await persistence.listPushSubscriptions();
+    const payload = JSON.stringify({ title: String(title).slice(0, 120), body: String(body).slice(0, 500), url: url || '/', icon: '/logo.jpg', badge: '/logo.jpg' });
+    let sent = 0;
+    let failed = 0;
+    const toRemove = [];
+    for (const item of subscriptions) {
+      try {
+        await webpush.sendNotification(item.subscription, payload);
+        sent++;
+      } catch (error) {
+        failed++;
+        if (error.statusCode === 410 || error.statusCode === 404) toRemove.push(item.endpoint);
+      }
+    }
+    const removed = await persistence.removePushEndpoints(toRemove);
+    await logEvent('push_broadcast', { sent, failed, removed });
+    return res.json({ ok: true, sent, failed, removed });
+  } catch {
+    return res.status(503).json({ error: 'Push broadcast storage unavailable' });
+  }
+});
+
+app.post('/api/admin/reset', ...adminOnly, (req, res) => {
+  return res.status(410).json({ error: 'Bulk reset is disabled; use an approved retention or data-deletion procedure.' });
+});
+
+app.get('/admin', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')));
+
 // N. MAIN CHAT ENDPOINT — SSE streaming
 //    Flow: FAQ match → Groq AI → Fallback
 // ─────────────────────────────────────────────────────────────────────────
