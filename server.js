@@ -107,14 +107,14 @@ async function logInquiry(input) {
 
 // Analytics is best-effort for public page loads; durable records are written
 // only when DATABASE_URL is configured. Health checks expose missing storage.
-async function logPageview(pagePath, referrer) {
+async function logPageview(pagePath, referrer, userId) {
   if (!isDatabaseConfigured()) return false;
-  await persistence.logPageview(pagePath, referrer);
+  await persistence.logPageview(pagePath, referrer, { userId });
   return true;
 }
-async function logEvent(name, meta) {
+async function logEvent(name, meta, userId) {
   if (!isDatabaseConfigured()) return false;
-  await persistence.logEvent(name, meta);
+  await persistence.logEvent(name, meta, { userId });
   return true;
 }
 
@@ -251,7 +251,7 @@ app.post('/api/push/subscribe', async (req, res) => {
   }
   try {
     await persistence.savePushSubscription({ subscription, userId, stage, lang });
-    await logEvent('push_subscribe', { stage, lang });
+    await logEvent('push_subscribe', { stage, lang }, userId);
     return res.json({ ok: true });
   } catch {
     return res.status(503).json({ error: 'Push subscription storage unavailable' });
