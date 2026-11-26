@@ -73,7 +73,7 @@ test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async 
     }, res);
     assert.equal(called, true);
     assert.equal(res.statusCode, 200);
-    assert.match(String(res.headers['set-cookie'] || res.headers['Set-Cookie']), /Path=\\/api\\/neon-auth/);
+    assert.ok(String(res.headers['set-cookie'] || res.headers['Set-Cookie']).includes('Path=/api/neon-auth'));
     assert.equal(res.headers['cache-control'], 'no-store');
   } finally {
     global.fetch = previousFetch;
