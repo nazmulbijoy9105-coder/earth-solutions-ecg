@@ -119,33 +119,8 @@ async function logEvent(name, meta, userId) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// D. SESSION MEMORY — in-memory store keyed by userId
-//    Drop-in upgrade: replace Map with db.collection('sessions') calls
-// ─────────────────────────────────────────────────────────────────────────
-const SESSION_MAX = 30;
-const SESSION_TTL = 3 * 60 * 60 * 1000;
-const sessions    = new Map();
+// D. Chat history and session state are stored in Neon PostgreSQL.
 
-function getSession(userId) {
-  if (!userId) return { messages: [], stage: null, lang: 'en' };
-  if (!sessions.has(userId)) sessions.set(userId, { messages: [], lastActive: Date.now(), stage: null, lang: 'en' });
-  const s = sessions.get(userId);
-  s.lastActive = Date.now();
-  return s;
-}
-function pushMsg(userId, role, content) {
-  if (!userId) return;
-  const s = getSession(userId);
-  s.messages.push({ role, content });
-  if (s.messages.length > SESSION_MAX) s.messages = s.messages.slice(-SESSION_MAX);
-}
-
-setInterval(() => {
-  const cutoff = Date.now() - SESSION_TTL;
-  for (const [id, s] of sessions) if (s.lastActive < cutoff) sessions.delete(id);
-}, 30 * 60 * 1000);
-
-// ─────────────────────────────────────────────────────────────────────────
 // E. SERVER-SIDE FAQ DATABASE — instant answers, zero Groq cost
 // ─────────────────────────────────────────────────────────────────────────
 // AI core (FAQs, stage prompts, fallbacks) lives in lib/ai-core.js, shared with api/chat.js
@@ -357,110 +332,176 @@ app.get('/admin', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')
 // N. MAIN CHAT ENDPOINT — SSE streaming
 //    Flow: FAQ match → Groq AI → Fallback
 // ─────────────────────────────────────────────────────────────────────────
+app.post('/api/chat/history', async (req, res) => {
+  const { userId, conversationId } = req.body || {};
+  if (!/^anon_[A-Za-z0-9_-]{16,100}$/.test(String(userId || '')) ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(conversationId || ''))) {
+    return res.status(400).json({ error: 'Invalid conversation identity' });
+  }
+  if (!isDatabaseConfigured()) return res.status(503).json({ error: 'Conversation storage is not configured' });
+  try {
+    const messages = await persistence.getConversationMessages(conversationId, userId, 50);
+    return res.setHeader('Cache-Control', 'no-store').json({ messages });
+  } catch {
+    return res.status(503).json({ error: 'Conversation history unavailable' });
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   setCORS(res, req);
-  res.setHeader('Content-Type',  'text/event-stream');
+  const body = req.body || {};
+  const { messages = [], userId, stage, conversationId, messageId } = body;
+  const lang = body.lang === 'bn' ? 'bn' : 'en';
+  const safeStage = Number.isInteger(Number(stage)) && Number(stage) >= 1 && Number(stage) <= 7 ? Number(stage) : null;
+  const safeUserId = typeof userId === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(userId) ? userId : null;
+  const validConversationId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(conversationId || ''));
+  const validMessageId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(messageId || ''));
+  const userMessages = Array.isArray(messages)
+    ? messages.filter(message => message && message.role === 'user' && typeof message.content === 'string').slice(-20)
+    : [];
+  const lastUserMsg = String(userMessages[userMessages.length - 1]?.content || '').slice(0, 4000);
+  if (!safeUserId || !validConversationId || !validMessageId || !lastUserMsg.trim()) {
+    return res.status(400).json({ error: 'A valid guest id, conversation id, message id and message are required' });
+  }
+
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  let previousMessages = [];
+  let isFirstMessage = userMessages.length === 1;
+
+  if (process.env.NODE_ENV === 'production' && !isDatabaseConfigured()) {
+    return res.status(503).json({ error: 'Persistent conversation storage is required' });
+  }
+
+  if (isDatabaseConfigured()) {
+    try {
+      const ownedConversationId = await persistence.getOrCreateConversation({
+        conversationId,
+        anonymousId: safeUserId,
+        stage: safeStage,
+        lang,
+      });
+      previousMessages = await persistence.getConversationMessages(ownedConversationId, safeUserId, 30);
+      isFirstMessage = previousMessages.length === 0;
+      await persistence.appendConversationMessage({
+        conversationId: ownedConversationId,
+        anonymousId: safeUserId,
+        role: 'user',
+        content: lastUserMsg,
+        clientMessageId: messageId,
+      });
+    } catch {
+      return res.status(503).json({ error: 'Persistent conversation storage is unavailable' });
+    }
+  }
+
+  const contextMessages = isDatabaseConfigured()
+    ? [...previousMessages, { role: 'user', content: lastUserMsg }].slice(-30)
+    : messages.filter(message => message && ['user', 'assistant'].includes(message.role) && typeof message.content === 'string')
+        .slice(-20)
+        .map(message => ({ role: message.role, content: message.content.slice(0, 4000) }));
+
+  res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
-  res.setHeader('Connection',    'keep-alive');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Conversation-Id', conversationId);
   res.flushHeaders();
 
-  const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
-  const done  = ()   => { res.write('data: [DONE]\n\n'); res.end(); };
+  const send = obj => res.write('data: ' + JSON.stringify(obj) + '\\n\\n');
+  const done = () => { res.write('data: [DONE]\\n\\n'); res.end(); };
+  let inquiryLogged = false;
 
   try {
-    const { messages = [], userId, stage, lang = 'en' } = req.body;
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-    // Merge server session memory with client-sent messages
-    const session = getSession(userId);
-    if (stage) session.stage = stage;
-    if (lang)  session.lang  = lang;
-
-    // Last user message
-    const userMsgs   = messages.filter(m => m.role === 'user');
-    const lastUserMsg = userMsgs[userMsgs.length - 1]?.content || '';
-
-    // ── 1. FAQ instant match ─────────────────────────────────────────
     const faqAnswer = matchFAQ(lastUserMsg, lang);
     if (faqAnswer) {
-      // Stream FAQ answer character-by-character for natural feel
-      if (userMsgs.length === 1) await logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
-      pushMsg(userId, 'user', lastUserMsg);
-      pushMsg(userId, 'assistant', faqAnswer);
-      const words = faqAnswer.split(' ');
-      for (const word of words) {
+      if (isFirstMessage) {
+        await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
+        inquiryLogged = true;
+      }
+      if (isDatabaseConfigured()) {
+        await persistence.appendConversationMessage({ conversationId, anonymousId: safeUserId, role: 'assistant', content: faqAnswer, provider: 'faq' });
+      }
+      for (const word of faqAnswer.split(' ')) {
         send({ choices: [{ delta: { content: word + ' ' } }] });
-        await new Promise(r => setTimeout(r, 18));
+        await new Promise(resolve => setTimeout(resolve, 18));
       }
       return done();
     }
 
-    // ── 2. Groq AI ───────────────────────────────────────────────────
-    if (!process.env.GROQ_API_KEY) throw new Error('GROQ_API_KEY not set');
-
-    if (userMsgs.length === 1) await logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
-    pushMsg(userId, 'user', lastUserMsg);
-
-    // Combine server session history + incoming messages (deduplicated)
-    const contextMessages = [...session.messages.slice(0, -1), ...messages].slice(-30);
+    if (!process.env.GROQ_API_KEY) throw new Error('AI provider is not configured');
+    if (isFirstMessage) {
+      await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
+      inquiryLogged = true;
+    }
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method:  'POST',
-      headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.GROQ_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:       'openai/gpt-oss-120b',
-        messages:    [{ role: 'system', content: buildSystemPrompt(stage, lang) }, ...contextMessages],
-        stream:      true,
+        model: 'openai/gpt-oss-120b',
+        messages: [{ role: 'system', content: buildSystemPrompt(safeStage, lang) }, ...contextMessages],
+        stream: true,
         temperature: 0.65,
-        max_tokens:  4096,
-        top_p:       0.9
-      })
+        max_tokens: 4096,
+        top_p: 0.9,
+      }),
     });
-
-    if (!groqRes.ok) throw new Error(`Groq ${groqRes.status}: ${await groqRes.text()}`);
+    if (!groqRes.ok) throw new Error('AI provider returned HTTP ' + groqRes.status);
 
     let fullReply = '';
-    let sseBuf = '';
-    const reader  = groqRes.body.getReader();
+    let sseBuffer = '';
+    const reader = groqRes.body.getReader();
     const decoder = new TextDecoder();
-
     while (true) {
-      const { done: d, value } = await reader.read();
-      if (d) break;
-      const chunk = decoder.decode(value, { stream: true });
-      sseBuf += chunk;
-      const sseLines = sseBuf.split('\n');
-      sseBuf = sseLines.pop();
-      for (const line of sseLines) {
+      const { done: streamDone, value } = await reader.read();
+      if (streamDone) break;
+      sseBuffer += decoder.decode(value, { stream: true });
+      const lines = sseBuffer.split('\\n');
+      sseBuffer = lines.pop();
+      for (const line of lines) {
         if (!line.startsWith('data:')) continue;
         const raw = line.slice(5).trim();
         if (!raw || raw === '[DONE]') continue;
         try {
           const parsed = JSON.parse(raw);
-          const token  = parsed.choices?.[0]?.delta?.content || '';
-          fullReply   += token;
-          res.write(`data: ${raw}\n\n`);
+          const token = parsed.choices?.[0]?.delta?.content || '';
+          fullReply += token;
+          res.write('data: ' + raw + '\\n\\n');
         } catch {}
       }
     }
-
-    if (fullReply) pushMsg(userId, 'assistant', fullReply);
+    if (fullReply && isDatabaseConfigured()) {
+      await persistence.appendConversationMessage({
+        conversationId,
+        anonymousId: safeUserId,
+        role: 'assistant',
+        content: fullReply,
+        provider: 'groq',
+        model: 'openai/gpt-oss-120b',
+      });
+    }
     return done();
-
-  } catch (err) {
-    console.error('[Peopole AI]', err.message);
-
-    // ── 3. Fallback ──────────────────────────────────────────────────
-    const { lang = 'en', userId, stage, messages = [] } = req.body;
-    const userMsgs = messages.filter(m => m.role === 'user');
-    if (userMsgs.length === 1) {
-      await logInquiry({ userId, stage, lang, firstMessage: userMsgs[0]?.content, ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, source: 'fallback' });
+  } catch (error) {
+    process.stderr.write('[Peopole AI] request failed: ' + String(error.message || 'unknown error') + '\\n');
+    if (isFirstMessage && !inquiryLogged) {
+      try {
+        await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'fallback' });
+      } catch {}
     }
     const fallbackText = getFallback(lang);
-    const words = fallbackText.split(' ');
-    for (const word of words) {
+    if (isDatabaseConfigured()) {
+      try {
+        await persistence.appendConversationMessage({
+          conversationId,
+          anonymousId: safeUserId,
+          role: 'assistant',
+          content: fallbackText,
+          provider: 'fallback',
+        });
+      } catch {}
+    }
+    for (const word of fallbackText.split(' ')) {
       send({ choices: [{ delta: { content: word + ' ' } }] });
-      await new Promise(r => setTimeout(r, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     }
     return done();
   }
