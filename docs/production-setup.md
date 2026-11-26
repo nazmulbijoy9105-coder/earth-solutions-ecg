@@ -90,3 +90,16 @@ This branch is a rehearsal/data-preservation branch, **not** a production branch
 The source JSON stores were removed from the remediation branch after their metadata was preserved in the private staging branch. Their historical Git commits may still contain the old password hashes; deleting current files does not erase repository history. Treat any real legacy passwords as exposed and require password reset. No Git history rewrite has been performed.
 
 To import from a separately secured local backup, set `LEGACY_DATA_DIR` to the directory containing the four JSON files, run the dry-run first, then review the report. Only run with `--apply` and `CONFIRM_LEGACY_IMPORT=1` against the intended non-production database after checking that the same records are not already present.
+
+
+## Legacy account claiming
+
+After Neon Auth registration is enabled, an authenticated user can explicitly request a legacy account claim from the account dialog. The server uses only the email address in the verified Neon Auth token; it does not accept a client-supplied email. The claim:
+- links at most one legacy record to one verified Neon Auth identity;
+- creates an application profile with role `user` only;
+- preserves a legacy `admin` label for audit but never converts it to admin privileges;
+- keeps legacy records with status `pending` suspended;
+- records the claim in `audit_events`;
+- rejects records already linked to another identity.
+
+Admin promotion requires a separate, reviewed action after identity and business authorization checks.
