@@ -59,6 +59,13 @@ module.exports = async function handler(req, res) {
   let isFirstMessage = safeMessages.length === 1;
   if (database.isDatabaseConfigured()) {
     try {
+      const rateLimit = await persistence.consumeChatRateLimit({ userId, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress });
+      if (!rateLimit.allowed) {
+        res.statusCode = 429;
+        res.setHeader('Retry-After', String(rateLimit.retryAfter));
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ error: 'Too many chat requests. Please wait before trying again.' }));
+      }
       const ownedId = await persistence.getOrCreateConversation({
         conversationId,
         anonymousId: userId,
