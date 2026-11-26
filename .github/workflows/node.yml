@@ -70,6 +70,7 @@ jobs:
         run: |
           node --check lib/auth-proxy.cjs
           node --check lib/neon-auth.cjs
+          node --check lib/legacy-accounts.cjs
           node --check lib/db.cjs
           node --check lib/persistence.cjs
           node --check scripts/import-legacy-json.js
@@ -78,6 +79,7 @@ jobs:
           node --check api/chat.js
           node --check api/chat/history.js
           node --check api/auth/me.js
+          node --check api/auth/claim-legacy.js
           node --check api/health.js
           node --check public/frontend/neon-auth.js
 
