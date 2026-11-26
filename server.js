@@ -384,7 +384,7 @@ app.post('/api/chat', async (req, res) => {
     const faqAnswer = matchFAQ(lastUserMsg, lang);
     if (faqAnswer) {
       // Stream FAQ answer character-by-character for natural feel
-      if (userMsgs.length === 1) logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
+      if (userMsgs.length === 1) await logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
       pushMsg(userId, 'user', lastUserMsg);
       pushMsg(userId, 'assistant', faqAnswer);
       const words = faqAnswer.split(' ');
@@ -398,7 +398,7 @@ app.post('/api/chat', async (req, res) => {
     // ── 2. Groq AI ───────────────────────────────────────────────────
     if (!process.env.GROQ_API_KEY) throw new Error('GROQ_API_KEY not set');
 
-    if (userMsgs.length === 1) logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
+    if (userMsgs.length === 1) await logInquiry({ userId, stage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
     pushMsg(userId, 'user', lastUserMsg);
 
     // Combine server session history + incoming messages (deduplicated)
@@ -454,7 +454,7 @@ app.post('/api/chat', async (req, res) => {
     const { lang = 'en', userId, stage, messages = [] } = req.body;
     const userMsgs = messages.filter(m => m.role === 'user');
     if (userMsgs.length === 1) {
-      logInquiry({ userId, stage, lang, firstMessage: userMsgs[0]?.content, ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, source: 'fallback' });
+      await logInquiry({ userId, stage, lang, firstMessage: userMsgs[0]?.content, ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, source: 'fallback' });
     }
     const fallbackText = getFallback(lang);
     const words = fallbackText.split(' ');
@@ -470,7 +470,7 @@ app.post('/api/chat', async (req, res) => {
 // O. SPA CATCH-ALL
 // ─────────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
-  logPageview('/', req.headers.referer || '');
+  logPageview('/', req.headers.referer || '').catch(() => {});
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
