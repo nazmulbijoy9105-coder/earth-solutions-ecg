@@ -197,7 +197,6 @@ const { SERVER_FAQS, matchFAQ, buildSystemPrompt, FALLBACKS, getFallback } = req
 // metadata. Never let express.static serve those paths.
 const PRIVATE_STATIC_PATHS = [
   '/data',
-  '/api',
   '/lib',
   '/migrations',
   '/node_modules',
@@ -207,6 +206,7 @@ const PRIVATE_STATIC_PATHS = [
 const PRIVATE_STATIC_FILES = new Set([
   '/server.js',
   '/user-routes.js',
+  '/api/chat.js',
   '/package.json',
   '/package-lock.json',
   '/vercel.json',
