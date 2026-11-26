@@ -1,6 +1,6 @@
-import database from '../lib/db.cjs';
+const database = require('../lib/db.cjs');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!database.isDatabaseConfigured()) {
     res.statusCode = 503;
