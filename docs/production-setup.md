@@ -134,3 +134,8 @@ The transfer uses one target transaction and is idempotent by legacy ID, analyti
 ## Frontend SDK packaging note
 
 The account UI currently loads a pinned `@neon/auth@0.8.2` browser module from esm.sh. This keeps the initial integration lightweight, but the SDK is not yet part of the npm lockfile or the site's own build artifact. Before production release, bundle or vendor the exact reviewed SDK version and add a restrictive Content Security Policy; do not treat the current CDN-loaded UI as final supply-chain hardening.
+
+
+## Authorization and RLS release blocker
+
+The current migration set defines ownership columns and the application performs server-side ownership checks for guest conversations, but it does **not** yet enable PostgreSQL row-level security policies or prove a least-privilege runtime role. Do not expose the database URL to the browser or Neon Data API. Before production, create a non-owner runtime role, define and test RLS policies for user-owned records, and verify that direct cross-user SQL access is denied. Admin access must remain fail-closed until the database-backed role review is complete.
