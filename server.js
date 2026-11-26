@@ -191,64 +191,23 @@ setInterval(() => {
 const { SERVER_FAQS, matchFAQ, buildSystemPrompt, FALLBACKS, getFallback } = require('./lib/ai-core');
 
 // ─────────────────────────────────────────────────────────────────────────
-// H. STATIC FILES
-// ─────────────────────────────────────────────────────────────────────────
-// The project root contains server code, private JSON stores and deployment
-// metadata. Never let express.static serve those paths.
-const PRIVATE_STATIC_PATHS = [
-  '/data',
-  '/lib',
-  '/migrations',
-  '/node_modules',
-  '/.git',
-  '/.github'
-];
-const PRIVATE_STATIC_FILES = new Set([
-  '/server.js',
-  '/user-routes.js',
-  '/api/chat.js',
-  '/package.json',
-  '/package-lock.json',
-  '/vercel.json',
-  '/.env',
-  '/.env.local',
-  '/.env.production'
-]);
+// H. STATIC FILES — explicit public asset boundary
+// Only files committed under /public are web-accessible. Server code, data,
+// migrations, dependency manifests and environment files stay outside it.
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
-app.use((req, res, next) => {
-  let requestedPath;
-  try {
-    requestedPath = decodeURIComponent(req.path).replace(/\\/g, '/');
-    // Reject residual escapes to prevent a second decoder (e.g. serve-static)
-    // from turning a double-encoded private path into a protected path.
-    if (requestedPath.includes('%')) return res.sendStatus(400);
-  } catch {
-    return res.sendStatus(400);
-  }
-
-  const normalizedPath = path.posix.normalize('/' + requestedPath.replace(/^\/+/, ''));
-  const isPrivateDirectory = PRIVATE_STATIC_PATHS.some(
-    privatePath => normalizedPath === privatePath || normalizedPath.startsWith(privatePath + '/')
-  );
-
-  if (isPrivateDirectory || PRIVATE_STATIC_FILES.has(normalizedPath)) {
-    return res.sendStatus(404);
-  }
-
-  return next();
-});
-
-app.use(express.static(path.join(__dirname), {
+app.use(express.static(PUBLIC_DIR, {
   index: false,
+  dotfiles: 'deny',
+  fallthrough: true,
   setHeaders(res, filePath) {
-    if (filePath.endsWith('sw.js')) {
+    if (path.basename(filePath) === 'sw.js') {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Service-Worker-Allowed', '/');
     }
   }
 }));
 
-// ─────────────────────────────────────────────────────────────────────────
 // I. CORS + OPTIONS
 // ─────────────────────────────────────────────────────────────────────────
 function setCORS(res, req) {
@@ -677,9 +636,9 @@ app.post('/api/chat', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 // O. SPA CATCH-ALL
 // ─────────────────────────────────────────────────────────────────────────
-app.get('*', (req, res) => {
-  logPageview(req.path, req.headers.referer || '');
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/', (req, res) => {
+  logPageview('/', req.headers.referer || '');
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
 app.listen(PORT, () => {
