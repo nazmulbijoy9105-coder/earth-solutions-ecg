@@ -52,10 +52,11 @@ async function main() {
       return;
     }
 
-    await target.query('BEGIN');
+    const targetClient = await target.connect();
     try {
+      await targetClient.query('BEGIN');
       for (const row of accounts.rows) {
-        await target.query(
+        await targetClient.query(
           `INSERT INTO legacy_account_imports
             (legacy_id, display_name, email, legacy_role_label, legacy_status_label,
              legacy_created_at, record_fingerprint, migration_status)
@@ -95,10 +96,12 @@ async function main() {
            row.stage,row.lang,row.created_at,row.last_seen_at]
         );
       }
-      await target.query('COMMIT');
+      await targetClient.query('COMMIT');
     } catch (error) {
-      await target.query('ROLLBACK');
+      try { await targetClient.query('ROLLBACK'); } catch {}
       throw error;
+    } finally {
+      targetClient.release();
     }
 
     process.stdout.write(JSON.stringify({ mode: 'applied', counts }, null, 2) + '\n');
