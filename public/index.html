@@ -582,6 +582,7 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span id="pricingBtnLabel">Pricing</span>
         </button>
+        <button class="account-btn" id="accountBtn" type="button">Sign in</button>
         <button class="lang-btn" id="langBtn" title="Switch Language">বাংলা</button>
         <button class="icon-btn" id="clearBtn" title="Clear conversation">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -719,8 +720,52 @@
   </div>
 </div>
 
+<!-- ═══════════ ACCOUNT DIALOG ═══════════ -->
+<dialog class="auth-dialog" id="authDialog" aria-labelledby="authTitle">
+  <div class="auth-dialog-inner">
+    <div class="auth-dialog-heading">
+      <div>
+        <h2 id="authTitle">Your Peopole AI account</h2>
+        <p>Optional account access. Guest chat remains available.</p>
+      </div>
+      <button class="auth-close" id="authClose" type="button" aria-label="Close account dialog">×</button>
+    </div>
+    <form id="authForm" novalidate>
+      <div id="authFormFields">
+        <label class="auth-field" for="authName">
+          <span>Full name</span>
+          <input id="authName" name="name" autocomplete="name" maxlength="120" />
+        </label>
+        <label class="auth-field" for="authEmail">
+          <span>Email address</span>
+          <input id="authEmail" name="email" type="email" autocomplete="email" required maxlength="254" />
+        </label>
+        <label class="auth-field" for="authPassword">
+          <span>Password</span>
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" required />
+        </label>
+        <label class="auth-field" for="authOtp">
+          <span>Email verification code</span>
+          <input id="authOtp" name="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="12" />
+        </label>
+        <div class="auth-actions">
+          <button class="auth-primary" id="authSubmit" type="submit">Sign in</button>
+          <button class="auth-primary" id="authVerify" type="button" hidden>Verify email</button>
+          <button class="auth-secondary" id="authResend" type="button" hidden>Resend code</button>
+          <button class="auth-secondary" id="authSignup" type="button" hidden>Create account</button>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <button class="auth-secondary" id="authSignOut" type="button" hidden>Sign out</button>
+      </div>
+      <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</dialog>
+
 <script src="/frontend/homepage.js"></script>
 <script src="/frontend/chat.js"></script>
 <script src="/frontend/chat-pdf.js"></script>
+<script type="module" src="/frontend/neon-auth.js"></script>
 </body>
 </html>
