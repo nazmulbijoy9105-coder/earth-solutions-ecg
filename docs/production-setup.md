@@ -103,3 +103,29 @@ After Neon Auth registration is enabled, an authenticated user can explicitly re
 - rejects records already linked to another identity.
 
 Admin promotion requires a separate, reviewed action after identity and business authorization checks.
+
+
+## Ordered migration and staging transfer commands
+
+On a fresh **non-production** Neon branch, place that branch's connection string in a local `.env.local` file (never commit it), then run:
+
+```bash
+npm ci
+npm run migrate
+```
+
+The CI workflow independently executes all five migration files against a clean PostgreSQL 17 service database and verifies the 13 required tables. Before running the migration chain against any Neon branch, confirm that the branch is disposable and that the migration history is empty.
+
+After the target branch has the complete schema, transfer the sanitized metadata from the rehearsal branch:
+
+```bash
+LEGACY_SOURCE_DATABASE_URL='(rehearsal branch connection string)' DATABASE_URL='(target branch connection string)' node scripts/transfer-staging-metadata.js
+```
+
+Review the dry-run counts. Only after approval, run:
+
+```bash
+LEGACY_SOURCE_DATABASE_URL='(rehearsal branch connection string)' DATABASE_URL='(target branch connection string)' CONFIRM_LEGACY_TRANSFER=1 node scripts/transfer-staging-metadata.js --apply
+```
+
+The transfer uses one target transaction and is idempotent by legacy ID, analytics fingerprint and push endpoint. It does not transfer passwords, linked Auth identities or admin privileges.
