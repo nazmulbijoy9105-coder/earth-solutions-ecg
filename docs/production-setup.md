@@ -139,3 +139,8 @@ The account UI currently loads a pinned `@neon/auth@0.8.2` browser module from e
 ## Authorization and RLS release blocker
 
 The current migration set defines ownership columns and the application performs server-side ownership checks for guest conversations, but it does **not** yet enable PostgreSQL row-level security policies or prove a least-privilege runtime role. Do not expose the database URL to the browser or Neon Data API. Before production, create a non-owner runtime role, define and test RLS policies for user-owned records, and verify that direct cross-user SQL access is denied. Admin access must remain fail-closed until the database-backed role review is complete.
+
+
+## Chat API abuse controls
+
+The chat APIs now use PostgreSQL-backed fixed-window buckets keyed by SHA-256 hashes of the guest ID and, when available, the client IP. The initial limits are 30 requests per guest ID and 120 requests per IP per 10-minute window. The raw IP is not stored in the rate-limit table. This is a baseline control, not a replacement for WAF-level protection, account-based quotas, monitoring, or a scheduled global cleanup of expired rate-limit rows.
