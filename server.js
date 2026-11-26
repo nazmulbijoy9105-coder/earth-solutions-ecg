@@ -16,6 +16,7 @@ const path      = require('path');
 const webpush   = require('web-push');
 const proxyNeonAuth = require('./lib/auth-proxy.cjs');
 const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
+const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
 
@@ -173,6 +174,22 @@ app.all('/api/neon-auth/*', (req, res) => proxyNeonAuth(req, res, req.params[0])
 app.get('/api/auth/me', requireNeonAuth, (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json({ user: req.auth });
+});
+
+app.post('/api/auth/claim-legacy', requireNeonAuth, async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (!req.auth.email || req.auth.emailVerified !== true) {
+    return res.status(403).json({ error: 'A verified email address is required' });
+  }
+  try {
+    const result = await claimLegacyAccount({ authUserId: req.auth.id, verifiedEmail: req.auth.email });
+    if (result.status === 'no_legacy_record') return res.status(404).json(result);
+    if (result.status === 'claim_rejected') return res.status(403).json(result);
+    if (result.status === 'already_linked_to_another_identity') return res.status(409).json(result);
+    return res.json(result);
+  } catch {
+    return res.status(503).json({ error: 'Account claim service unavailable' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────
