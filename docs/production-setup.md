@@ -67,3 +67,26 @@ The migration flow must:
 - Do not enable sign-up while the Neon Auth provider is still the shared development sender.
 - Do not treat a valid Neon Auth identity as an application administrator. App roles must come from `app_user_profiles` and be checked server-side.
 - Do not enable payment fulfillment until bKash/Nagad merchant credentials, callback verification, idempotency, and reconciliation tests are complete.
+
+
+## Staging database rehearsal (2026-11-27)
+
+A separate, non-default Neon branch named `production-readiness-staging-2026-11-27` was created for schema rehearsal. Its branch ID is `br-summer-mode-bi9r3gts`. The new application tables were created there, and the legacy metadata import was checked:
+
+| Record type | Imported to staging branch |
+|---|---:|
+| Legacy account metadata | 4 |
+| Analytics events | 4 |
+| Inquiries | 0 |
+| Push subscriptions | 0 |
+| Linked Neon Auth profiles | 0 |
+| Legacy password hashes | 0 |
+| Admin privileges granted | 0 |
+
+The four legacy account records remain in `legacy_account_imports` with `review_required` status. Their old role labels are preserved as labels only. No password hashes were copied and no Neon Auth account was created or linked.
+
+This branch is a rehearsal/data-preservation branch, **not** a production branch and **not** a completed `node-pg-migrate` execution. The equivalent DDL was tested on disposable Neon migration branches and the durable staging schema was then created separately. The default Neon branch has not received these application tables. Run the actual ordered migration chain against a fresh disposable branch before applying it to the default branch.
+
+The source JSON stores were removed from the remediation branch after their metadata was preserved in the private staging branch. Their historical Git commits may still contain the old password hashes; deleting current files does not erase repository history. Treat any real legacy passwords as exposed and require password reset. No Git history rewrite has been performed.
+
+To import from a separately secured local backup, set `LEGACY_DATA_DIR` to the directory containing the four JSON files, run the dry-run first, then review the report. Only run with `--apply` and `CONFIRM_LEGACY_IMPORT=1` against the intended non-production database after checking that the same records are not already present.
