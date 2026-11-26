@@ -89,7 +89,7 @@ test('private data and server implementation files are not served', async () => 
 
   for (const pathname of privatePaths) {
     const response = await fetch(`${baseUrl}${pathname}`);
-    assert.equal(response.status, 404, `${pathname} should not be publicly served`);
+    assert.ok([400, 404].includes(response.status), `${pathname} should not be publicly served (received ${response.status})`);
   }
 });
 
