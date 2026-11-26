@@ -1,7 +1,7 @@
-import neonAuth from '../../lib/neon-auth.cjs';
-import legacyAccounts from '../../lib/legacy-accounts.cjs';
+const neonAuth = require('../../lib/neon-auth.cjs');
+const legacyAccounts = require('../../lib/legacy-accounts.cjs');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     res.statusCode = 405;
