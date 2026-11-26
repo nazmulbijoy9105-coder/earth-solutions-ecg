@@ -82,9 +82,7 @@ async function refreshSession() {
 
 try {
   const { createAuthClient } = await import('https://esm.sh/@neon/auth@0.8.2?bundle');
-  authClient = createAuthClient(new URL('/api/neon-auth', window.location.origin).toString(), {
-    fetchOptions: { credentials: 'include' },
-  });
+  authClient = createAuthClient(new URL('/api/neon-auth', window.location.origin).toString());
 
   try { await refreshSession(); } catch { showGuest(); }
 } catch {
