@@ -515,8 +515,16 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`✅  Peopole AI v8.0 running → http://localhost:${PORT}`);
-  console.log(`🔐  Admin panel → http://localhost:${PORT}/admin`);
-console.log(`📢  Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? '⚠ VAPID keys not set' : '✓ Configured'}`);
+const httpServer = app.listen(PORT, () => {
+  console.log(`Peopole AI v8.0 listening on port ${PORT}`);
+  console.log(`Admin portal: /admin (disabled pending Neon Auth role migration)`);
+  console.log(`Push notifications: ${VAPID_PUBLIC === 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY' ? 'not configured' : 'configured'}`);
 });
+
+function shutdown() {
+  httpServer.close(async () => {
+    try { await closePool(); } catch {}
+  });
+}
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);
