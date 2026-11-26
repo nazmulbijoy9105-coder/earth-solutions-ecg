@@ -129,3 +129,8 @@ LEGACY_SOURCE_DATABASE_URL='(rehearsal branch connection string)' DATABASE_URL='
 ```
 
 The transfer uses one target transaction and is idempotent by legacy ID, analytics fingerprint and push endpoint. It does not transfer passwords, linked Auth identities or admin privileges.
+
+
+## Frontend SDK packaging note
+
+The account UI currently loads a pinned `@neon/auth@0.8.2` browser module from esm.sh. This keeps the initial integration lightweight, but the SDK is not yet part of the npm lockfile or the site's own build artifact. Before production release, bundle or vendor the exact reviewed SDK version and add a restrictive Content Security Policy; do not treat the current CDN-loaded UI as final supply-chain hardening.
