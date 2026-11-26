@@ -219,5 +219,7 @@ signOutButton.addEventListener('click', async () => {
 
 if (!AUTH_SIGNUP_ENABLED) {
   signupButton.hidden = true;
-  setStatus('New registration is paused until production email delivery and legacy account claims are verified.');
+  if (authClient && mode !== 'signed-in') {
+    setStatus('New registration is paused until production email delivery and legacy account claims are verified.');
+  }
 }
