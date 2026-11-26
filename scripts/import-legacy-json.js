@@ -8,7 +8,11 @@ const crypto = require('node:crypto');
 const { withTransaction, closePool, isDatabaseConfigured } = require('../lib/db.cjs');
 
 const root = path.resolve(__dirname, '..');
-const read = name => JSON.parse(fs.readFileSync(path.join(root, 'data', name), 'utf8'));
+const dataDir = process.env.LEGACY_DATA_DIR || path.join(root, 'data');
+const read = (name, fallback) => {
+  const file = path.join(dataDir, name);
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : fallback;
+};
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
 const args = new Set(process.argv.slice(2));
 const apply = args.has('--apply');
@@ -34,11 +38,11 @@ function safePath(value) {
 }
 
 function loadData() {
-  const users = read('users.json').users || [];
-  const inquiries = read('inquiries.json').inquiries || [];
-  const analytics = read('analytics.json');
+  const users = read('users.json', { users: [] }).users || [];
+  const inquiries = read('inquiries.json', { inquiries: [] }).inquiries || [];
+  const analytics = read('analytics.json', { events: [] });
   const events = analytics.events || [];
-  const subscriptions = read('push_subscriptions.json').subscriptions || [];
+  const subscriptions = read('push_subscriptions.json', { subscriptions: [] }).subscriptions || [];
 
   const seenEmails = new Set();
   for (const user of users) {
@@ -68,6 +72,7 @@ function loadData() {
 async function main() {
   const data = loadData();
   const counts = {
+    sourceDirectory: dataDir,
     legacyAccounts: data.users.length,
     inquiries: data.inquiries.length,
     analyticsEvents: data.events.length,
