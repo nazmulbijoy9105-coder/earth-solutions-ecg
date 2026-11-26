@@ -1,9 +1,7 @@
 // Vercel chat function — uses the same PostgreSQL repositories as Express.
-import core from '../lib/ai-core.js';
-import persistence from '../lib/persistence.cjs';
-import database from '../lib/db.cjs';
-
-const { buildSystemPrompt, matchFAQ, getFallback } = core;
+const { buildSystemPrompt, matchFAQ, getFallback } = require('../lib/ai-core.js');
+const persistence = require('../lib/persistence.cjs');
+const database = require('../lib/db.cjs');
 
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -13,7 +11,7 @@ function validGuestId(value) {
   return typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const allowedOrigin = process.env.ALLOWED_ORIGIN;
   if (allowedOrigin && req.headers.origin === allowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
