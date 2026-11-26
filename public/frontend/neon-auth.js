@@ -15,6 +15,7 @@ const submitButton = document.getElementById('authSubmit');
 const otpButton = document.getElementById('authVerify');
 const resendButton = document.getElementById('authResend');
 const signOutButton = document.getElementById('authSignOut');
+const claimButton = document.getElementById('authClaim');
 const closeButton = document.getElementById('authClose');
 const signupButton = document.getElementById('authSignup');
 const authFormFields = document.getElementById('authFormFields');
@@ -22,6 +23,7 @@ const authFormFields = document.getElementById('authFormFields');
 let authClient = null;
 let mode = 'signin';
 let pendingEmail = '';
+let currentToken = null;
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -40,6 +42,7 @@ function setMode(nextMode) {
   otpButton.hidden = !verifying;
   resendButton.hidden = !verifying;
   signOutButton.hidden = mode !== 'signed-in';
+  claimButton.hidden = mode !== 'signed-in';
   signupButton.hidden = !AUTH_SIGNUP_ENABLED || verifying || mode === 'signed-in';
   submitButton.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
   setStatus('');
@@ -54,6 +57,7 @@ function showSignedIn(user) {
 }
 
 function showGuest() {
+  currentToken = null;
   setMode('signin');
   accountButton.textContent = 'Sign in';
   accountButton.setAttribute('aria-label', 'Sign in to your account');
@@ -69,6 +73,7 @@ async function refreshSession() {
 
   const token = data.session.token;
   if (!token) throw new Error('No verifiable session token was returned');
+  currentToken = token;
   const response = await fetch('/api/auth/me', {
     headers: { Authorization: 'Bearer ' + token },
     credentials: 'same-origin',
@@ -164,6 +169,36 @@ resendButton.addEventListener('click', async () => {
     setStatus(error.message || 'Could not resend the code.', true);
   } finally {
     resendButton.disabled = false;
+  }
+});
+
+claimButton.addEventListener('click', async () => {
+  if (!currentToken) return setStatus('Please sign in again before claiming an account.', true);
+  claimButton.disabled = true;
+  try {
+    const response = await fetch('/api/auth/claim-legacy', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + currentToken },
+      cache: 'no-store',
+    });
+    const result = await response.json().catch(() => ({}));
+    if (response.status === 404 || result.status === 'no_legacy_record') {
+      setStatus('No legacy account matches this verified email address. Contact support if you believe this is an error.');
+    } else if (response.status === 409) {
+      setStatus('This legacy account is already linked to another identity. Contact support.', true);
+    } else if (response.status === 403) {
+      setStatus('This legacy account is not eligible for automatic claiming. Contact support.', true);
+    } else if (!response.ok) {
+      throw new Error(result.error || 'Account claim failed');
+    } else if (result.accountStatus === 'suspended') {
+      setStatus('Account linked, but the legacy record was pending. Access remains suspended pending review.');
+    } else {
+      setStatus('Legacy account linked. Application role is User; any former admin label requires separate approval.');
+    }
+  } catch (error) {
+    setStatus(error.message || 'Account claim service is unavailable.', true);
+  } finally {
+    claimButton.disabled = false;
   }
 });
 
