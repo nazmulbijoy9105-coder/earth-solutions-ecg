@@ -12,6 +12,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: peopole_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d peopole_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -39,6 +53,18 @@ jobs:
 
       - name: Verify migration CLI loads
         run: npx node-pg-migrate --help
+
+      - name: Execute complete migration chain on clean PostgreSQL
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE SCHEMA neon_auth'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE neon_auth."user" (id uuid PRIMARY KEY)'
+          npx node-pg-migrate up --database-url-var DATABASE_URL --migrations-dir migrations --schema public --use-glob
+          migration_count=$(psql "$DATABASE_URL" -Atc 'SELECT count(*) FROM pgmigrations')
+          test "$migration_count" -eq 5
+          required_count=$(psql "$DATABASE_URL" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ANY (ARRAY['app_user_profiles','legacy_account_imports','chat_conversations','chat_messages','payment_orders','payment_events','immigration_sources','immigration_source_versions','immigration_source_reviews','audit_events','app_inquiries','app_analytics_events','app_push_subscriptions'])")
+          test "$required_count" -eq 13
 
       - name: Check Neon Auth and database integration syntax
         run: |
