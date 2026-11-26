@@ -64,7 +64,7 @@ after(async () => {
 });
 
 test('public homepage and allowlisted assets remain available', async () => {
-  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/pricing.html', '/admin.html', '/logo.jpg', '/manifest.json', '/sw.js']) {
+  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/pricing.html', '/admin.html', '/logo.jpg', '/manifest.json', '/sw.js']) {
     const response = await fetch(`${baseUrl}${pathname}`);
     assert.equal(response.status, 200, `${pathname} should be publicly available`);
   }
