@@ -223,7 +223,7 @@ app.use((req, res, next) => {
     return res.sendStatus(400);
   }
 
-  const normalizedPath = path.posix.normalize('/' + requestedPath.replace(/^\\/+/, ''));
+  const normalizedPath = path.posix.normalize('/' + requestedPath.replace(/^\/+/, ''));
   const isPrivateDirectory = PRIVATE_STATIC_PATHS.some(
     privatePath => normalizedPath === privatePath || normalizedPath.startsWith(privatePath + '/')
   );
