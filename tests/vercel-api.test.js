@@ -83,3 +83,11 @@ test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async 
     else process.env.NEON_AUTH_BASE_URL = previousBase;
   }
 });
+
+
+test('legacy account claim endpoint requires a verified Neon bearer token', async () => {
+  const module = await import('../api/auth/claim-legacy.js');
+  const res = responseMock();
+  await module.default({ method: 'POST', headers: {}, body: {} }, res);
+  assert.equal(res.statusCode, 401);
+});
