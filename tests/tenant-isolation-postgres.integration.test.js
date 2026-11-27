@@ -17,15 +17,16 @@ test('forced RLS prevents one guest from reading or writing another guest conver
   const authB = randomUUID();
   const accountConversationA = randomUUID();
   const accountConversationB = randomUUID();
+  const quotaMessageIds = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
   const rateKeyA = createHash('sha256').update('guest:' + guestA).digest('hex');
   const rateKeyB = createHash('sha256').update('guest:' + guestB).digest('hex');
   try {
     await client.connect();
     const role = await client.query(
       `SELECT rolname, rolcanlogin, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole
-       FROM pg_roles WHERE rolname IN ('earth_app_runtime', 'earth_app_admin') ORDER BY rolname`
+       FROM pg_roles WHERE rolname IN ('earth_app_owner', 'earth_app_runtime', 'earth_app_admin') ORDER BY rolname`
     );
-    assert.equal(role.rowCount, 2, 'both dedicated database group roles must exist');
+    assert.equal(role.rowCount, 3, 'owner, runtime and admin group roles must exist');
     for (const row of role.rows) {
       assert.equal(row.rolcanlogin, false, row.rolname + ' must not be a login');
       assert.equal(row.rolsuper, false, row.rolname + ' must not be superuser');
@@ -33,14 +34,38 @@ test('forced RLS prevents one guest from reading or writing another guest conver
       assert.equal(row.rolcreatedb, false, row.rolname + ' must not create databases');
       assert.equal(row.rolcreaterole, false, row.rolname + ' must not create roles');
     }
+    const requiredTables = [
+      'app_user_profiles', 'legacy_account_imports', 'chat_conversations',
+      'chat_messages', 'payment_orders', 'payment_events', 'immigration_sources',
+      'immigration_source_versions', 'immigration_source_reviews', 'audit_events',
+      'app_inquiries', 'app_analytics_events', 'app_push_subscriptions',
+      'api_rate_limits', 'free_message_usage',
+    ];
     const ownership = await client.query(
       `SELECT count(*)::int AS count FROM pg_class c
        JOIN pg_namespace n ON n.oid = c.relnamespace
        JOIN pg_roles r ON r.oid = c.relowner
-       WHERE n.nspname = 'public' AND r.rolname IN ('earth_app_runtime', 'earth_app_admin')
-         AND c.relkind IN ('r', 'p')`
+       WHERE n.nspname = 'public' AND r.rolname = 'earth_app_owner'
+         AND c.relname = ANY($1::text[]) AND c.relkind IN ('r', 'p')`,
+      [requiredTables]
     );
-    assert.equal(ownership.rows[0].count, 0, 'neither group role may own application tables');
+    assert.equal(ownership.rows[0].count, requiredTables.length, 'all application tables must belong to the dedicated owner role');
+    const rls = await client.query(
+      `SELECT names.table_name, c.relrowsecurity, c.relforcerowsecurity,
+              count(p.policyname)::int AS policies
+       FROM unnest($1::text[]) AS names(table_name)
+       LEFT JOIN pg_namespace n ON n.nspname = 'public'
+       LEFT JOIN pg_class c ON c.relnamespace = n.oid AND c.relname = names.table_name
+       LEFT JOIN pg_policies p ON p.schemaname = 'public' AND p.tablename = names.table_name
+       GROUP BY names.table_name, c.relrowsecurity, c.relforcerowsecurity`,
+      [requiredTables]
+    );
+    assert.equal(rls.rowCount, requiredTables.length, 'every application table must exist');
+    for (const row of rls.rows) {
+      assert.equal(row.relrowsecurity, true, row.table_name + ' must enable RLS');
+      assert.equal(row.relforcerowsecurity, true, row.table_name + ' must force RLS');
+      assert.ok(row.policies > 0, row.table_name + ' must have at least one explicit policy');
+    }
     const roleSeparation = await client.query(
       `SELECT pg_has_role('earth_app_runtime', 'earth_app_admin', 'MEMBER') AS runtime_is_admin,
               pg_has_role('earth_app_admin', 'earth_app_runtime', 'MEMBER') AS admin_is_runtime`
@@ -48,7 +73,11 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     assert.equal(roleSeparation.rows[0].runtime_is_admin, false);
     assert.equal(roleSeparation.rows[0].admin_is_runtime, false);
 
-    await client.query('INSERT INTO neon_auth."user" (id) VALUES ($1), ($2)', [authA, authB]);
+    await client.query(
+      'INSERT INTO neon_auth."user" (id, name, email, "emailVerified") VALUES ($1, $2, $3, false), ($4, $5, $6, false)',
+      [authA, 'Isolation Test A', 'isolation-a-' + authA + '@example.invalid', authB, 'Isolation Test B', 'isolation-b-' + authB + '@example.invalid']
+    );
+    await client.query('INSERT INTO app_user_profiles (auth_user_id) VALUES ($1), ($2)', [authA, authB]);
     await client.query(
       'INSERT INTO chat_conversations (id, anonymous_id, auth_user_id, lang) VALUES ($1, $2, NULL, $3), ($4, $5, NULL, $3), ($6, NULL, $7, $3), ($8, NULL, $9, $3)',
       [conversationA, guestA, 'en', conversationB, guestB, accountConversationA, authA, accountConversationB, authB]
@@ -61,6 +90,13 @@ test('forced RLS prevents one guest from reading or writing another guest conver
       "INSERT INTO chat_messages (conversation_id, role, content) VALUES ($1, 'user', 'account A'), ($2, 'user', 'account B')",
       [accountConversationA, accountConversationB]
     );
+    await client.query(
+      `INSERT INTO free_message_usage (anonymous_id, auth_user_id, client_message_id, conversation_id, content_sha256)
+       VALUES ($1, NULL, $2, $3, repeat('a', 64)), ($4, NULL, $5, $6, repeat('b', 64)),
+              (NULL, $7, $8, $9, repeat('c', 64)), (NULL, $10, $11, $12, repeat('d', 64))`,
+      [guestA, quotaMessageIds[0], conversationA, guestB, quotaMessageIds[1], conversationB,
+       authA, quotaMessageIds[2], accountConversationA, authB, quotaMessageIds[3], accountConversationB]
+    );
 
     await client.query('BEGIN');
     await client.query('SET LOCAL ROLE earth_app_runtime');
@@ -72,6 +108,10 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     assert.deepEqual(ownMessages.rows.map(row => row.content), ['private A']);
     const foreignMessages = await client.query('SELECT content FROM chat_messages WHERE conversation_id = $1', [conversationB]);
     assert.equal(foreignMessages.rowCount, 0);
+    const guestQuota = await client.query('SELECT client_message_id FROM free_message_usage ORDER BY client_message_id');
+    assert.deepEqual(guestQuota.rows.map(row => row.client_message_id), [quotaMessageIds[0]]);
+    const foreignGuestQuota = await client.query('SELECT client_message_id FROM free_message_usage WHERE client_message_id = $1', [quotaMessageIds[1]]);
+    assert.equal(foreignGuestQuota.rowCount, 0);
 
     const attemptedUpdate = await client.query('UPDATE chat_conversations SET stage = 7 WHERE id = $1', [conversationB]);
     assert.equal(attemptedUpdate.rowCount, 0);
@@ -105,6 +145,14 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     assert.deepEqual(accountRows.rows.map(row => row.id), [accountConversationA]);
     const accountPrivate = await client.query('SELECT content FROM chat_messages WHERE conversation_id = $1', [accountConversationA]);
     assert.deepEqual(accountPrivate.rows.map(row => row.content), ['account A']);
+    const ownProfile = await client.query('SELECT auth_user_id FROM app_user_profiles');
+    assert.deepEqual(ownProfile.rows.map(row => row.auth_user_id), [authA]);
+    const foreignProfile = await client.query('SELECT auth_user_id FROM app_user_profiles WHERE auth_user_id = $1', [authB]);
+    assert.equal(foreignProfile.rowCount, 0);
+    const ownQuota = await client.query('SELECT client_message_id FROM free_message_usage');
+    assert.deepEqual(ownQuota.rows.map(row => row.client_message_id), [quotaMessageIds[2]]);
+    const foreignQuota = await client.query('SELECT client_message_id FROM free_message_usage WHERE client_message_id = $1', [quotaMessageIds[3]]);
+    assert.equal(foreignQuota.rowCount, 0);
     const accountForeign = await client.query('SELECT content FROM chat_messages WHERE conversation_id = $1', [accountConversationB]);
     assert.equal(accountForeign.rowCount, 0);
     const accountUpdate = await client.query('UPDATE chat_conversations SET stage = 6 WHERE id = $1', [accountConversationB]);
@@ -144,11 +192,17 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     await client.query('SET LOCAL ROLE earth_app_admin');
     const adminRows = await client.query('SELECT id FROM chat_conversations WHERE id = ANY($1::uuid[]) ORDER BY id', [[conversationA, conversationB, accountConversationA, accountConversationB]]);
     assert.equal(adminRows.rowCount, 4, 'only the separate admin database role can read across customers');
+    const adminProfiles = await client.query('SELECT auth_user_id FROM app_user_profiles WHERE auth_user_id = ANY($1::uuid[])', [[authA, authB]]);
+    assert.equal(adminProfiles.rowCount, 2, 'admin role can access all customer profiles');
+    const adminQuota = await client.query('SELECT client_message_id FROM free_message_usage WHERE client_message_id = ANY($1::uuid[])', [quotaMessageIds]);
+    assert.equal(adminQuota.rowCount, 4, 'admin role can access all customer quota rows');
     await client.query('ROLLBACK');
   } finally {
     try { await client.query('ROLLBACK'); } catch {}
     try { await client.query('DELETE FROM api_rate_limits WHERE bucket_key = ANY($1::char(64)[])', [[rateKeyA, rateKeyB]]); } catch {}
+    try { await client.query('DELETE FROM free_message_usage WHERE client_message_id = ANY($1::uuid[])', [quotaMessageIds]); } catch {}
     try { await client.query('DELETE FROM chat_conversations WHERE id = ANY($1::uuid[])', [[conversationA, conversationB, accountConversationA, accountConversationB]]); } catch {}
+    try { await client.query('DELETE FROM app_user_profiles WHERE auth_user_id = ANY($1::uuid[])', [[authA, authB]]); } catch {}
     try { await client.query('DELETE FROM neon_auth."user" WHERE id = ANY($1::uuid[])', [[authA, authB]]); } catch {}
     await client.end();
   }
