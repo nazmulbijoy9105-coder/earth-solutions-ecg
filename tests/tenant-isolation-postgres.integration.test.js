@@ -147,6 +147,7 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     await client.query('ROLLBACK');
   } finally {
     try { await client.query('ROLLBACK'); } catch {}
+    try { await client.query('DELETE FROM api_rate_limits WHERE bucket_key = ANY($1::char(64)[])', [[rateKeyA, rateKeyB]]); } catch {}
     try { await client.query('DELETE FROM chat_conversations WHERE id = ANY($1::uuid[])', [[conversationA, conversationB, accountConversationA, accountConversationB]]); } catch {}
     try { await client.query('DELETE FROM neon_auth."user" WHERE id = ANY($1::uuid[])', [[authA, authB]]); } catch {}
     await client.end();
