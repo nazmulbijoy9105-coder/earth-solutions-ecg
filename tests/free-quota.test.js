@@ -93,7 +93,7 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
       () => persistence.appendUserMessageWithQuota({
         conversationId, anonymousId: 'invalid', messageId: ids[0], content: 'forged',
       }),
-      /Valid conversation, guest, message and content are required/
+      /Exactly one customer identity is required/
     );
   } finally {
     require.cache[dbPath].exports = originalDb;
