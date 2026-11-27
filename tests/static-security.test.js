@@ -30,6 +30,7 @@ before(async () => {
     env: {
       ...process.env,
       PORT: String(port),
+      DATABASE_URL: '',
       ADMIN_PASSWORD: 'test-only-password-123',
       GROQ_API_KEY: ''
     },
