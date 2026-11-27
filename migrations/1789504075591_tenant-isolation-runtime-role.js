@@ -11,6 +11,9 @@ exports.up = (pgm) => {
     GRANT earth_app_owner TO CURRENT_USER WITH SET TRUE, INHERIT FALSE;
     GRANT USAGE, CREATE ON SCHEMA public TO earth_app_owner;
     GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
+    -- The quota ownership migration adds a foreign key to Neon Auth users.
+    GRANT USAGE ON SCHEMA neon_auth TO earth_app_owner;
+    GRANT REFERENCES ON TABLE neon_auth.\"user\" TO earth_app_owner;
 
     -- Transfer ownership to a dedicated NOLOGIN owner. Do not use CURRENT_USER:
     -- that would leave tables owned by the privileged migration/web principal.
