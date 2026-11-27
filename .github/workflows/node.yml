@@ -65,6 +65,10 @@ jobs:
           test "$migration_count" -eq 9
           required_count=$(psql "$DATABASE_URL" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ANY (ARRAY['app_user_profiles','legacy_account_imports','chat_conversations','chat_messages','payment_orders','payment_events','immigration_sources','immigration_source_versions','immigration_source_reviews','audit_events','app_inquiries','app_analytics_events','app_push_subscriptions','api_rate_limits','free_message_usage'])")
           test "$required_count" -eq 15
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD 'ci-runtime-password'"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD 'ci-admin-password'"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'GRANT earth_app_runtime TO earth_app_login'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'GRANT earth_app_admin TO earth_app_admin_login'
 
       - name: Check Neon Auth and database integration syntax
         run: |
@@ -93,5 +97,7 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
+          DATABASE_URL: postgresql://earth_app_login:ci-runtime-password@localhost:5432/peopole_test
+          ADMIN_DATABASE_URL: postgresql://earth_app_admin_login:ci-admin-password@localhost:5432/peopole_test
+          TEST_DATABASE_OWNER_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
         run: npm test
