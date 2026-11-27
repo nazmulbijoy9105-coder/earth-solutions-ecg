@@ -187,6 +187,14 @@ exports.up = (pgm) => {
     GRANT SELECT, INSERT ON app_user_profiles TO earth_app_runtime;
     GRANT SELECT ON legacy_account_imports TO earth_app_runtime;
     GRANT UPDATE (linked_auth_user_id, migration_status) ON legacy_account_imports TO earth_app_runtime;
+    GRANT SELECT, INSERT, UPDATE ON chat_conversations TO earth_app_runtime;
+    GRANT SELECT, INSERT ON chat_messages TO earth_app_runtime;
+    GRANT SELECT, INSERT ON payment_orders TO earth_app_runtime;
+    GRANT SELECT ON payment_events TO earth_app_runtime;
+    GRANT INSERT ON app_inquiries, app_analytics_events, audit_events TO earth_app_runtime;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON app_push_subscriptions, api_rate_limits TO earth_app_runtime;
+    GRANT SELECT, INSERT, DELETE ON free_message_usage TO earth_app_runtime;
+    GRANT SELECT ON immigration_sources, immigration_source_versions TO earth_app_runtime;
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO earth_app_runtime, earth_app_admin;
     GRANT SELECT, INSERT, UPDATE, DELETE ON
       app_user_profiles, legacy_account_imports, chat_conversations, chat_messages,
