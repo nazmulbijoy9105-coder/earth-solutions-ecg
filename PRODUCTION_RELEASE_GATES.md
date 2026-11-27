@@ -91,7 +91,7 @@ Keep new customer registration disabled until a verified sender domain and full 
 ## 7. Required cutover sequence
 
 1. Create an isolated Neon staging branch from a verified restore or controlled copy.
-2. Run all nine migrations with a migration-owner credential that has the required role-creation privileges.
+2. Run all nine migrations with a dedicated migration-owner credential that has role-creation and ownership-transfer privileges. Rehearse the complete cutover and restore first. Production requires a planned maintenance window because the old `peopole_app` connection may lose access as soon as ownership and FORCE RLS change.
 3. Create separate login roles. Customer traffic: `earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_runtime TO earth_app_login;`. Admin operations: `earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_admin TO earth_app_admin_login;`.
 4. Verify each login's flags, exact memberships, absence of table ownership and inability to inherit the other role.
 5. Set `DATABASE_URL`, `ADMIN_DATABASE_URL`, `GUEST_SESSION_SECRET`, `ALLOWED_ORIGIN` and other required secrets in the server environment. Never expose admin credentials or the guest signing secret to the browser.
