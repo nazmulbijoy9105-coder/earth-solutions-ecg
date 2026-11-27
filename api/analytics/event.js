@@ -23,14 +23,14 @@ module.exports = async function handler(req, res) {
     return json(res, 503, { error: 'Analytics storage is not configured' });
   }
 
-  let identity;
-  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const meta = body.meta && typeof body.meta === 'object' && !Array.isArray(body.meta) ? body.meta : {};
   if (!/^[a-zA-Z0-9_.:-]{1,100}$/.test(name) || Buffer.byteLength(JSON.stringify(meta)) > 4096) {
     return json(res, 400, { error: 'Invalid analytics event' });
   }
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
 
   try {
     await persistence.logEvent(name, meta, identity);
