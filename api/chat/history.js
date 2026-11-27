@@ -1,5 +1,6 @@
 const persistence = require('../../lib/persistence.cjs');
 const database = require('../../lib/db.cjs');
+const { resolveCustomerIdentity } = require('../../lib/customer-identity.cjs');
 
 const validUuid = value => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
 const validGuestId = value => typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
@@ -12,8 +13,10 @@ module.exports = async function handler(req, res) {
     return res.end(JSON.stringify({ error: 'Method not allowed' }));
   }
 
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { res.statusCode = 401; return res.end(JSON.stringify({ error: 'Invalid or unavailable customer identity' })); }
   const body = req.body || {};
-  if (!validGuestId(body.userId) || !validUuid(body.conversationId)) {
+  if (!validUuid(body.conversationId)) {
     res.statusCode = 400;
     return res.end(JSON.stringify({ error: 'Invalid conversation identity' }));
   }
@@ -23,7 +26,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const messages = await persistence.getConversationMessages(body.conversationId, body.userId, 50);
+    const messages = await persistence.getConversationMessages(body.conversationId, identity.ownerId, 50);
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ messages }));
   } catch {
