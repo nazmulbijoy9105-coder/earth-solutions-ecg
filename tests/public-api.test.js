@@ -94,3 +94,20 @@ test('Vercel analytics and push routes fail closed when durable storage is absen
     else process.env.ALLOWED_ORIGIN = previousOrigin;
   }
 });
+
+
+test('Vercel VAPID endpoint does not publish a placeholder key or wildcard CORS', async () => {
+  const previousKey = process.env.VAPID_PUBLIC;
+  delete process.env.VAPID_PUBLIC;
+  try {
+    const handler = (await import('../api/push/vapid-public-key.js')).default;
+    const res = responseMock();
+    await handler({ method: 'GET', headers: {} }, res);
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.headers['access-control-allow-origin'], undefined);
+    assert.match(res.body, /not configured/);
+  } finally {
+    if (previousKey === undefined) delete process.env.VAPID_PUBLIC;
+    else process.env.VAPID_PUBLIC = previousKey;
+  }
+});
