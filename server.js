@@ -406,7 +406,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
     : [];
   const lastUserMsg = String(userMessages[userMessages.length - 1]?.content || '').slice(0, 4000);
   if (!safeUserId || !validConversationId || !validMessageId || !lastUserMsg.trim()) {
-    return res.status(400).json({ error: 'A valid guest id, conversation id, message id and message are required' });
+    return res.status(400).json({ error: 'A valid customer identity, conversation id, message id and message are required' });
   }
 
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
