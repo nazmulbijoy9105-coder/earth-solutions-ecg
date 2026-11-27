@@ -12,7 +12,7 @@ test('a push endpoint cannot be reassigned to a different anonymous identity', {
   const persistencePath = require.resolve('../lib/persistence.cjs');
   const originalDb = require(dbPath);
   const originalPersistence = require.cache[persistencePath];
-  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  const client = new Client({ connectionString: process.env.TEST_DATABASE_OWNER_URL || process.env.DATABASE_URL });
   await client.connect();
 
   require.cache[dbPath].exports = {
