@@ -133,7 +133,7 @@ The transfer uses one target transaction and is idempotent by legacy ID, analyti
 
 ## Frontend SDK packaging note
 
-The account UI currently loads a pinned `@neon/auth@0.8.2` browser module from esm.sh. This keeps the initial integration lightweight, but the SDK is not yet part of the npm lockfile or the site's own build artifact. Before production release, bundle or vendor the exact reviewed SDK version and add a restrictive Content Security Policy; do not treat the current CDN-loaded UI as final supply-chain hardening.
+The account UI currently loads a pinned `@neon/auth@0.8.2` browser module from esm.sh. The application now applies a Content Security Policy that allows scripts only from the same origin and esm.sh, while inline HTML event handlers and inline script blocks have been removed from the public pages. The SDK is still not part of the npm lockfile or the site's own build artifact. Before production release, bundle or vendor the exact reviewed SDK version and verify the deployed Vercel/Express response headers in a real browser; CSP is defense-in-depth, not a substitute for dependency vendoring.
 
 
 ## Authorization and RLS release blocker
