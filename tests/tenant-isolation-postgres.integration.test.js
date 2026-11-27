@@ -8,7 +8,7 @@ const { Client } = require('pg');
 test('forced RLS prevents one guest from reading or writing another guest conversation', {
   skip: !process.env.DATABASE_URL,
 }, async () => {
-  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  const client = new Client({ connectionString: process.env.TEST_DATABASE_OWNER_URL || process.env.DATABASE_URL });
   const guestA = 'guest_' + randomBytes(24).toString('base64url');
   const guestB = 'guest_' + randomBytes(24).toString('base64url');
   const conversationA = randomUUID();
