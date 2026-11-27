@@ -2,6 +2,7 @@
 const { buildSystemPrompt, matchFAQ, getFallback } = require('../lib/ai-core.js');
 const persistence = require('../lib/persistence.cjs');
 const database = require('../lib/db.cjs');
+const { resolveCustomerIdentity } = require('../lib/customer-identity.cjs');
 
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -195,12 +196,12 @@ module.exports = async function handler(req, res) {
     const fallback = getFallback(lang);
     if (isFirstMessage && !inquiryLogged && database.isDatabaseConfigured()) {
       try {
-        await persistence.createInquiry({ userId, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'fallback' });
+        await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'fallback' });
       } catch {}
     }
     if (database.isDatabaseConfigured()) {
       try {
-        await persistence.appendConversationMessage({ conversationId, anonymousId: userId, role: 'assistant', content: fallback, provider: 'fallback' });
+        await persistence.appendConversationMessage({ conversationId, ...identity, role: 'assistant', content: fallback, provider: 'fallback' });
       } catch {}
     }
     try {
