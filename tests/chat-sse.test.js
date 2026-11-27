@@ -7,11 +7,15 @@ test('Vercel chat streams standards-compliant SSE delimiters', async () => {
   const previousDatabaseUrl = process.env.DATABASE_URL;
   const previousGroqKey = process.env.GROQ_API_KEY;
   const previousNodeEnv = process.env.NODE_ENV;
+  const previousGuestSecret = process.env.GUEST_SESSION_SECRET;
+  const previousAllowedOrigin = process.env.ALLOWED_ORIGIN;
   const previousFetch = global.fetch;
 
   delete process.env.DATABASE_URL;
   process.env.GROQ_API_KEY = 'test-key';
   process.env.NODE_ENV = 'test';
+  process.env.GUEST_SESSION_SECRET = 'test-secret-with-at-least-32-bytes-long';
+  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
 
   const chunks = [];
   const response = {
@@ -53,5 +57,9 @@ test('Vercel chat streams standards-compliant SSE delimiters', async () => {
     else process.env.GROQ_API_KEY = previousGroqKey;
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousNodeEnv;
+    if (previousGuestSecret === undefined) delete process.env.GUEST_SESSION_SECRET;
+    else process.env.GUEST_SESSION_SECRET = previousGuestSecret;
+    if (previousAllowedOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousAllowedOrigin;
   }
 });
