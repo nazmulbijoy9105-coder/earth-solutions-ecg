@@ -5,16 +5,8 @@ exports.shorthands = undefined;
 // migration owner, table owner, superuser, or a BYPASSRLS principal.
 exports.up = (pgm) => {
   pgm.sql(`
-    DO $$
-    BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'earth_app_runtime') THEN
-        CREATE ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
-      END IF;
-      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'earth_app_admin') THEN
-        CREATE ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
-      END IF;
-    END $$;
-
+    CREATE ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+    CREATE ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
     ALTER ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
     ALTER ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
     GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
@@ -27,16 +19,16 @@ exports.up = (pgm) => {
 
     CREATE OR REPLACE FUNCTION public.app_ctx_user_id() RETURNS text
     LANGUAGE sql STABLE PARALLEL SAFE
-    AS $$ SELECT nullif(current_setting('app.auth_user_id', true), '') $$;
+    AS 'SELECT nullif(current_setting(''app.auth_user_id'', true), '''')';
     CREATE OR REPLACE FUNCTION public.app_ctx_guest_id() RETURNS text
     LANGUAGE sql STABLE PARALLEL SAFE
-    AS $$ SELECT nullif(current_setting('app.anonymous_id', true), '') $$;
+    AS 'SELECT nullif(current_setting(''app.anonymous_id'', true), '''')';
     CREATE OR REPLACE FUNCTION public.app_ctx_is_admin() RETURNS boolean
     LANGUAGE sql STABLE PARALLEL SAFE
-    AS $ SELECT pg_has_role(current_user, 'earth_app_admin', 'MEMBER') $;
+    AS 'SELECT pg_has_role(current_user, ''earth_app_admin'', ''MEMBER'')';
     CREATE OR REPLACE FUNCTION public.app_ctx_verified_email() RETURNS text
     LANGUAGE sql STABLE PARALLEL SAFE
-    AS $$ SELECT nullif(lower(current_setting('app.verified_email', true)), '') $$;
+    AS 'SELECT nullif(lower(current_setting(''app.verified_email'', true)), '''')';
 
     ALTER TABLE app_user_profiles ENABLE ROW LEVEL SECURITY;
     ALTER TABLE app_user_profiles FORCE ROW LEVEL SECURITY;
@@ -217,35 +209,41 @@ exports.up = (pgm) => {
       app_push_subscriptions, api_rate_limits, free_message_usage
     TO earth_app_admin;
 
-    DO $
-    DECLARE table_name text;
-    BEGIN
-      FOREACH table_name IN ARRAY ARRAY[
-        'app_user_profiles', 'legacy_account_imports', 'chat_conversations', 'chat_messages',
-        'payment_orders', 'payment_events', 'immigration_sources', 'immigration_source_versions',
-        'immigration_source_reviews', 'audit_events', 'app_inquiries', 'app_analytics_events',
-        'app_push_subscriptions', 'api_rate_limits', 'free_message_usage'
-      ] LOOP
-        EXECUTE format('CREATE POLICY %I ON public.%I FOR ALL TO earth_app_admin USING (true) WITH CHECK (true)', 'admin_access_' || table_name, table_name);
-      END LOOP;
-    END $;
+    CREATE POLICY admin_access_app_user_profiles ON app_user_profiles FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_legacy_account_imports ON legacy_account_imports FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_chat_conversations ON chat_conversations FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_chat_messages ON chat_messages FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_payment_orders ON payment_orders FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_payment_events ON payment_events FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_immigration_sources ON immigration_sources FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_immigration_source_versions ON immigration_source_versions FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_immigration_source_reviews ON immigration_source_reviews FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_audit_events ON audit_events FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_app_inquiries ON app_inquiries FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_app_analytics_events ON app_analytics_events FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_app_push_subscriptions ON app_push_subscriptions FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_api_rate_limits ON api_rate_limits FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+    CREATE POLICY admin_access_free_message_usage ON free_message_usage FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
   `);
 };
 
 exports.down = (pgm) => {
   pgm.sql(`
-    DO $
-    DECLARE table_name text;
-    BEGIN
-      FOREACH table_name IN ARRAY ARRAY[
-        'app_user_profiles', 'legacy_account_imports', 'chat_conversations', 'chat_messages',
-        'payment_orders', 'payment_events', 'immigration_sources', 'immigration_source_versions',
-        'immigration_source_reviews', 'audit_events', 'app_inquiries', 'app_analytics_events',
-        'app_push_subscriptions', 'api_rate_limits', 'free_message_usage'
-      ] LOOP
-        EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', 'admin_access_' || table_name, table_name);
-      END LOOP;
-    END $;
+    DROP POLICY IF EXISTS admin_access_app_user_profiles ON app_user_profiles;
+    DROP POLICY IF EXISTS admin_access_legacy_account_imports ON legacy_account_imports;
+    DROP POLICY IF EXISTS admin_access_chat_conversations ON chat_conversations;
+    DROP POLICY IF EXISTS admin_access_chat_messages ON chat_messages;
+    DROP POLICY IF EXISTS admin_access_payment_orders ON payment_orders;
+    DROP POLICY IF EXISTS admin_access_payment_events ON payment_events;
+    DROP POLICY IF EXISTS admin_access_immigration_sources ON immigration_sources;
+    DROP POLICY IF EXISTS admin_access_immigration_source_versions ON immigration_source_versions;
+    DROP POLICY IF EXISTS admin_access_immigration_source_reviews ON immigration_source_reviews;
+    DROP POLICY IF EXISTS admin_access_audit_events ON audit_events;
+    DROP POLICY IF EXISTS admin_access_app_inquiries ON app_inquiries;
+    DROP POLICY IF EXISTS admin_access_app_analytics_events ON app_analytics_events;
+    DROP POLICY IF EXISTS admin_access_app_push_subscriptions ON app_push_subscriptions;
+    DROP POLICY IF EXISTS admin_access_api_rate_limits ON api_rate_limits;
+    DROP POLICY IF EXISTS admin_access_free_message_usage ON free_message_usage;
     DROP POLICY IF EXISTS audit_events_read_admin ON audit_events;
     DROP POLICY IF EXISTS audit_events_insert_own ON audit_events;
     DROP POLICY IF EXISTS immigration_source_reviews_admin ON immigration_source_reviews;
