@@ -5,29 +5,31 @@ exports.shorthands = undefined;
 // migration owner, table owner, superuser, or a BYPASSRLS principal.
 exports.up = (pgm) => {
   pgm.sql(`
+    CREATE ROLE earth_app_owner NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
     CREATE ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
     CREATE ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
-    ALTER ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-    ALTER ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-    GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
+    GRANT earth_app_owner TO CURRENT_USER WITH ADMIN OPTION;
+    GRANT USAGE ON SCHEMA public TO earth_app_owner, earth_app_runtime, earth_app_admin;
 
-    -- Transfer ownership away from the prior web/runtime principal. The migration
-    -- connection must be a dedicated owner, never DATABASE_URL or peopole_app.
-    ALTER TABLE app_user_profiles OWNER TO CURRENT_USER;
-    ALTER TABLE legacy_account_imports OWNER TO CURRENT_USER;
-    ALTER TABLE chat_conversations OWNER TO CURRENT_USER;
-    ALTER TABLE chat_messages OWNER TO CURRENT_USER;
-    ALTER TABLE payment_orders OWNER TO CURRENT_USER;
-    ALTER TABLE payment_events OWNER TO CURRENT_USER;
-    ALTER TABLE immigration_sources OWNER TO CURRENT_USER;
-    ALTER TABLE immigration_source_versions OWNER TO CURRENT_USER;
-    ALTER TABLE immigration_source_reviews OWNER TO CURRENT_USER;
-    ALTER TABLE audit_events OWNER TO CURRENT_USER;
-    ALTER TABLE app_inquiries OWNER TO CURRENT_USER;
-    ALTER TABLE app_analytics_events OWNER TO CURRENT_USER;
-    ALTER TABLE app_push_subscriptions OWNER TO CURRENT_USER;
-    ALTER TABLE api_rate_limits OWNER TO CURRENT_USER;
-    ALTER TABLE free_message_usage OWNER TO CURRENT_USER;
+    -- Transfer ownership to a dedicated NOLOGIN owner. Do not use CURRENT_USER:
+    -- that would leave tables owned by the privileged migration/web principal.
+    SET ROLE earth_app_owner;
+    ALTER TABLE app_user_profiles OWNER TO earth_app_owner;
+    ALTER TABLE legacy_account_imports OWNER TO earth_app_owner;
+    ALTER TABLE chat_conversations OWNER TO earth_app_owner;
+    ALTER TABLE chat_messages OWNER TO earth_app_owner;
+    ALTER TABLE payment_orders OWNER TO earth_app_owner;
+    ALTER TABLE payment_events OWNER TO earth_app_owner;
+    ALTER TABLE immigration_sources OWNER TO earth_app_owner;
+    ALTER TABLE immigration_source_versions OWNER TO earth_app_owner;
+    ALTER TABLE immigration_source_reviews OWNER TO earth_app_owner;
+    ALTER TABLE audit_events OWNER TO earth_app_owner;
+    ALTER TABLE app_inquiries OWNER TO earth_app_owner;
+    ALTER TABLE app_analytics_events OWNER TO earth_app_owner;
+    ALTER TABLE app_push_subscriptions OWNER TO earth_app_owner;
+    ALTER TABLE api_rate_limits OWNER TO earth_app_owner;
+    ALTER TABLE free_message_usage OWNER TO earth_app_owner;
+    RESET ROLE;
     GRANT SELECT, INSERT, UPDATE ON chat_conversations TO earth_app_runtime;
     GRANT SELECT, INSERT ON chat_messages TO earth_app_runtime;
     GRANT SELECT, INSERT ON payment_orders TO earth_app_runtime;
