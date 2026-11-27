@@ -65,9 +65,24 @@ after(async () => {
 });
 
 test('public homepage and allowlisted assets remain available', async () => {
-  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/pricing.html', '/admin.html', '/admin', '/logo.jpg', '/manifest.json', '/sw.js']) {
+  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/frontend/pricing.js', '/pricing.html', '/admin.html', '/admin', '/logo.jpg', '/manifest.json', '/sw.js']) {
     const response = await fetch(`${baseUrl}${pathname}`);
     assert.equal(response.status, 200, `${pathname} should be publicly available`);
+  }
+});
+
+test('public HTML uses CSP-compatible external event handlers', async () => {
+  const homepage = await fetch(`${baseUrl}/index.html`);
+  const policy = homepage.headers.get('content-security-policy') || '';
+  assert.match(policy, /default-src 'self'/);
+  assert.match(policy, /script-src 'self' https:\/\/esm\.sh/);
+  assert.doesNotMatch(policy, /script-src[^;]*unsafe-inline/);
+
+  for (const pathname of ['/index.html', '/pricing.html', '/admin.html']) {
+    const response = await fetch(`${baseUrl}${pathname}`);
+    const html = await response.text();
+    assert.doesNotMatch(html, /\\son[a-z]+\\s*=/i, `${pathname} must not contain inline event handlers`);
+    assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/i, `${pathname} must not contain inline script blocks`);
   }
 });
 
