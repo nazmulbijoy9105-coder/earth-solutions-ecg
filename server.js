@@ -13,78 +13,14 @@
 
 const express   = require('express');
 const path      = require('path');
-const crypto    = require('node:crypto');
 const webpush   = require('web-push');
 const proxyNeonAuth = require('./lib/auth-proxy.cjs');
-const { requireNeonAuth, requireAppAdmin, verifyNeonToken } = require('./lib/neon-auth.cjs');
+const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
+const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
-
-const GUEST_COOKIE = 'ecg_guest';
-const GUEST_TTL_SECONDS = 30 * 24 * 60 * 60;
-function guestSecret() {
-  const value = process.env.GUEST_SESSION_SECRET || '';
-  if (Buffer.byteLength(value) < 32) throw new Error('GUEST_SESSION_SECRET must contain at least 32 bytes');
-  return value;
-}
-function signGuestPayload(payload) {
-  return crypto.createHmac('sha256', guestSecret()).update(payload).digest('base64url');
-}
-function parseCookieHeader(header, name) {
-  for (const part of String(header || '').split(';')) {
-    const index = part.indexOf('=');
-    if (index < 0) continue;
-    if (part.slice(0, index).trim() === name) return decodeURIComponent(part.slice(index + 1).trim());
-  }
-  return null;
-}
-function verifyGuestCookie(value) {
-  if (!value) return null;
-  const parts = value.split('.');
-  if (parts.length !== 3) return null;
-  const [guestId, expires, signature] = parts;
-  if (!/^guest_[A-Za-z0-9_-]{32,80}$/.test(guestId) || !/^\\d+$/.test(expires) || Number(expires) <= Math.floor(Date.now() / 1000)) return null;
-  const payload = guestId + '.' + expires;
-  const expected = Buffer.from(signGuestPayload(payload));
-  const supplied = Buffer.from(signature);
-  if (expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) return null;
-  return guestId;
-}
-function issueGuestCookie(res, guestId) {
-  const expires = String(Math.floor(Date.now() / 1000) + GUEST_TTL_SECONDS);
-  const payload = guestId + '.' + expires;
-  const token = payload + '.' + signGuestPayload(payload);
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', GUEST_COOKIE + '=' + encodeURIComponent(token) + '; HttpOnly; SameSite=Lax; Path=/api; Max-Age=' + GUEST_TTL_SECONDS + secure);
-}
-async function requireCustomerIdentity(req, res, next) {
-  const authorization = req.headers.authorization || '';
-  const bearer = /^Bearer\\s+(.+)$/i.exec(authorization);
-  if (bearer) {
-    try {
-      const user = await verifyNeonToken(bearer[1]);
-      req.identity = { authUserId: user.id, anonymousId: null, ownerId: user.id };
-      return next();
-    } catch {
-      return res.status(401).json({ error: 'Invalid or expired customer session' });
-    }
-  }
-  let guestId;
-  try {
-    guestId = verifyGuestCookie(parseCookieHeader(req.headers.cookie, GUEST_COOKIE));
-    if (!guestId) {
-      guestId = 'guest_' + crypto.randomBytes(24).toString('base64url');
-      issueGuestCookie(res, guestId);
-    }
-  } catch {
-    return res.status(503).json({ error: 'Guest identity service is not configured' });
-  }
-  req.identity = { authUserId: null, anonymousId: guestId, ownerId: guestId };
-  return next();
-}
-
 
 // P0-07 security hardening
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
