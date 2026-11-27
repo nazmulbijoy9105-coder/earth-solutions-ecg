@@ -72,6 +72,12 @@ test('forced RLS prevents one guest from reading or writing another guest conver
       error => error && error.code === '42501'
     );
     await client.query('ROLLBACK');
+
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE earth_app_admin');
+    const adminRows = await client.query('SELECT id FROM chat_conversations WHERE id = ANY($1::uuid[]) ORDER BY id', [[conversationA, conversationB, accountConversationA, accountConversationB]]);
+    assert.equal(adminRows.rowCount, 4, 'only the separate admin database role can read across customers');
+    await client.query('ROLLBACK');
   } finally {
     try { await client.query('ROLLBACK'); } catch {}
     try { await client.query('DELETE FROM chat_conversations WHERE id = ANY($1::uuid[])', [[conversationA, conversationB, accountConversationA, accountConversationB]]); } catch {}
