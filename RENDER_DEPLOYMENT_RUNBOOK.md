@@ -32,17 +32,20 @@ The application now ignores client-supplied owner IDs for chat, analytics and pu
 
 Verify presence in Render's dashboard without copying values into tickets, logs, source control, screenshots, or chat. At minimum, verify the configured production values for:
 
-- `DATABASE_URL` (customer-facing runtime login; member of `earth_app_runtime` only)\n- `ADMIN_DATABASE_URL` (separate privileged admin login; member of `earth_app_admin` only; use only from the server-side admin pool, never expose to browser)
+- `DATABASE_URL` (customer-facing runtime login; member of `earth_app_runtime` only)
+- `ADMIN_DATABASE_URL` (separate privileged admin login; member of `earth_app_admin` only; use only from the server-side admin pool, never expose to browser)
 - `NEON_AUTH_BASE_URL`
 - `ALLOWED_ORIGIN`
 - `GROQ_API_KEY` (if AI chat is enabled)
-- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)\n- `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)\n- `GUEST_SESSION_SECRET` (at least 32 random bytes; keep stable across instances and restarts; never expose it to the browser)
+- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)
+- `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)
+- `GUEST_SESSION_SECRET` (at least 32 random bytes; keep stable across instances and restarts; never expose it to the browser)
 
 Never print secret values. A present variable is not proof that the credential is valid or points to the intended production resource.
 
 ## External gates not solved by a Git commit
 
-1. Provision and migrate the intended production database through the reviewed migration chain. Create two separate login roles. Customer traffic: `earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_runtime TO earth_app_login;` and use its connection string only as `DATABASE_URL`. Admin operations: `earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_admin TO earth_app_admin_login;` and use its connection string only as `ADMIN_DATABASE_URL`. Both login roles must be non-owners, non-superusers, and not members of BYPASSRLS roles. The application uses a separate admin pool; never use either login for migrations. Do not add `earth_app_admin` membership to the customer runtime login. Keep the admin connection secret restricted to the application server. Verify `rolsuper=false`, `rolbypassrls=false`, `rolinherit=true`, no table ownership, and exact role memberships. Never use the migration-owner connection string for the web process.
+1. Provision and migrate the intended production database through the reviewed nine-migration chain. Create two separate login roles. Customer traffic: `earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_runtime TO earth_app_login;` and use its connection string only as `DATABASE_URL`. Admin operations: `earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_admin TO earth_app_admin_login;` and use its connection string only as `ADMIN_DATABASE_URL`. Both login roles must be non-owners, non-superusers, and not members of BYPASSRLS roles. The application uses a separate admin pool; never use either login for migrations. Do not add `earth_app_admin` membership to the customer runtime login. Keep the admin connection secret restricted to the application server. Verify `rolsuper=false`, `rolbypassrls=false`, `rolinherit=true`, no table ownership, and exact role memberships. Never use the migration-owner connection string for the web process.
 2. Verify Neon Auth email sender configuration, OTP, password recovery, sign-in/out, refresh and revocation in a real browser.
 3. Generate and set a matching VAPID key pair, subscribe a real browser, and confirm delivery and unsubscribe.
 4. Configure durable backups, retention, restore testing, and written RPO/RTO.
