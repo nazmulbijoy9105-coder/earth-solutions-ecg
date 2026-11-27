@@ -3,12 +3,25 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
-const database = require('../lib/db.cjs');
-const persistence = require('../lib/persistence.cjs');
+const { Client } = require('pg');
 
 test('a push endpoint cannot be reassigned to a different anonymous identity', {
   skip: !process.env.DATABASE_URL,
 }, async () => {
+  const dbPath = require.resolve('../lib/db.cjs');
+  const persistencePath = require.resolve('../lib/persistence.cjs');
+  const originalDb = require(dbPath);
+  const originalPersistence = require.cache[persistencePath];
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+
+  require.cache[dbPath].exports = {
+    ...originalDb,
+    query: (sql, params = []) => client.query(sql, params),
+  };
+  delete require.cache[persistencePath];
+  const persistence = require('../lib/persistence.cjs');
+
   const owner = 'anon_' + randomUUID().replace(/-/g, '');
   const attacker = 'anon_' + randomUUID().replace(/-/g, '');
   const endpoint = 'https://push.example.test/' + randomUUID();
@@ -29,7 +42,7 @@ test('a push endpoint cannot be reassigned to a different anonymous identity', {
       /already owned by another identity/
     );
 
-    const afterRejectedTransfer = await database.query(
+    const afterRejectedTransfer = await client.query(
       'SELECT anonymous_id, subscription FROM app_push_subscriptions WHERE endpoint = $1',
       [endpoint]
     );
@@ -37,7 +50,7 @@ test('a push endpoint cannot be reassigned to a different anonymous identity', {
     assert.deepEqual(afterRejectedTransfer.rows[0].subscription, original);
 
     await persistence.savePushSubscription({ subscription: replacement, userId: owner, stage: 7, lang: 'bn' });
-    const afterSameOwnerUpdate = await database.query(
+    const afterSameOwnerUpdate = await client.query(
       'SELECT anonymous_id, subscription, stage, lang FROM app_push_subscriptions WHERE endpoint = $1',
       [endpoint]
     );
@@ -46,7 +59,10 @@ test('a push endpoint cannot be reassigned to a different anonymous identity', {
     assert.equal(afterSameOwnerUpdate.rows[0].stage, 7);
     assert.equal(afterSameOwnerUpdate.rows[0].lang, 'bn');
   } finally {
-    await database.query('DELETE FROM app_push_subscriptions WHERE endpoint = $1', [endpoint]);
-    await database.closePool();
+    await client.query('DELETE FROM app_push_subscriptions WHERE endpoint = $1', [endpoint]);
+    await client.end();
+    require.cache[dbPath].exports = originalDb;
+    delete require.cache[persistencePath];
+    if (originalPersistence) require.cache[persistencePath] = originalPersistence;
   }
 });
