@@ -12,11 +12,13 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
   const persistencePath = require.resolve('../lib/persistence.cjs');
   const originalDb = require(dbPath);
   const originalPersistence = require.cache[persistencePath];
+  let owner;
   const withRealTransaction = async work => {
     const client = new Client({ connectionString: process.env.DATABASE_URL });
     await client.connect();
     try {
       await client.query('BEGIN');
+      await client.query("SELECT set_config('app.anonymous_id', $1, true), set_config('app.auth_user_id', '', true)", [owner]);
       const result = await work(client);
       await client.query('COMMIT');
       return result;
@@ -31,7 +33,7 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
   require.cache[dbPath].exports = { ...originalDb, withTransaction: withRealTransaction };
   delete require.cache[persistencePath];
   const persistence = require('../lib/persistence.cjs');
-  const owner = 'guest_' + randomUUID().replace(/-/g, '');
+  owner = 'guest_' + randomUUID().replace(/-/g, '');
   const conversationId = randomUUID();
   const otherConversationId = randomUUID();
   const ids = Array.from({ length: 12 }, () => randomUUID());
