@@ -2,6 +2,7 @@
 
 const database = require('../../lib/db.cjs');
 const persistence = require('../../lib/persistence.cjs');
+const { resolveCustomerIdentity } = require('../../lib/customer-identity.cjs');
 
 const json = (res, status, body) => {
   res.statusCode = status;
