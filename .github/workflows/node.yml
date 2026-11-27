@@ -88,4 +88,6 @@ jobs:
         run: node scripts/import-legacy-json.js
 
       - name: Run tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
         run: npm test
