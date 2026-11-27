@@ -32,7 +32,7 @@ The application now ignores client-supplied owner IDs for chat, analytics and pu
 
 Verify presence in Render's dashboard without copying values into tickets, logs, source control, screenshots, or chat. At minimum, verify the configured production values for:
 
-- `DATABASE_URL`
+- `DATABASE_URL` (customer-facing runtime login; member of `earth_app_runtime` only)\n- `ADMIN_DATABASE_URL` (separate privileged admin login; member of `earth_app_admin` only; use only from the server-side admin pool, never expose to browser)
 - `NEON_AUTH_BASE_URL`
 - `ALLOWED_ORIGIN`
 - `GROQ_API_KEY` (if AI chat is enabled)
@@ -42,7 +42,7 @@ Never print secret values. A present variable is not proof that the credential i
 
 ## External gates not solved by a Git commit
 
-1. Provision and migrate the intended production database through the reviewed migration chain. Create a separate login role, e.g. `earth_app_login`, with `LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOBYPASSRLS`, grant membership in `earth_app_runtime` to that login, and use only the login role in Render's `DATABASE_URL`. The login must not own tables and must not be a member of any BYPASSRLS role. Then grant the group role: `GRANT earth_app_runtime TO earth_app_login;` and grant only `CONNECT` on the intended database as required. Verify `rolsuper=false`, `rolbypassrls=false`, `rolinherit=true`, no table ownership, and no membership in privileged roles. Never use the migration-owner connection string for the web process.
+1. Provision and migrate the intended production database through the reviewed migration chain. Create two separate login roles. Customer traffic: `earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_runtime TO earth_app_login;` and use its connection string only as `DATABASE_URL`. Admin operations: `earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`, then `GRANT earth_app_admin TO earth_app_admin_login;` and use its connection string only as `ADMIN_DATABASE_URL`. Both login roles must be non-owners, non-superusers, and not members of BYPASSRLS roles. The application uses a separate admin pool; never use either login for migrations. Verify `rolsuper=false`, `rolbypassrls=false`, `rolinherit=true`, no table ownership, and exact role memberships. Never use the migration-owner connection string for the web process.
 2. Verify Neon Auth email sender configuration, OTP, password recovery, sign-in/out, refresh and revocation in a real browser.
 3. Generate and set a matching VAPID key pair, subscribe a real browser, and confirm delivery and unsubscribe.
 4. Configure durable backups, retention, restore testing, and written RPO/RTO.
