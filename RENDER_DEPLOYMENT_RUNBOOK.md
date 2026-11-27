@@ -42,7 +42,7 @@ Never print secret values. A present variable is not proof that the credential i
 
 ## External gates not solved by a Git commit
 
-1. Provision and migrate the intended production database through the reviewed migration chain. Create a separate login role, e.g. `earth_app_login`, with `LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS`, grant membership in `earth_app_runtime` to that login, and use only the login role in Render's `DATABASE_URL`. The login must not own tables and must not be a member of any BYPASSRLS role. Never use the migration-owner connection string for the web process.
+1. Provision and migrate the intended production database through the reviewed migration chain. Create a separate login role, e.g. `earth_app_login`, with `LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOBYPASSRLS`, grant membership in `earth_app_runtime` to that login, and use only the login role in Render's `DATABASE_URL`. The login must not own tables and must not be a member of any BYPASSRLS role. Then grant the group role: `GRANT earth_app_runtime TO earth_app_login;` and grant only `CONNECT` on the intended database as required. Verify `rolsuper=false`, `rolbypassrls=false`, `rolinherit=true`, no table ownership, and no membership in privileged roles. Never use the migration-owner connection string for the web process.
 2. Verify Neon Auth email sender configuration, OTP, password recovery, sign-in/out, refresh and revocation in a real browser.
 3. Generate and set a matching VAPID key pair, subscribe a real browser, and confirm delivery and unsubscribe.
 4. Configure durable backups, retention, restore testing, and written RPO/RTO.
