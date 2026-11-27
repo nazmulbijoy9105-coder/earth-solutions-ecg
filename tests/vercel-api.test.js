@@ -33,7 +33,10 @@ test('Vercel health and auth endpoints fail closed when storage or identity is a
   }
 });
 
-test('Vercel chat endpoints reject invalid guest identities before opening a stream', async () => {
+test('Vercel chat endpoints ignore client owner IDs and reject malformed conversation references', async () => {
+  const previousSecret = process.env.GUEST_SESSION_SECRET;
+  process.env.GUEST_SESSION_SECRET = 'test-secret-with-at-least-32-bytes-long';
+  try {
   const chatModule = await import('../api/chat.js');
   const chatRes = responseMock();
   await chatModule.default({ method: 'POST', body: { messages: [] }, headers: {} }, chatRes);
@@ -43,6 +46,10 @@ test('Vercel chat endpoints reject invalid guest identities before opening a str
   const historyRes = responseMock();
   await historyModule.default({ method: 'POST', body: { userId: 'bad', conversationId: 'bad' }, headers: {} }, historyRes);
   assert.equal(historyRes.statusCode, 400);
+  } finally {
+    if (previousSecret === undefined) delete process.env.GUEST_SESSION_SECRET;
+    else process.env.GUEST_SESSION_SECRET = previousSecret;
+  }
 });
 
 
