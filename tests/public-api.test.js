@@ -111,3 +111,18 @@ test('Vercel VAPID endpoint does not publish a placeholder key or wildcard CORS'
     else process.env.VAPID_PUBLIC = previousKey;
   }
 });
+
+
+test('Vercel VAPID endpoint rejects malformed public keys', async () => {
+  const previousKey = process.env.VAPID_PUBLIC;
+  process.env.VAPID_PUBLIC = 'not-a-valid-vapid-key';
+  try {
+    const handler = (await import('../api/push/vapid-public-key.js')).default;
+    const res = responseMock();
+    await handler({ method: 'GET', headers: {} }, res);
+    assert.equal(res.statusCode, 503);
+  } finally {
+    if (previousKey === undefined) delete process.env.VAPID_PUBLIC;
+    else process.env.VAPID_PUBLIC = previousKey;
+  }
+});
