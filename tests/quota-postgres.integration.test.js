@@ -18,6 +18,7 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
     await client.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE earth_app_runtime');
       await client.query("SELECT set_config('app.anonymous_id', $1, true), set_config('app.auth_user_id', '', true)", [owner]);
       const result = await work(client);
       await client.query('COMMIT');
@@ -37,7 +38,7 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
   const conversationId = randomUUID();
   const otherConversationId = randomUUID();
   const ids = Array.from({ length: 12 }, () => randomUUID());
-  const setup = new Client({ connectionString: process.env.DATABASE_URL });
+  const setup = new Client({ connectionString: process.env.TEST_DATABASE_OWNER_URL || process.env.DATABASE_URL });
 
   try {
     await setup.connect();
