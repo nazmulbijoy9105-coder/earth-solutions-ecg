@@ -22,7 +22,7 @@ test('a push endpoint cannot be reassigned to a different anonymous identity', {
   delete require.cache[persistencePath];
   const persistence = require('../lib/persistence.cjs');
 
-  const owner = 'anon_' + randomUUID().replace(/-/g, '');
+  const owner = 'guest_' + randomUUID().replace(/-/g, '');
   const attacker = 'anon_' + randomUUID().replace(/-/g, '');
   const endpoint = 'https://push.example.test/' + randomUUID();
   const original = {
