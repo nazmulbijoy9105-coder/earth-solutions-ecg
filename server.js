@@ -199,17 +199,31 @@ app.post('/api/auth/claim-legacy', requireNeonAuth, async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────
 // J. HEALTH + ANALYTICS ENDPOINTS
-app.get('/api/health', async (req, res) => {
+// Liveness must not depend on PostgreSQL: Render can distinguish a running
+// process from a process that is ready to serve customer traffic.
+app.get('/healthz', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(200).json({ status: 'alive' });
+});
+
+// Readiness verifies connectivity, complete migrations, a least-privileged
+// database role, and forced RLS on customer-owned tables. It intentionally
+// returns only a generic failure; database names, roles and schema details
+// are never exposed to unauthenticated callers.
+async function readinessHandler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (!isDatabaseConfigured()) {
-    return res.status(503).json({ status: 'degraded', database: 'not_configured' });
+    return res.status(503).json({ status: 'not_ready', reason: 'database_unavailable' });
   }
   try {
     await databaseHealthCheck();
-    return res.json({ status: 'ok', database: 'ok' });
+    return res.status(200).json({ status: 'ready' });
   } catch {
-    return res.status(503).json({ status: 'degraded', database: 'unavailable' });
+    return res.status(503).json({ status: 'not_ready', reason: 'database_or_isolation_gate_failed' });
   }
-});
+}
+app.get('/readyz', readinessHandler);
+app.get('/api/health', readinessHandler);
 
 app.post('/api/analytics/pageview', async (req, res) => {
   const { path: pagePath, referrer, userId } = req.body || {};
