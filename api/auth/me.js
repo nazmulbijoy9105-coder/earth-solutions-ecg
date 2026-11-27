@@ -8,7 +8,7 @@ module.exports = async function handler(req, res) {
     return res.end(JSON.stringify({ error: 'Method not allowed' }));
   }
   const header = req.headers.authorization || '';
-  const match = /^Bearer\\s+(.+)$/i.exec(header);
+  const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) {
     res.statusCode = 401;
     return res.end(JSON.stringify({ error: 'Authentication required' }));
