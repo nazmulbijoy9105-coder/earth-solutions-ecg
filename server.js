@@ -13,13 +13,78 @@
 
 const express   = require('express');
 const path      = require('path');
+const crypto    = require('node:crypto');
 const webpush   = require('web-push');
 const proxyNeonAuth = require('./lib/auth-proxy.cjs');
-const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
+const { requireNeonAuth, requireAppAdmin, verifyNeonToken } = require('./lib/neon-auth.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
+
+const GUEST_COOKIE = 'ecg_guest';
+const GUEST_TTL_SECONDS = 30 * 24 * 60 * 60;
+function guestSecret() {
+  const value = process.env.GUEST_SESSION_SECRET || '';
+  if (Buffer.byteLength(value) < 32) throw new Error('GUEST_SESSION_SECRET must contain at least 32 bytes');
+  return value;
+}
+function signGuestPayload(payload) {
+  return crypto.createHmac('sha256', guestSecret()).update(payload).digest('base64url');
+}
+function parseCookieHeader(header, name) {
+  for (const part of String(header || '').split(';')) {
+    const index = part.indexOf('=');
+    if (index < 0) continue;
+    if (part.slice(0, index).trim() === name) return decodeURIComponent(part.slice(index + 1).trim());
+  }
+  return null;
+}
+function verifyGuestCookie(value) {
+  if (!value) return null;
+  const parts = value.split('.');
+  if (parts.length !== 3) return null;
+  const [guestId, expires, signature] = parts;
+  if (!/^guest_[A-Za-z0-9_-]{32,80}$/.test(guestId) || !/^\\d+$/.test(expires) || Number(expires) <= Math.floor(Date.now() / 1000)) return null;
+  const payload = guestId + '.' + expires;
+  const expected = Buffer.from(signGuestPayload(payload));
+  const supplied = Buffer.from(signature);
+  if (expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) return null;
+  return guestId;
+}
+function issueGuestCookie(res, guestId) {
+  const expires = String(Math.floor(Date.now() / 1000) + GUEST_TTL_SECONDS);
+  const payload = guestId + '.' + expires;
+  const token = payload + '.' + signGuestPayload(payload);
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', GUEST_COOKIE + '=' + encodeURIComponent(token) + '; HttpOnly; SameSite=Lax; Path=/api; Max-Age=' + GUEST_TTL_SECONDS + secure);
+}
+async function requireCustomerIdentity(req, res, next) {
+  const authorization = req.headers.authorization || '';
+  const bearer = /^Bearer\\s+(.+)$/i.exec(authorization);
+  if (bearer) {
+    try {
+      const user = await verifyNeonToken(bearer[1]);
+      req.identity = { authUserId: user.id, anonymousId: null, ownerId: user.id };
+      return next();
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired customer session' });
+    }
+  }
+  let guestId;
+  try {
+    guestId = verifyGuestCookie(parseCookieHeader(req.headers.cookie, GUEST_COOKIE));
+    if (!guestId) {
+      guestId = 'guest_' + crypto.randomBytes(24).toString('base64url');
+      issueGuestCookie(res, guestId);
+    }
+  } catch {
+    return res.status(503).json({ error: 'Guest identity service is not configured' });
+  }
+  req.identity = { authUserId: null, anonymousId: guestId, ownerId: guestId };
+  return next();
+}
+
 
 // P0-07 security hardening
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -230,22 +295,22 @@ async function readinessHandler(req, res) {
 app.get('/readyz', readinessHandler);
 app.get('/api/health', readinessHandler);
 
-app.post('/api/analytics/pageview', async (req, res) => {
-  const { path: pagePath, referrer, userId } = req.body || {};
+app.post('/api/analytics/pageview', requireCustomerIdentity, async (req, res) => {
+  const { path: pagePath, referrer } = req.body || {};
   if (!pagePath) return res.status(400).json({ error: 'path is required' });
   try {
-    await logPageview(pagePath, referrer, userId);
+    await logPageview(pagePath, referrer, req.identity);
     return res.json({ ok: true });
   } catch {
     return res.status(503).json({ error: 'Analytics storage unavailable' });
   }
 });
 
-app.post('/api/analytics/event', async (req, res) => {
-  const { name, meta, userId } = req.body || {};
+app.post('/api/analytics/event', requireCustomerIdentity, async (req, res) => {
+  const { name, meta } = req.body || {};
   if (!name) return res.status(400).json({ error: 'name is required' });
   try {
-    await persistence.logEvent(name, meta, { userId });
+    await persistence.logEvent(name, meta, req.identity);
     return res.json({ ok: true });
   } catch {
     return res.status(503).json({ error: 'Analytics storage unavailable' });
@@ -263,25 +328,25 @@ app.get('/api/push/vapid-public-key', (req, res) => {
   return res.json({ key: VAPID_PUBLIC });
 });
 
-app.post('/api/push/subscribe', async (req, res) => {
+app.post('/api/push/subscribe', requireCustomerIdentity, async (req, res) => {
   setCORS(res, req);
-  const { subscription, userId, stage, lang } = req.body || {};
+  const { subscription, stage, lang } = req.body || {};
   if (!subscription || !subscription.endpoint) {
     return res.status(400).json({ error: 'Invalid subscription' });
   }
   try {
-    await persistence.savePushSubscription({ subscription, userId, stage, lang });
-    await logEvent('push_subscribe', { stage, lang }, userId);
+    await persistence.savePushSubscription({ subscription, ...req.identity, stage, lang });
+    await logEvent('push_subscribe', { stage, lang }, req.identity);
     return res.json({ ok: true });
   } catch {
     return res.status(503).json({ error: 'Push subscription storage unavailable' });
   }
 });
 
-app.post('/api/push/unsubscribe', async (req, res) => {
-  const { endpoint, userId } = req.body || {};
+app.post('/api/push/unsubscribe', requireCustomerIdentity, async (req, res) => {
+  const { endpoint } = req.body || {};
   try {
-    await persistence.removePushSubscription({ endpoint, userId });
+    await persistence.removePushSubscription({ endpoint, ...req.identity });
     return res.json({ ok: true });
   } catch {
     return res.status(503).json({ error: 'Push subscription storage unavailable' });
@@ -361,7 +426,7 @@ app.post('/api/admin/push/broadcast', ...adminOnly, async (req, res) => {
       }
     }
     const removed = await persistence.removePushEndpoints(toRemove);
-    await logEvent('push_broadcast', { sent, failed, removed });
+    await persistence.logEvent('push_broadcast', { sent, failed, removed }, { authUserId: req.auth.id });
     return res.json({ ok: true, sent, failed, removed });
   } catch {
     return res.status(503).json({ error: 'Push broadcast storage unavailable' });
@@ -377,28 +442,27 @@ app.get('/admin', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')
 // N. MAIN CHAT ENDPOINT — SSE streaming
 //    Flow: FAQ match → Groq AI → Fallback
 // ─────────────────────────────────────────────────────────────────────────
-app.post('/api/chat/history', async (req, res) => {
-  const { userId, conversationId } = req.body || {};
-  if (!/^anon_[A-Za-z0-9_-]{16,100}$/.test(String(userId || '')) ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(conversationId || ''))) {
+app.post('/api/chat/history', requireCustomerIdentity, async (req, res) => {
+  const { conversationId } = req.body || {};
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(conversationId || ''))) {
     return res.status(400).json({ error: 'Invalid conversation identity' });
   }
   if (!isDatabaseConfigured()) return res.status(503).json({ error: 'Conversation storage is not configured' });
   try {
-    const messages = await persistence.getConversationMessages(conversationId, userId, 50);
+    const messages = await persistence.getConversationMessages(conversationId, req.identity.ownerId, 50);
     return res.setHeader('Cache-Control', 'no-store').json({ messages });
   } catch {
     return res.status(503).json({ error: 'Conversation history unavailable' });
   }
 });
 
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
   setCORS(res, req);
   const body = req.body || {};
-  const { messages = [], userId, stage, conversationId, messageId } = body;
+  const { messages = [], stage, conversationId, messageId } = body;
   const lang = body.lang === 'bn' ? 'bn' : 'en';
   const safeStage = Number.isInteger(Number(stage)) && Number(stage) >= 1 && Number(stage) <= 7 ? Number(stage) : null;
-  const safeUserId = typeof userId === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(userId) ? userId : null;
+  const safeUserId = req.identity.ownerId;
   const validConversationId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(conversationId || ''));
   const validMessageId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(messageId || ''));
   const userMessages = Array.isArray(messages)
@@ -426,14 +490,15 @@ app.post('/api/chat', async (req, res) => {
       }
       const ownedConversationId = await persistence.getOrCreateConversation({
         conversationId,
-        anonymousId: safeUserId,
+        ...req.identity,
         stage: safeStage,
         lang,
       });
       previousMessages = await persistence.getConversationMessages(ownedConversationId, safeUserId, 30);
       const dailyQuota = await persistence.appendUserMessageWithQuota({
         conversationId: ownedConversationId,
-        anonymousId: safeUserId,
+        anonymousId: req.identity.anonymousId,
+        authUserId: req.identity.authUserId,
         messageId,
         content: lastUserMsg,
       });
@@ -477,7 +542,7 @@ app.post('/api/chat', async (req, res) => {
         inquiryLogged = true;
       }
       if (isDatabaseConfigured()) {
-        await persistence.appendConversationMessage({ conversationId, anonymousId: safeUserId, role: 'assistant', content: faqAnswer, provider: 'faq' });
+        await persistence.appendConversationMessage({ conversationId, ...req.identity, role: 'assistant', content: faqAnswer, provider: 'faq' });
       }
       for (const word of faqAnswer.split(' ')) {
         send({ choices: [{ delta: { content: word + ' ' } }] });
