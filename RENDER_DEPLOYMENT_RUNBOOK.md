@@ -26,7 +26,7 @@ Use `npm ci` so Render installs the committed lockfile without silently resolvin
 - `/api/health` remains a compatibility alias for `/readyz`.
 - A 503 from `/readyz` is intentional. Do not weaken the check to make a deployment appear healthy.
 
-The presence of an RLS policy is not proof that its predicate is correct. Before enabling customer traffic, run cross-tenant read/write denial tests using two distinct authenticated customers and guest identities.
+The application now ignores client-supplied owner IDs for chat, analytics and push APIs. Guests receive a signed, HttpOnly, SameSite cookie-backed identity; signed-in requests use a verified Neon Auth JWT. The server sets transaction-local PostgreSQL identity context for every application query. The presence of an RLS policy is not proof that its predicate is correct. Before enabling customer traffic, run cross-tenant read/write denial tests using two distinct authenticated customers and two guest identities.
 
 ## Environment variable handling
 
@@ -36,13 +36,13 @@ Verify presence in Render's dashboard without copying values into tickets, logs,
 - `NEON_AUTH_BASE_URL`
 - `ALLOWED_ORIGIN`
 - `GROQ_API_KEY` (if AI chat is enabled)
-- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)\n- `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)
+- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)\n- `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)\n- `GUEST_SESSION_SECRET` (at least 32 random bytes; keep stable across instances and restarts; never expose it to the browser)
 
 Never print secret values. A present variable is not proof that the credential is valid or points to the intended production resource.
 
 ## External gates not solved by a Git commit
 
-1. Provision and migrate the intended production database through the reviewed migration chain; establish a non-owner, non-BYPASSRLS runtime role and correct RLS predicates.
+1. Provision and migrate the intended production database through the reviewed migration chain. Create a separate login role, e.g. `earth_app_login`, with `LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS`, grant membership in `earth_app_runtime` to that login, and use only the login role in Render's `DATABASE_URL`. The login must not own tables and must not be a member of any BYPASSRLS role. Never use the migration-owner connection string for the web process.
 2. Verify Neon Auth email sender configuration, OTP, password recovery, sign-in/out, refresh and revocation in a real browser.
 3. Generate and set a matching VAPID key pair, subscribe a real browser, and confirm delivery and unsubscribe.
 4. Configure durable backups, retention, restore testing, and written RPO/RTO.
