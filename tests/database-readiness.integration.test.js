@@ -2,14 +2,17 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { healthCheck, closePool } = require('../lib/db.cjs');
+const { Pool } = require('pg');
+const { healthCheck } = require('../lib/db.cjs');
 
-test('readiness accepts only separate non-owner runtime and admin logins with forced RLS', {
+test('readiness accepts only separate non-owner runtime and admin PostgreSQL logins with forced RLS', {
   skip: !process.env.DATABASE_URL || !process.env.ADMIN_DATABASE_URL || !process.env.TEST_DATABASE_OWNER_URL,
 }, async () => {
+  const runtimePool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
+  const adminPool = new Pool({ connectionString: process.env.ADMIN_DATABASE_URL, max: 1 });
   try {
-    assert.equal(await healthCheck(), true);
+    assert.equal(await healthCheck({ runtimePool, adminPool }), true);
   } finally {
-    await closePool();
+    await Promise.all([runtimePool.end(), adminPool.end()]);
   }
 });
