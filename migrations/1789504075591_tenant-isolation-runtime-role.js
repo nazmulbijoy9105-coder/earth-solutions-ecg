@@ -9,11 +9,11 @@ exports.up = (pgm) => {
     CREATE ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
     CREATE ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
     GRANT earth_app_owner TO CURRENT_USER WITH ADMIN OPTION;
-    GRANT USAGE ON SCHEMA public TO earth_app_owner, earth_app_runtime, earth_app_admin;
+    GRANT USAGE, CREATE ON SCHEMA public TO earth_app_owner;
+    GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
 
     -- Transfer ownership to a dedicated NOLOGIN owner. Do not use CURRENT_USER:
     -- that would leave tables owned by the privileged migration/web principal.
-    SET ROLE earth_app_owner;
     ALTER TABLE app_user_profiles OWNER TO earth_app_owner;
     ALTER TABLE legacy_account_imports OWNER TO earth_app_owner;
     ALTER TABLE chat_conversations OWNER TO earth_app_owner;
@@ -29,7 +29,6 @@ exports.up = (pgm) => {
     ALTER TABLE app_push_subscriptions OWNER TO earth_app_owner;
     ALTER TABLE api_rate_limits OWNER TO earth_app_owner;
     ALTER TABLE free_message_usage OWNER TO earth_app_owner;
-    RESET ROLE;
     GRANT SELECT, INSERT, UPDATE ON chat_conversations TO earth_app_runtime;
     GRANT SELECT, INSERT ON chat_messages TO earth_app_runtime;
     GRANT SELECT, INSERT ON payment_orders TO earth_app_runtime;
