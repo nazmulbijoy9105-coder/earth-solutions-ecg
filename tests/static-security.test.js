@@ -30,7 +30,8 @@ before(async () => {
     env: {
       ...process.env,
       PORT: String(port),
-      ADMIN_PASSWORD: 'test-only-password-123'
+      ADMIN_PASSWORD: 'test-only-password-123',
+      GROQ_API_KEY: ''
     },
     stdio: 'ignore'
   });
@@ -113,4 +114,24 @@ test('production health fails closed without PostgreSQL and legacy admin login i
     body: JSON.stringify({ password: 'legacy-password' }),
   });
   assert.equal(login.status, 410);
+});
+
+
+test('Express chat fallback emits standards-compliant SSE delimiters', async () => {
+  const response = await fetch(`${baseUrl}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: 'anon_1234567890123456',
+      conversationId: '123e4567-e89b-42d3-a456-426614174000',
+      messageId: '123e4567-e89b-42d3-a456-426614174001',
+      messages: [{ role: 'user', content: 'A question outside the FAQ catalog' }],
+    }),
+  });
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /text\/event-stream/);
+  const output = await response.text();
+  assert.match(output, /data: \{.*\}\n\n/);
+  assert.match(output, /data: \[DONE\]\n\n$/);
+  assert.equal(output.includes(String.fromCharCode(92) + 'n'), false);
 });
