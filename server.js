@@ -596,7 +596,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
     if (fullReply && isDatabaseConfigured()) {
       await persistence.appendConversationMessage({
         conversationId,
-        anonymousId: safeUserId,
+        ...req.identity,
         role: 'assistant',
         content: fullReply,
         provider: 'groq',
