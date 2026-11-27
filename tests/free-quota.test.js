@@ -10,7 +10,7 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
   const originalPersistence = require.cache[persistencePath];
   const usage = new Map();
   const messages = new Map();
-  const owner = 'anon_123456789012345678901234';
+  const owner = 'guest_12345678901234567890123456789012';
   const conversationId = '223e4567-e89b-42d3-a456-426614174000';
   const client = {
     async query(sql, params = []) {
@@ -19,10 +19,10 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
         return { rows: params[1] === owner ? [{ id: conversationId }] : [], rowCount: params[1] === owner ? 1 : 0 };
       }
       if (sql.includes('INSERT INTO free_message_usage')) {
-        const key = params[0] + ':' + params[1];
+        const key = params[0] + ':' + params[2];
         if (usage.has(key)) return { rows: [], rowCount: 0 };
-        usage.set(key, { conversation_id: params[2], content_sha256: params[3] });
-        return { rows: [{ client_message_id: params[1] }], rowCount: 1 };
+        usage.set(key, { conversation_id: params[3], content_sha256: params[4] });
+        return { rows: [{ client_message_id: params[2] }], rowCount: 1 };
       }
       if (sql.includes('SELECT conversation_id, content_sha256')) {
         const value = usage.get(params[0] + ':' + params[1]);
