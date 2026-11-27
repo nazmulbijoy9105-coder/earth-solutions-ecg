@@ -10,10 +10,14 @@ exports.up = (pgm) => {
       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'earth_app_runtime') THEN
         CREATE ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
       END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'earth_app_admin') THEN
+        CREATE ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+      END IF;
     END $$;
 
     ALTER ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
-    GRANT USAGE ON SCHEMA public TO earth_app_runtime;
+    ALTER ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+    GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
     GRANT SELECT, INSERT, UPDATE, DELETE ON
       chat_conversations, chat_messages, payment_orders, payment_events,
       immigration_sources, immigration_source_versions, immigration_source_reviews,
@@ -29,7 +33,7 @@ exports.up = (pgm) => {
     AS $$ SELECT nullif(current_setting('app.anonymous_id', true), '') $$;
     CREATE OR REPLACE FUNCTION public.app_ctx_is_admin() RETURNS boolean
     LANGUAGE sql STABLE PARALLEL SAFE
-    AS $$ SELECT coalesce(current_setting('app.access_role', true) = 'admin', false) $$;
+    AS $ SELECT pg_has_role(current_user, 'earth_app_admin', 'MEMBER') $;
     CREATE OR REPLACE FUNCTION public.app_ctx_verified_email() RETURNS text
     LANGUAGE sql STABLE PARALLEL SAFE
     AS $$ SELECT nullif(lower(current_setting('app.verified_email', true)), '') $$;
@@ -205,12 +209,43 @@ exports.up = (pgm) => {
     GRANT SELECT, INSERT ON app_user_profiles TO earth_app_runtime;
     GRANT SELECT ON legacy_account_imports TO earth_app_runtime;
     GRANT UPDATE (linked_auth_user_id, migration_status) ON legacy_account_imports TO earth_app_runtime;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO earth_app_runtime;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO earth_app_runtime, earth_app_admin;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON
+      app_user_profiles, legacy_account_imports, chat_conversations, chat_messages,
+      payment_orders, payment_events, immigration_sources, immigration_source_versions,
+      immigration_source_reviews, audit_events, app_inquiries, app_analytics_events,
+      app_push_subscriptions, api_rate_limits, free_message_usage
+    TO earth_app_admin;
+
+    DO $
+    DECLARE table_name text;
+    BEGIN
+      FOREACH table_name IN ARRAY ARRAY[
+        'app_user_profiles', 'legacy_account_imports', 'chat_conversations', 'chat_messages',
+        'payment_orders', 'payment_events', 'immigration_sources', 'immigration_source_versions',
+        'immigration_source_reviews', 'audit_events', 'app_inquiries', 'app_analytics_events',
+        'app_push_subscriptions', 'api_rate_limits', 'free_message_usage'
+      ] LOOP
+        EXECUTE format('CREATE POLICY %I ON public.%I FOR ALL TO earth_app_admin USING (true) WITH CHECK (true)', 'admin_access_' || table_name, table_name);
+      END LOOP;
+    END $;
   `);
 };
 
 exports.down = (pgm) => {
   pgm.sql(`
+    DO $
+    DECLARE table_name text;
+    BEGIN
+      FOREACH table_name IN ARRAY ARRAY[
+        'app_user_profiles', 'legacy_account_imports', 'chat_conversations', 'chat_messages',
+        'payment_orders', 'payment_events', 'immigration_sources', 'immigration_source_versions',
+        'immigration_source_reviews', 'audit_events', 'app_inquiries', 'app_analytics_events',
+        'app_push_subscriptions', 'api_rate_limits', 'free_message_usage'
+      ] LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', 'admin_access_' || table_name, table_name);
+      END LOOP;
+    END $;
     DROP POLICY IF EXISTS audit_events_read_admin ON audit_events;
     DROP POLICY IF EXISTS audit_events_insert_own ON audit_events;
     DROP POLICY IF EXISTS immigration_source_reviews_admin ON immigration_source_reviews;
@@ -265,7 +300,11 @@ exports.down = (pgm) => {
     DROP FUNCTION IF EXISTS public.app_ctx_is_admin();
     DROP FUNCTION IF EXISTS public.app_ctx_guest_id();
     DROP FUNCTION IF EXISTS public.app_ctx_user_id();
+    DROP OWNED BY earth_app_admin;
+    DROP OWNED BY earth_app_runtime;
+    REVOKE earth_app_admin FROM PUBLIC;
     REVOKE earth_app_runtime FROM PUBLIC;
+    DROP ROLE IF EXISTS earth_app_admin;
     DROP ROLE IF EXISTS earth_app_runtime;
   `);
 };
