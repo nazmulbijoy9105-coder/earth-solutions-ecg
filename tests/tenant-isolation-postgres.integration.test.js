@@ -97,6 +97,31 @@ test('forced RLS prevents one guest from reading or writing another guest conver
     );
     await client.query('ROLLBACK');
 
+    // A normal customer cannot self-assign an admin profile or forge a paid
+    // payment state; payment callbacks/admin processing need the separate role.
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE earth_app_runtime');
+    await client.query("SELECT set_config('app.auth_user_id', $1, true), set_config('app.anonymous_id', '', true)", [authA]);
+    const denied = async (sql, params) => {
+      await client.query('SAVEPOINT denied_attempt');
+      await assert.rejects(() => client.query(sql, params), error => error && error.code === '42501');
+      await client.query('ROLLBACK TO SAVEPOINT denied_attempt');
+      await client.query('RELEASE SAVEPOINT denied_attempt');
+    };
+    await denied(
+      "INSERT INTO app_user_profiles (auth_user_id, role, account_status) VALUES ($1, 'admin', 'active')",
+      [authA]
+    );
+    await denied(
+      "INSERT INTO payment_orders (order_reference, auth_user_id, provider, product_code, amount, status, idempotency_key) VALUES ($1, $2, 'bkash', 'test', 100, 'paid', $3)",
+      ['order-' + randomUUID(), authA, 'idem-' + randomUUID()]
+    );
+    await denied(
+      "INSERT INTO payment_events (payment_order_id, provider, provider_event_id, event_type, payload_sha256) VALUES ($1, 'bkash', $2, 'payment.success', repeat('a', 64))",
+      [randomUUID(), 'event-' + randomUUID()]
+    );
+    await client.query('ROLLBACK');
+
     await client.query('BEGIN');
     await client.query('SET LOCAL ROLE earth_app_admin');
     const adminRows = await client.query('SELECT id FROM chat_conversations WHERE id = ANY($1::uuid[]) ORDER BY id', [[conversationA, conversationB, accountConversationA, accountConversationB]]);
