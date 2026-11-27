@@ -65,6 +65,7 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
       conversationId, anonymousId: owner, messageId: ids[9], content: 'hello', dailyLimit: 10,
     });
     assert.equal(retry.allowed, true);
+    assert.equal(retry.duplicate, true);
     assert.equal(retry.used, 10);
     await assert.rejects(
       () => persistence.appendUserMessageWithQuota({
