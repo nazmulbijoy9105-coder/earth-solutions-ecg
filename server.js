@@ -392,14 +392,6 @@ app.post('/api/chat', async (req, res) => {
   if (isDatabaseConfigured()) {
     try {
       const rateLimit = await persistence.consumeChatRateLimit({ userId: safeUserId, ip });
-      const dailyQuota = await persistence.consumeDailyFreeQuota({ userId: safeUserId, messageId });
-      if (!dailyQuota.allowed) {
-        const retryAt = new Date(dailyQuota.retryAt);
-        res.setHeader('Retry-After', String(Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))));
-        res.setHeader('X-Free-Quota-Limit', String(dailyQuota.limit));
-        res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
-        return res.status(429).json({ error: 'Daily free message limit reached. Please try again after the daily reset.' });
-      }
       if (!rateLimit.allowed) {
         res.setHeader('Retry-After', String(rateLimit.retryAfter));
         return res.status(429).json({ error: 'Too many chat requests. Please wait before trying again.' });
@@ -411,14 +403,20 @@ app.post('/api/chat', async (req, res) => {
         lang,
       });
       previousMessages = await persistence.getConversationMessages(ownedConversationId, safeUserId, 30);
-      isFirstMessage = previousMessages.length === 0;
-      await persistence.appendConversationMessage({
+      const dailyQuota = await persistence.appendUserMessageWithQuota({
         conversationId: ownedConversationId,
         anonymousId: safeUserId,
-        role: 'user',
+        messageId,
         content: lastUserMsg,
-        clientMessageId: messageId,
       });
+      if (!dailyQuota.allowed) {
+        const retryAt = new Date(dailyQuota.retryAt);
+        res.setHeader('Retry-After', String(Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))));
+        res.setHeader('X-Free-Quota-Limit', String(dailyQuota.limit));
+        res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
+        return res.status(429).json({ error: 'Daily free message limit reached. Please try again after the daily reset.' });
+      }
+      isFirstMessage = previousMessages.length === 0;
     } catch {
       return res.status(503).json({ error: 'Persistent conversation storage is unavailable' });
     }
