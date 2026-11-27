@@ -1,0 +1,96 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+
+function responseMock() {
+  return {
+    headers: {},
+    statusCode: 200,
+    body: null,
+    setHeader(name, value) { this.headers[name.toLowerCase()] = value; },
+    end(value) { this.body = value; },
+  };
+}
+
+test('Vercel analytics and push routes reject unsupported methods and untrusted origins', async () => {
+  const previousOrigin = process.env.ALLOWED_ORIGIN;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
+  process.env.DATABASE_URL = 'postgresql://test.invalid/app';
+  try {
+    const routes = [
+      ['../api/analytics/event.js', { method: 'GET', headers: {} }, 405],
+      ['../api/analytics/event.js', { method: 'POST', headers: { origin: 'https://attacker.example' }, body: {} }, 403],
+      ['../api/analytics/pageview.js', { method: 'GET', headers: {} }, 405],
+      ['../api/analytics/pageview.js', { method: 'POST', headers: { origin: 'https://attacker.example' }, body: {} }, 403],
+      ['../api/push/subscribe.js', { method: 'GET', headers: {} }, 405],
+      ['../api/push/subscribe.js', { method: 'POST', headers: { origin: 'https://attacker.example' }, body: {} }, 403],
+    ];
+    for (const [path, request, expected] of routes) {
+      const handler = (await import(path)).default;
+      const res = responseMock();
+      await handler(request, res);
+      assert.equal(res.statusCode, expected, path);
+      assert.equal(res.headers['cache-control'], 'no-store');
+    }
+  } finally {
+    if (previousOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousOrigin;
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+  }
+});
+
+test('Vercel analytics and push routes validate payloads before database access', async () => {
+  const previousOrigin = process.env.ALLOWED_ORIGIN;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
+  process.env.DATABASE_URL = 'postgresql://test.invalid/app';
+  const headers = { origin: 'https://app.example.test' };
+  try {
+    const cases = [
+      ['../api/analytics/event.js', { method: 'POST', headers, body: { name: 'bad event name', meta: {} } }, 400],
+      ['../api/analytics/event.js', { method: 'POST', headers, body: { name: 'valid.event', userId: 'forged' } }, 400],
+      ['../api/analytics/pageview.js', { method: 'POST', headers, body: { path: '//evil.example' } }, 400],
+      ['../api/analytics/pageview.js', { method: 'POST', headers, body: { path: '/ok', userId: 'forged' } }, 400],
+      ['../api/push/subscribe.js', { method: 'POST', headers, body: { userId: 'forged', subscription: {} } }, 400],
+    ];
+    for (const [path, request, expected] of cases) {
+      const handler = (await import(path)).default;
+      const res = responseMock();
+      await handler(request, res);
+      assert.equal(res.statusCode, expected, path);
+    }
+  } finally {
+    if (previousOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousOrigin;
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+  }
+});
+
+test('Vercel analytics and push routes fail closed when durable storage is absent', async () => {
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  const previousOrigin = process.env.ALLOWED_ORIGIN;
+  delete process.env.DATABASE_URL;
+  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
+  try {
+    const cases = [
+      ['../api/analytics/event.js', { name: 'valid.event' }],
+      ['../api/analytics/pageview.js', { path: '/home' }],
+      ['../api/push/subscribe.js', { userId: 'anon_1234567890123456', subscription: { endpoint: 'https://push.example.test/x', keys: { p256dh: 'key', auth: 'auth' } } }],
+    ];
+    for (const [path, body] of cases) {
+      const handler = (await import(path)).default;
+      const res = responseMock();
+      await handler({ method: 'POST', headers: { origin: 'https://app.example.test' }, body }, res);
+      assert.equal(res.statusCode, 503, path);
+    }
+  } finally {
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+    if (previousOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousOrigin;
+  }
+});
