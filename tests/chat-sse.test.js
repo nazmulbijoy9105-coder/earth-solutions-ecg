@@ -44,7 +44,7 @@ test('Vercel chat streams standards-compliant SSE delimiters', async () => {
     const output = chunks.join('');
     assert.match(output, /data: \{"choices":\[\{"delta":\{"content":"Hello"\}\}\]\}\n\n/);
     assert.match(output, /data: \[DONE\]\n\n$/);
-    assert.equal(output.includes('\\\\n'), false);
+    assert.equal(output.includes(String.fromCharCode(92) + 'n'), false);
   } finally {
     global.fetch = previousFetch;
     if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
