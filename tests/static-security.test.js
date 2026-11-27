@@ -116,11 +116,11 @@ test('private data and server implementation files are not served', async () => 
   }
 });
 
-test('Express API routes still reach their handlers', async () => {
+test('Express push API fails closed when VAPID credentials are not configured', async () => {
   const response = await fetch(`${baseUrl}/api/push/vapid-public-key`);
-  assert.equal(response.status, 200);
+  assert.equal(response.status, 503);
   const body = await response.json();
-  assert.equal(typeof body.key, 'string');
+  assert.match(body.error, /not configured/i);
 });
 
 
