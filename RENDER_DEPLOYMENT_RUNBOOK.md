@@ -22,11 +22,11 @@ Use `npm ci` so Render installs the committed lockfile without silently resolvin
 ## Readiness contract
 
 - `/healthz` returns 200 when the Node process is alive. It does not prove database availability.
-- `/readyz` returns 200 only when the application schema and migration ledger exist, the database runtime role is not superuser or BYPASSRLS, and customer-owned tables have forced RLS policies while not being owned by the runtime role.
+- `/readyz` returns 200 only when the application schema and migration ledger exist; the customer and admin connections use separate inherited memberships in their respective non-login roles; neither login is superuser, BYPASSRLS, CREATEROLE, CREATEDB or a table owner; all required application tables have forced RLS and policies; and the runtime login is not a member of the admin role.
 - `/api/health` remains a compatibility alias for `/readyz`.
 - A 503 from `/readyz` is intentional. Do not weaken the check to make a deployment appear healthy.
 
-The application now ignores client-supplied owner IDs for chat, analytics and push APIs. Guests receive a signed, HttpOnly, SameSite cookie-backed identity; signed-in requests use a verified Neon Auth JWT. The server sets transaction-local PostgreSQL identity context for every application query. The presence of an RLS policy is not proof that its predicate is correct. Before enabling customer traffic, run cross-tenant read/write denial tests using two distinct authenticated customers and two guest identities.
+The application now ignores client-supplied owner IDs for chat, history, analytics and push APIs. Guests receive a signed, HttpOnly, SameSite cookie-backed identity; signed-in requests use a verified Neon Auth JWT. The server sets transaction-local PostgreSQL identity and hashed rate-limit bucket context for application queries. Runtime SQL grants are restricted: customers cannot self-assign admin, mark payment orders paid, write payment events, delete quota rows or read unverified source material. The presence of an RLS policy is not proof that its predicate is correct. Before enabling customer traffic, run cross-tenant read/write denial tests using two distinct authenticated customers and two guest identities.
 
 ## Environment variable handling
 
