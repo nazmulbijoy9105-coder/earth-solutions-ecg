@@ -16,7 +16,7 @@ exports.up = (pgm) => {
     GRANT SELECT ON payment_events TO earth_app_runtime;
     GRANT INSERT ON app_inquiries, app_analytics_events, audit_events TO earth_app_runtime;
     GRANT SELECT, INSERT, UPDATE, DELETE ON app_push_subscriptions, api_rate_limits TO earth_app_runtime;
-    GRANT SELECT, INSERT, DELETE ON free_message_usage TO earth_app_runtime;
+    GRANT SELECT, INSERT ON free_message_usage TO earth_app_runtime;
     GRANT SELECT ON immigration_sources, immigration_source_versions TO earth_app_runtime;
 
     CREATE OR REPLACE FUNCTION public.app_ctx_user_id() RETURNS text
