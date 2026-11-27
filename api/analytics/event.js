@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     return json(res, 400, { error: 'Invalid analytics event' });
   }
   let identity;
-  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
+  try { identity = await resolveCustomerIdentity(req, res); } catch (error) { const status = error?.statusCode || 401; return json(res, status, { error: status === 503 ? 'Customer identity service is not configured' : status === 403 ? 'Untrusted request origin' : 'Invalid or unavailable customer identity' }); }
 
   try {
     await persistence.logEvent(name, meta, identity);
