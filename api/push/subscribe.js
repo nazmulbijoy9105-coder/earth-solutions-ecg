@@ -3,7 +3,6 @@
 const database = require('../../lib/db.cjs');
 const persistence = require('../../lib/persistence.cjs');
 
-const validGuestId = value => typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
 const json = (res, status, body) => {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -24,20 +23,22 @@ module.exports = async function handler(req, res) {
     return json(res, 503, { error: 'Push storage is not configured' });
   }
 
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   const body = req.body || {};
   const subscription = body.subscription;
-  if (!validGuestId(body.userId) || !subscription || typeof subscription !== 'object' ||
+  if (!subscription || typeof subscription !== 'object' ||
       typeof subscription.endpoint !== 'string' || subscription.endpoint.length > 4096 ||
       !subscription.endpoint.startsWith('https://') ||
       !subscription.keys || typeof subscription.keys.p256dh !== 'string' ||
       typeof subscription.keys.auth !== 'string' ||
       Buffer.byteLength(JSON.stringify(subscription)) > 8192) {
-    return json(res, 400, { error: 'Invalid push subscription or anonymous identity' });
+    return json(res, 400, { error: 'Invalid push subscription' });
   }
   try {
     await persistence.savePushSubscription({
       subscription,
-      userId: body.userId,
+      ...identity,
       stage: body.stage,
       lang: body.lang,
     });
