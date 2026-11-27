@@ -8,8 +8,8 @@ This report separates repository code and CI evidence from live infrastructure e
 
 ## 1. Repository implementation and CI evidence
 
-- Latest code-tested commit: `5872bf5fdea6e485747967c356b73095e411ad51`.
-- CI run [#236](https://github.com/nazmulbijoy9105-coder/earth-solutions-ecg/actions/runs/45954456542): **29 tests passed, 0 failed**.
+- Latest code-tested commit: `51a74848741f81a730de01d6b40e77882230ba68`.
+- CI run [#256](https://github.com/nazmulbijoy9105-coder/earth-solutions-ecg/actions/runs/45955615914): **29 tests passed, 0 failed**.
 - `npm audit`: 0 vulnerabilities in the locked CI dependency tree.
 - The full **nine-migration** chain applied to clean PostgreSQL 17; CI verified all 15 required application tables.
 - The subsequent PR-head commit `f9e35015c3d4433e4e4fac5b42030a445fe26a9a` updates release documentation only. Re-run CI on the final head before merge.
@@ -22,7 +22,8 @@ This report separates repository code and CI evidence from live infrastructure e
 - All application persistence queries require an explicit identity context and run in a transaction with transaction-local PostgreSQL settings.
 - Customer identity is derived from a verified Neon Auth bearer token or a server-issued signed HttpOnly guest cookie using `GUEST_SESSION_SECRET`. Client-supplied owner IDs are ignored on chat, history, analytics and push APIs.
 - Chat conversations/messages, daily quota rows, inquiries, analytics and push subscriptions are scoped to the authenticated account or signed guest. Payment tables have owner policies, but payment APIs are not implemented.
-- PostgreSQL integration tests cover guest and authenticated account read/write isolation, denial of cross-tenant writes, inability of the runtime role to self-promote using a session variable, and cross-tenant visibility through the separate admin database role.
+- PostgreSQL integration tests cover guest and authenticated account read/write isolation, denial of cross-tenant writes, rate-limit bucket isolation, inability of the runtime role to self-promote using a session variable, non-login/non-owner/non-BYPASSRLS role properties, denial of customer self-promotion to admin, denial of forged paid payment records, and cross-tenant visibility through the separate admin database role.
+- Runtime SQL privileges are restricted by use: inquiry/analytics/audit writes only; payment-order creation only in `pending` state with no customer update/delete; payment events read-only; quota rows cannot be deleted by the runtime role; verified immigration sources are read-only; push subscriptions and customer conversations retain only the operations their flows need.
 - Migration `1789504075592_account-owned-guest-quota` extends daily quota ownership to authenticated accounts. It is intentionally non-reversible; rollback requires a verified restore and reviewed data migration rather than silent deletion.
 
 ### Security boundary
