@@ -114,7 +114,7 @@ npm ci
 npm run migrate
 ```
 
-The CI workflow independently executes all five migration files against a clean PostgreSQL 17 service database and verifies the 13 required tables. Before running the migration chain against any Neon branch, confirm that the branch is disposable and that the migration history is empty.
+The CI workflow independently executes all five migration files against a clean PostgreSQL 17 service database and verifies the 15 required application tables. Before running the migration chain against any Neon branch, confirm that the branch is disposable and that the migration history is empty.
 
 After the target branch has the complete schema, transfer the sanitized metadata from the rehearsal branch:
 
