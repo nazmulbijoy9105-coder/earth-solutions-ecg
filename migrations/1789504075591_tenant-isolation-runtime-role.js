@@ -123,9 +123,6 @@ exports.up = (pgm) => {
     ALTER TABLE app_inquiries FORCE ROW LEVEL SECURITY;
     CREATE POLICY app_inquiries_owner ON app_inquiries
       FOR INSERT TO earth_app_runtime
-      USING (public.app_ctx_is_admin() OR
-        (auth_user_id::text = public.app_ctx_user_id() AND anonymous_id IS NULL) OR
-        (auth_user_id IS NULL AND anonymous_id = public.app_ctx_guest_id()))
       WITH CHECK (public.app_ctx_is_admin() OR
         (auth_user_id::text = public.app_ctx_user_id() AND anonymous_id IS NULL) OR
         (auth_user_id IS NULL AND anonymous_id = public.app_ctx_guest_id()));
@@ -134,9 +131,6 @@ exports.up = (pgm) => {
     ALTER TABLE app_analytics_events FORCE ROW LEVEL SECURITY;
     CREATE POLICY app_analytics_events_owner ON app_analytics_events
       FOR INSERT TO earth_app_runtime
-      USING (public.app_ctx_is_admin() OR
-        (auth_user_id::text = public.app_ctx_user_id() AND anonymous_id IS NULL) OR
-        (auth_user_id IS NULL AND anonymous_id = public.app_ctx_guest_id()))
       WITH CHECK (public.app_ctx_is_admin() OR
         (auth_user_id::text = public.app_ctx_user_id() AND anonymous_id IS NULL) OR
         (auth_user_id IS NULL AND anonymous_id = public.app_ctx_guest_id()));
