@@ -15,7 +15,6 @@ exports.up = (pgm) => {
     ALTER ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
     GRANT USAGE ON SCHEMA public TO earth_app_runtime;
     GRANT SELECT, INSERT, UPDATE, DELETE ON
-      app_user_profiles, legacy_account_imports,
       chat_conversations, chat_messages, payment_orders, payment_events,
       immigration_sources, immigration_source_versions, immigration_source_reviews,
       audit_events, app_inquiries, app_analytics_events, app_push_subscriptions,
@@ -204,8 +203,8 @@ exports.up = (pgm) => {
       FOR SELECT TO earth_app_runtime USING (public.app_ctx_is_admin());
 
     GRANT SELECT, INSERT ON app_user_profiles TO earth_app_runtime;
+    GRANT SELECT ON legacy_account_imports TO earth_app_runtime;
     GRANT UPDATE (linked_auth_user_id, migration_status) ON legacy_account_imports TO earth_app_runtime;
-    GRANT SELECT, INSERT, UPDATE, DELETE ON legacy_account_imports TO earth_app_runtime;
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO earth_app_runtime;
   `);
 };
