@@ -34,7 +34,8 @@ before(async () => {
       DATABASE_URL: '',
       ADMIN_PASSWORD: 'test-only-password-123',
       GROQ_API_KEY: '',
-      METRICS_TOKEN: 'test-only-metrics-token'
+      METRICS_TOKEN: 'test-only-metrics-token',
+      GUEST_SESSION_SECRET: 'test-secret-with-at-least-32-bytes-long'
     },
     stdio: ['ignore', 'ignore', 'pipe']
   });
