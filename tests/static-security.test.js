@@ -81,7 +81,7 @@ test('public HTML uses CSP-compatible external event handlers', async () => {
   for (const pathname of ['/index.html', '/pricing.html', '/admin.html']) {
     const response = await fetch(`${baseUrl}${pathname}`);
     const html = await response.text();
-    assert.doesNotMatch(html, /\\son[a-z]+\\s*=/i, `${pathname} must not contain inline event handlers`);
+    assert.doesNotMatch(html, /\son[a-z]+\s*=/i, `${pathname} must not contain inline event handlers`);
     assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/i, `${pathname} must not contain inline script blocks`);
   }
 });
