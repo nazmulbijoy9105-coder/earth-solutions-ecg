@@ -30,11 +30,15 @@ module.exports = async function handler(req, res) {
     return res.end(JSON.stringify({ error: 'Method not allowed' }));
   }
 
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); }
+  catch { res.statusCode = 401; return res.end(JSON.stringify({ error: 'Invalid or unavailable customer identity' })); }
+
   const body = req.body || {};
   const lang = body.lang === 'bn' ? 'bn' : 'en';
   const stageNum = Number(body.stage);
   const stage = Number.isInteger(stageNum) && stageNum >= 1 && stageNum <= 7 ? stageNum : null;
-  const userId = body.userId;
+  const userId = identity.ownerId;
   const conversationId = body.conversationId;
   const messageId = body.messageId;
   const safeMessages = (Array.isArray(body.messages) ? body.messages : [])
@@ -43,7 +47,7 @@ module.exports = async function handler(req, res) {
   const lastUser = safeMessages[safeMessages.length - 1];
   const lastUserText = String(lastUser?.content || '').slice(0, 4000);
 
-  if (!validGuestId(userId) || !validUuid(conversationId) || !validUuid(messageId) || !lastUserText.trim()) {
+  if (!Boolean(userId) || !validUuid(conversationId) || !validUuid(messageId) || !lastUserText.trim()) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ error: 'A valid guest id, conversation id, message id and message are required' }));
@@ -67,15 +71,15 @@ module.exports = async function handler(req, res) {
         return res.end(JSON.stringify({ error: 'Too many chat requests. Please wait before trying again.' }));
       }
       const ownedId = await persistence.getOrCreateConversation({
-        conversationId,
-        anonymousId: userId,
+        conversationId, ...identity,
+        ...identity,
         stage,
         lang,
       });
-      previousMessages = await persistence.getConversationMessages(ownedId, userId, 30);
+      previousMessages = await persistence.getConversationMessages(ownedId, identity.ownerId, 30);
       const dailyQuota = await persistence.appendUserMessageWithQuota({
         conversationId: ownedId,
-        anonymousId: userId,
+        ...identity,
         messageId,
         content: lastUserText,
       });
@@ -130,11 +134,11 @@ module.exports = async function handler(req, res) {
       const faq = matchFAQ(lastUserText, lang);
       if (faq) {
         if (isFirstMessage && database.isDatabaseConfigured()) {
-          await persistence.createInquiry({ userId, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'faq' });
+          await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'faq' });
           inquiryLogged = true;
         }
         if (database.isDatabaseConfigured()) {
-          await persistence.appendConversationMessage({ conversationId, anonymousId: userId, role: 'assistant', content: faq, provider: 'faq' });
+          await persistence.appendConversationMessage({ conversationId, ...identity, role: 'assistant', content: faq, provider: 'faq' });
         }
         await streamText(faq, 18);
         return finish();
