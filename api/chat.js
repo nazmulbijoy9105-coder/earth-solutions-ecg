@@ -66,7 +66,9 @@ module.exports = async function handler(req, res) {
         res.setHeader('Retry-After', String(Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))));
         res.setHeader('X-Free-Quota-Limit', String(dailyQuota.limit));
         res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
-        res.statusCode = 429;\n        res.setHeader('Content-Type', 'application/json');\n        return res.end(JSON.stringify({ error: 'Daily free message limit reached. Please try again after the daily reset.' }));
+        res.statusCode = 429;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ error: 'Daily free message limit reached. Please try again after the daily reset.' }));
       }
       if (!rateLimit.allowed) {
         res.statusCode = 429;
