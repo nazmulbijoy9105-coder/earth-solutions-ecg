@@ -13,7 +13,11 @@ This document separates repository CI evidence from live infrastructure evidence
 - GitHub Actions run [#179](https://github.com/nazmulbijoy9105-coder/earth-solutions-ecg/actions/runs/45922495202): successful; 25 tests passed, 0 failed.
 - The run passed `npm audit` with 0 reported vulnerabilities, JavaScript syntax checks, migration CLI loading, and the seven-migration chain against a clean disposable PostgreSQL 17 database.
 - The CI schema assertion expects 15 application tables. This is a CI-only schema rehearsal; it does not mean the connected Neon production branch has those tables.
-- Recent code hardening replaced three Vercel placeholder handlers with validated PostgreSQL-backed analytics/pageview/push handlers, made VAPID configuration fail closed, and prevents a push endpoint from being reassigned to a different anonymous owner.
+- Added a forced-RLS tenant isolation migration for all 15 application tables, separate `earth_app_runtime` and `earth_app_admin` non-login group roles, and separate runtime/admin connection pools. Both roles are designed as non-superuser and non-BYPASSRLS; neither may own application tables.
+- All application persistence queries now require a trusted identity context and use transaction-local PostgreSQL settings. Customer identity comes from a verified Neon Auth bearer token or a server-issued signed HttpOnly guest cookie; client-supplied owner IDs are ignored.
+- Chat conversations/messages, daily quota rows, inquiries, analytics and push subscriptions are scoped to authenticated account or signed guest identity. Payment order/event tables have owner policies, but payment APIs are not implemented.
+- CI includes PostgreSQL RLS integration tests for guest and authenticated customer read/write isolation, verifies that setting a session variable cannot self-promote the runtime role to admin, and verifies that only the separate admin database role can read across tenants.
+- Added an explicitly irreversible quota-ownership migration rather than silently destroying account-owned quota rows during rollback. Restore-based rollback must be planned and tested.
 
 ## 2. Live Neon infrastructure findings
 
@@ -26,15 +30,15 @@ The connected Neon project named `peopole-ai` has two branches:
 
 Additional read-only catalog checks found:
 
-- No `public.pgmigrations` migration ledger on either branch.
+- No `public.pgmigrations` migration ledger on either branch at the time of inspection.
 - `free_message_usage` is absent from both branches.
-- No public-table RLS policies were present on staging.
+- No public-table RLS policies were present on staging at the time of the read-only inspection.
 - All 14 staging application tables had both `relrowsecurity = false` and `relforcerowsecurity = false`.
 - The staging application tables are owned by `peopole_app`.
 - The connected runtime role `peopole_app` has `rolbypassrls = true`, as well as role/database creation privileges. This role cannot serve as a tenant-isolated runtime principal.
 - The production branch has not received the application's ordered migration chain. The staging schema was created separately and is not a migration-runner rehearsal.
 
-**Consequence:** do not point the application at the current default Neon branch. Do not claim tenant isolation. Do not enable RLS by adding policies alone while the application connects as a BYPASSRLS role.
+**Consequence:** the code now contains and CI-tests the isolation design, but the connected Neon branches remain unchanged. Do not point the application at the current default branch. Do not claim production tenant isolation until the nine-migration chain is applied to a restored staging branch, the two separate login roles are provisioned and verified, and the app is configured to use the correct `DATABASE_URL` and `ADMIN_DATABASE_URL`.
 
 ## 3. Neon Auth findings
 
@@ -71,9 +75,9 @@ Read-only configuration inspection returned:
 | Gate | Required evidence | Current status |
 |---|---|---|
 | Production database | Ordered migrations run on the intended production branch; schema and migration ledger reconciled | **Blocked** |
-| Tenant isolation | Non-owner, non-BYPASSRLS runtime role; RLS + FORCE RLS; trusted per-request identity context; cross-tenant read/write denial tests | **Blocked** |
+| Tenant isolation | Non-owner, non-BYPASSRLS runtime role; RLS + FORCE RLS; trusted per-request identity context; cross-tenant read/write denial tests | **Code + CI verified; live Neon provisioning and deployment blocked** |
 | Account lifecycle | Verified sender domain; OTP, sign-in/out, reset, session refresh/revocation, browser/mobile E2E | **Blocked** |
-| Customer ownership | Authenticated accounts own their conversations, messages, subscriptions and orders; guest identifiers are not treated as identity | **Blocked** |
+| Customer ownership | Authenticated accounts and signed guests own conversations, messages, quota, analytics, inquiries and push subscriptions; payments require separate API work | **Code + CI verified for implemented data paths; live deployment and payment APIs blocked** |
 | Payments | Merchant sandbox and production credentials; signed callbacks; idempotency; refunds; reconciliation; audit trail | **Not implemented** |
 | Push | Complete VAPID configuration; real browser subscription and delivery tests; endpoint ownership protections | **Partially implemented; delivery unverified** |
 | Privacy/data governance | Privacy notice, retention, export, deletion, consent, incident response and access audit | **Blocked** |
@@ -94,4 +98,4 @@ Until all mandatory gates pass:
 
 ## 8. What this report does not claim
 
-This assessment does not certify legal compliance, payment settlement, production tenant isolation, production availability, security against penetration testing, or customer readiness. It records the evidence observed on the date above. Re-run the checks after every infrastructure or release change.
+This assessment does not certify legal compliance, payment settlement, production tenant isolation (the code has not been applied to the connected Neon branches), production availability, security against penetration testing, or customer readiness. It records the evidence observed on the date above. Re-run the checks after every infrastructure or release change.
