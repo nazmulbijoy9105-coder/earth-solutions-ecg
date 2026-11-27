@@ -428,8 +428,8 @@ app.post('/api/chat', async (req, res) => {
   res.setHeader('X-Conversation-Id', conversationId);
   res.flushHeaders();
 
-  const send = obj => res.write('data: ' + JSON.stringify(obj) + '\\n\\n');
-  const done = () => { res.write('data: [DONE]\\n\\n'); res.end(); };
+  const send = obj => res.write('data: ' + JSON.stringify(obj) + '\n\n');
+  const done = () => { res.write('data: [DONE]\n\n'); res.end(); };
   let inquiryLogged = false;
 
   try {
@@ -477,7 +477,7 @@ app.post('/api/chat', async (req, res) => {
       const { done: streamDone, value } = await reader.read();
       if (streamDone) break;
       sseBuffer += decoder.decode(value, { stream: true });
-      const lines = sseBuffer.split('\\n');
+      const lines = sseBuffer.split('\n');
       sseBuffer = lines.pop();
       for (const line of lines) {
         if (!line.startsWith('data:')) continue;
@@ -487,7 +487,7 @@ app.post('/api/chat', async (req, res) => {
           const parsed = JSON.parse(raw);
           const token = parsed.choices?.[0]?.delta?.content || '';
           fullReply += token;
-          res.write('data: ' + raw + '\\n\\n');
+          res.write('data: ' + raw + '\n\n');
         } catch {}
       }
     }
@@ -503,7 +503,7 @@ app.post('/api/chat', async (req, res) => {
     }
     return done();
   } catch (error) {
-    process.stderr.write('[Peopole AI] request failed: ' + String(error.message || 'unknown error') + '\\n');
+    process.stderr.write('[Peopole AI] request failed: ' + String(error.message || 'unknown error') + '\n');
     if (isFirstMessage && !inquiryLogged) {
       try {
         await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'fallback' });
