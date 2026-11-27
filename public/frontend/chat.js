@@ -340,8 +340,9 @@ function addAdBanner(ad) {
     <div class="ad-inner">
       <div class="ad-label">Sponsored</div>
       <div class="ad-text">${renderMarkdown(content.text)}</div>
-      <button class="ad-dismiss" onclick="this.closest('.ad-banner').remove()">✕</button>
+      <button class="ad-dismiss" type="button" aria-label="Dismiss sponsored item">✕</button>
     </div>`;
+  wrap.querySelector('.ad-dismiss')?.addEventListener('click', () => wrap.remove());
   els.messages.appendChild(wrap);
   els.messages.scrollTop = els.messages.scrollHeight;
   trackEvent('ad_impression', { adId: ad.id, stage, lang });
