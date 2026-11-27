@@ -21,7 +21,7 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
       if (sql.includes('INSERT INTO free_message_usage')) {
         const key = params[0] + ':' + params[1];
         if (usage.has(key)) return { rows: [], rowCount: 0 };
-        usage.set(key, { conversationId: params[2], contentHash: params[3] });
+        usage.set(key, { conversation_id: params[2], content_sha256: params[3] });
         return { rows: [{ client_message_id: params[1] }], rowCount: 1 };
       }
       if (sql.includes('SELECT conversation_id, content_sha256')) {
