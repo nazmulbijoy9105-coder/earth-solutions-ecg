@@ -21,8 +21,12 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
       if (sql.includes('INSERT INTO free_message_usage')) {
         const key = params[0] + ':' + params[1];
         if (usage.has(key)) return { rows: [], rowCount: 0 };
-        usage.set(key, true);
+        usage.set(key, { conversationId: params[2], contentHash: params[3] });
         return { rows: [{ client_message_id: params[1] }], rowCount: 1 };
+      }
+      if (sql.includes('SELECT conversation_id, content_sha256')) {
+        const value = usage.get(params[0] + ':' + params[1]);
+        return { rows: value ? [value] : [], rowCount: value ? 1 : 0 };
       }
       if (sql.includes('SELECT count(*)::int AS used')) {
         return { rows: [{ used: usage.size, retry_at: new Date(Date.now() + 86400000) }], rowCount: 1 };
@@ -58,10 +62,23 @@ test('quota and user-message persistence are atomic and idempotent', async () =>
       assert.equal(result.allowed, true);
     }
     const retry = await persistence.appendUserMessageWithQuota({
-      conversationId, anonymousId: owner, messageId: ids[9], content: 'hello again', dailyLimit: 10,
+      conversationId, anonymousId: owner, messageId: ids[9], content: 'hello', dailyLimit: 10,
     });
     assert.equal(retry.allowed, true);
     assert.equal(retry.used, 10);
+    await assert.rejects(
+      () => persistence.appendUserMessageWithQuota({
+        conversationId, anonymousId: owner, messageId: ids[9], content: 'changed payload', dailyLimit: 10,
+      }),
+      /Message identity was already used/
+    );
+    await assert.rejects(
+      () => persistence.appendUserMessageWithQuota({
+        conversationId: '323e4567-e89b-42d3-a456-426614174000',
+        anonymousId: owner, messageId: ids[9], content: 'hello', dailyLimit: 10,
+      }),
+      /Message identity was already used/
+    );
 
     const eleventh = await persistence.appendUserMessageWithQuota({
       conversationId, anonymousId: owner, messageId: ids[10], content: 'eleventh', dailyLimit: 10,
