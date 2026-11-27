@@ -3,7 +3,6 @@
 const database = require('../../lib/db.cjs');
 const persistence = require('../../lib/persistence.cjs');
 
-const validGuestId = value => typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
 const json = (res, status, body) => {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -24,18 +23,17 @@ module.exports = async function handler(req, res) {
     return json(res, 503, { error: 'Analytics storage is not configured' });
   }
 
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const meta = body.meta && typeof body.meta === 'object' && !Array.isArray(body.meta) ? body.meta : {};
   if (!/^[a-zA-Z0-9_.:-]{1,100}$/.test(name) || Buffer.byteLength(JSON.stringify(meta)) > 4096) {
     return json(res, 400, { error: 'Invalid analytics event' });
   }
-  if (body.userId != null && !validGuestId(body.userId)) {
-    return json(res, 400, { error: 'Invalid anonymous identity' });
-  }
 
   try {
-    await persistence.logEvent(name, meta, { userId: body.userId });
+    await persistence.logEvent(name, meta, identity);
     return json(res, 202, { accepted: true });
   } catch {
     return json(res, 503, { error: 'Analytics storage unavailable' });
