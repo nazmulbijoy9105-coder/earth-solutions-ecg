@@ -416,6 +416,9 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
         return res.status(429).json({ error: 'Daily free message limit reached. Please try again after the daily reset.' });
       }
+      if (dailyQuota.duplicate) {
+        return res.status(409).json({ error: 'This message was already submitted. Refresh conversation history before retrying.' });
+      }
       isFirstMessage = previousMessages.length === 0;
     } catch {
       return res.status(503).json({ error: 'Persistent conversation storage is unavailable' });
