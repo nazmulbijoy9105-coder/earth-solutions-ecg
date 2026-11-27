@@ -126,3 +126,22 @@ test('Vercel VAPID endpoint rejects malformed public keys', async () => {
     else process.env.VAPID_PUBLIC = previousKey;
   }
 });
+
+
+test('Vercel VAPID endpoint requires both public and private server configuration', async () => {
+  const previousPublic = process.env.VAPID_PUBLIC;
+  const previousPrivate = process.env.VAPID_PRIVATE;
+  process.env.VAPID_PUBLIC = Buffer.alloc(65, 7).toString('base64url');
+  delete process.env.VAPID_PRIVATE;
+  try {
+    const handler = (await import('../api/push/vapid-public-key.js')).default;
+    const res = responseMock();
+    await handler({ method: 'GET', headers: {} }, res);
+    assert.equal(res.statusCode, 503);
+  } finally {
+    if (previousPublic === undefined) delete process.env.VAPID_PUBLIC;
+    else process.env.VAPID_PUBLIC = previousPublic;
+    if (previousPrivate === undefined) delete process.env.VAPID_PRIVATE;
+    else process.env.VAPID_PRIVATE = previousPrivate;
+  }
+});
