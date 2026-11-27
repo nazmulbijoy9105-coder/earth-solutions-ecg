@@ -88,6 +88,11 @@ module.exports = async function handler(req, res) {
         res.setHeader('Content-Type', 'application/json');
         return res.end(JSON.stringify({ error: 'Daily free message limit reached. Please try again after the daily reset.' }));
       }
+      if (dailyQuota.duplicate) {
+        res.statusCode = 409;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ error: 'This message was already submitted. Refresh conversation history before retrying.' }));
+      }
       isFirstMessage = previousMessages.length === 0;
     } catch {
       res.statusCode = 503;
