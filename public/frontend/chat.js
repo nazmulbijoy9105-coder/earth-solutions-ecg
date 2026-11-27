@@ -969,4 +969,18 @@ function init() {
   if (els.messageInput) els.messageInput.focus();
 }
 
+document.addEventListener('click', event => {
+  const target = event.target instanceof Element ? event.target.closest('[data-pricing-action]') : null;
+  if (!target) return;
+  const action = target.getAttribute('data-pricing-action');
+  if (action === 'backdrop' && event.target !== target) return;
+  if (action === 'open') window.openPricingModal();
+  else if (action === 'faq') toggleFAQ();
+  else if (action === 'backdrop' || action === 'close') window.closePricingModal();
+  else if (action === 'select-plan') {
+    const plan = target.getAttribute('data-plan');
+    if (plan) window.selectPlan(plan);
+  }
+});
+
 document.addEventListener('DOMContentLoaded', init);
