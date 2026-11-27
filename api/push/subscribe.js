@@ -23,8 +23,6 @@ module.exports = async function handler(req, res) {
     return json(res, 503, { error: 'Push storage is not configured' });
   }
 
-  let identity;
-  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   const body = req.body || {};
   const subscription = body.subscription;
   if (!subscription || typeof subscription !== 'object' ||
@@ -35,6 +33,8 @@ module.exports = async function handler(req, res) {
       Buffer.byteLength(JSON.stringify(subscription)) > 8192) {
     return json(res, 400, { error: 'Invalid push subscription' });
   }
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   try {
     await persistence.savePushSubscription({
       subscription,
