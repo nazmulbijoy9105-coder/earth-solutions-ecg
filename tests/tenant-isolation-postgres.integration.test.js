@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { randomUUID, randomBytes } = require('node:crypto');
+const { randomUUID, randomBytes, createHash } = require('node:crypto');
 const { Client } = require('pg');
 
 test('forced RLS prevents one guest from reading or writing another guest conversation', {
@@ -17,6 +17,8 @@ test('forced RLS prevents one guest from reading or writing another guest conver
   const authB = randomUUID();
   const accountConversationA = randomUUID();
   const accountConversationB = randomUUID();
+  const rateKeyA = createHash('sha256').update('guest:' + guestA).digest('hex');
+  const rateKeyB = createHash('sha256').update('guest:' + guestB).digest('hex');
   try {
     await client.connect();
     const role = await client.query(
@@ -77,6 +79,22 @@ test('forced RLS prevents one guest from reading or writing another guest conver
       () => client.query("INSERT INTO chat_messages (conversation_id, role, content) VALUES ($1, 'user', 'forged')", [conversationB]),
       error => error && error.code === '42501'
     );
+    await client.query('ROLLBACK');
+
+    await client.query(
+      'INSERT INTO api_rate_limits (bucket_key, window_start, request_count) VALUES ($1, now(), 1), ($2, now(), 1)',
+      [rateKeyA, rateKeyB]
+    );
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE earth_app_runtime');
+    await client.query(
+      "SELECT set_config('app.anonymous_id', $1, true), set_config('app.auth_user_id', '', true), set_config('app.rate_limit_key_1', $2, true), set_config('app.rate_limit_key_2', '', true)",
+      [guestA, rateKeyA]
+    );
+    const ownBuckets = await client.query('SELECT bucket_key FROM api_rate_limits');
+    assert.deepEqual(ownBuckets.rows.map(row => row.bucket_key.trim()), [rateKeyA]);
+    const foreignBuckets = await client.query('SELECT bucket_key FROM api_rate_limits WHERE bucket_key = $1', [rateKeyB]);
+    assert.equal(foreignBuckets.rowCount, 0);
     await client.query('ROLLBACK');
 
     // Repeat the same isolation proof for authenticated Neon Auth identities.
