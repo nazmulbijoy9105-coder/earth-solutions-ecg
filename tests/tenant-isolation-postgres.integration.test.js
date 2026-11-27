@@ -19,8 +19,32 @@ test('forced RLS prevents one guest from reading or writing another guest conver
   const accountConversationB = randomUUID();
   try {
     await client.connect();
-    const role = await client.query("SELECT 1 FROM pg_roles WHERE rolname = 'earth_app_runtime'");
-    assert.equal(role.rowCount, 1, 'RLS runtime role must be created by migrations');
+    const role = await client.query(
+      `SELECT rolname, rolcanlogin, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole
+       FROM pg_roles WHERE rolname IN ('earth_app_runtime', 'earth_app_admin') ORDER BY rolname`
+    );
+    assert.equal(role.rowCount, 2, 'both dedicated database group roles must exist');
+    for (const row of role.rows) {
+      assert.equal(row.rolcanlogin, false, row.rolname + ' must not be a login');
+      assert.equal(row.rolsuper, false, row.rolname + ' must not be superuser');
+      assert.equal(row.rolbypassrls, false, row.rolname + ' must not bypass RLS');
+      assert.equal(row.rolcreatedb, false, row.rolname + ' must not create databases');
+      assert.equal(row.rolcreaterole, false, row.rolname + ' must not create roles');
+    }
+    const ownership = await client.query(
+      `SELECT count(*)::int AS count FROM pg_class c
+       JOIN pg_namespace n ON n.oid = c.relnamespace
+       JOIN pg_roles r ON r.oid = c.relowner
+       WHERE n.nspname = 'public' AND r.rolname IN ('earth_app_runtime', 'earth_app_admin')
+         AND c.relkind IN ('r', 'p')`
+    );
+    assert.equal(ownership.rows[0].count, 0, 'neither group role may own application tables');
+    const roleSeparation = await client.query(
+      `SELECT pg_has_role('earth_app_runtime', 'earth_app_admin', 'MEMBER') AS runtime_is_admin,
+              pg_has_role('earth_app_admin', 'earth_app_runtime', 'MEMBER') AS admin_is_runtime`
+    );
+    assert.equal(roleSeparation.rows[0].runtime_is_admin, false);
+    assert.equal(roleSeparation.rows[0].admin_is_runtime, false);
 
     await client.query('INSERT INTO neon_auth."user" (id) VALUES ($1), ($2)', [authA, authB]);
     await client.query(
