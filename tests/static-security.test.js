@@ -33,7 +33,8 @@ before(async () => {
       PORT: String(port),
       DATABASE_URL: '',
       ADMIN_PASSWORD: 'test-only-password-123',
-      GROQ_API_KEY: ''
+      GROQ_API_KEY: '',
+      METRICS_TOKEN: 'test-only-metrics-token'
     },
     stdio: ['ignore', 'ignore', 'pipe']
   });
@@ -123,6 +124,22 @@ test('Express push API fails closed when VAPID credentials are not configured', 
   assert.match(body.error, /not configured/i);
 });
 
+
+test('Prometheus metrics require a bearer token and expose bounded request metrics', async () => {
+  const denied = await fetch(`${baseUrl}/metrics`);
+  assert.equal(denied.status, 404);
+
+  const allowed = await fetch(`${baseUrl}/metrics`, {
+    headers: { Authorization: 'Bearer test-only-metrics-token' },
+  });
+  assert.equal(allowed.status, 200);
+  assert.match(allowed.headers.get('content-type') || '', /text\/plain/);
+  const body = await allowed.text();
+  assert.match(body, /process_uptime_seconds/);
+  assert.match(body, /http_requests_total/);
+  assert.match(body, /http_request_duration_seconds_count/);
+  assert.doesNotMatch(body, /127\.0\.0\.1|anon_[A-Za-z0-9_-]+/);
+});
 
 test('liveness stays healthy while readiness fails closed without PostgreSQL', async () => {
   const liveness = await fetch(`${baseUrl}/healthz`);
