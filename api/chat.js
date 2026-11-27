@@ -60,16 +60,6 @@ module.exports = async function handler(req, res) {
   if (database.isDatabaseConfigured()) {
     try {
       const rateLimit = await persistence.consumeChatRateLimit({ userId, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress });
-      const dailyQuota = await persistence.consumeDailyFreeQuota({ userId: userId, messageId });
-      if (!dailyQuota.allowed) {
-        const retryAt = new Date(dailyQuota.retryAt);
-        res.setHeader('Retry-After', String(Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))));
-        res.setHeader('X-Free-Quota-Limit', String(dailyQuota.limit));
-        res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
-        res.statusCode = 429;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({ error: 'Daily free message limit reached. Please try again after the daily reset.' }));
-      }
       if (!rateLimit.allowed) {
         res.statusCode = 429;
         res.setHeader('Retry-After', String(rateLimit.retryAfter));
@@ -83,14 +73,22 @@ module.exports = async function handler(req, res) {
         lang,
       });
       previousMessages = await persistence.getConversationMessages(ownedId, userId, 30);
-      isFirstMessage = previousMessages.length === 0;
-      await persistence.appendConversationMessage({
+      const dailyQuota = await persistence.appendUserMessageWithQuota({
         conversationId: ownedId,
         anonymousId: userId,
-        role: 'user',
+        messageId,
         content: lastUserText,
-        clientMessageId: messageId,
       });
+      if (!dailyQuota.allowed) {
+        const retryAt = new Date(dailyQuota.retryAt);
+        res.setHeader('Retry-After', String(Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 1000))));
+        res.setHeader('X-Free-Quota-Limit', String(dailyQuota.limit));
+        res.setHeader('X-Free-Quota-Reset', retryAt.toISOString());
+        res.statusCode = 429;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ error: 'Daily free message limit reached. Please try again after the daily reset.' }));
+      }
+      isFirstMessage = previousMessages.length === 0;
     } catch {
       res.statusCode = 503;
       res.setHeader('Content-Type', 'application/json');
