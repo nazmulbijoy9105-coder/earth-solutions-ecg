@@ -91,3 +91,28 @@ test('legacy account claim endpoint requires a verified Neon bearer token', asyn
   await module.default({ method: 'POST', headers: {}, body: {} }, res);
   assert.equal(res.statusCode, 401);
 });
+
+test('Vercel bearer-protected endpoints recognize a Bearer scheme and reach token validation', async () => {
+  const previousBase = process.env.NEON_AUTH_BASE_URL;
+  const previousJwks = process.env.NEON_AUTH_JWKS_URL;
+  delete process.env.NEON_AUTH_BASE_URL;
+  delete process.env.NEON_AUTH_JWKS_URL;
+  const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+  const syntacticallyValidToken = encode({ alg: 'EdDSA', kid: 'test-key' }) + '.' + encode({}) + '.AA';
+  try {
+    const authModule = await import('../api/auth/me.js');
+    const authRes = responseMock();
+    await authModule.default({ method: 'GET', headers: { authorization: 'Bearer ' + syntacticallyValidToken } }, authRes);
+    assert.equal(authRes.statusCode, 503, 'valid Bearer syntax should reach auth configuration validation');
+
+    const claimModule = await import('../api/auth/claim-legacy.js');
+    const claimRes = responseMock();
+    await claimModule.default({ method: 'POST', headers: { authorization: 'Bearer ' + syntacticallyValidToken }, body: {} }, claimRes);
+    assert.equal(claimRes.statusCode, 503, 'valid Bearer syntax should reach auth configuration validation');
+  } finally {
+    if (previousBase === undefined) delete process.env.NEON_AUTH_BASE_URL;
+    else process.env.NEON_AUTH_BASE_URL = previousBase;
+    if (previousJwks === undefined) delete process.env.NEON_AUTH_JWKS_URL;
+    else process.env.NEON_AUTH_JWKS_URL = previousJwks;
+  }
+});
