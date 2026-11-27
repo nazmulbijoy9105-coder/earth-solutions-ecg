@@ -67,6 +67,7 @@ The remediation migrations define:
 - `payment_orders` and `payment_events`: payment state and callback event ledger.
 - `immigration_sources`, `immigration_source_versions`, `immigration_source_reviews`: source provenance and review history.
 - `audit_events`: application audit trail.
+- `free_message_usage`: idempotent per-guest daily free-message accounting.
 
 Migration files are in `migrations/`. The legacy JSON import script defaults to dry-run and accepts a separately secured `LEGACY_DATA_DIR`. Never commit database credentials, Resend keys, raw push subscription archives or user data.
 
