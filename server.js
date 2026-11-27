@@ -180,14 +180,14 @@ async function logInquiry(input) {
 
 // Analytics is best-effort for public page loads; durable records are written
 // only when DATABASE_URL is configured. Health checks expose missing storage.
-async function logPageview(pagePath, referrer, userId) {
+async function logPageview(pagePath, referrer, identity) {
   if (!isDatabaseConfigured()) return false;
-  await persistence.logPageview(pagePath, referrer, { userId });
+  await persistence.logPageview(pagePath, referrer, identity);
   return true;
 }
-async function logEvent(name, meta, userId) {
+async function logEvent(name, meta, identity) {
   if (!isDatabaseConfigured()) return false;
-  await persistence.logEvent(name, meta, { userId });
+  await persistence.logEvent(name, meta, identity);
   return true;
 }
 
@@ -538,7 +538,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
     const faqAnswer = matchFAQ(lastUserMsg, lang);
     if (faqAnswer) {
       if (isFirstMessage) {
-        await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
+        await logInquiry({ ...req.identity, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'faq' });
         inquiryLogged = true;
       }
       if (isDatabaseConfigured()) {
@@ -553,7 +553,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
 
     if (!process.env.GROQ_API_KEY) throw new Error('AI provider is not configured');
     if (isFirstMessage) {
-      await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
+      await logInquiry({ ...req.identity, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'ai' });
       inquiryLogged = true;
     }
 
@@ -608,7 +608,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
     process.stderr.write('[Peopole AI] request failed: ' + String(error.message || 'unknown error') + '\n');
     if (isFirstMessage && !inquiryLogged) {
       try {
-        await logInquiry({ userId: safeUserId, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'fallback' });
+        await logInquiry({ ...req.identity, stage: safeStage, lang, firstMessage: lastUserMsg, ip, source: 'fallback' });
       } catch {}
     }
     const fallbackText = getFallback(lang);
