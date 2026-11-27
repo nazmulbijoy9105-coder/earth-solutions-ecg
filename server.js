@@ -86,14 +86,18 @@ app.use(express.json({ limit: '2mb' }));
 //    Set VAPID_PUBLIC / VAPID_PRIVATE env vars (generate once with web-push)
 //    Run once to generate:  npx web-push generate-vapid-keys
 // ─────────────────────────────────────────────────────────────────────────
-const VAPID_PUBLIC  = process.env.VAPID_PUBLIC  || 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY';
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE || 'REPLACE_WITH_YOUR_VAPID_PRIVATE_KEY';
-const VAPID_EMAIL   = process.env.VAPID_EMAIL   || 'mailto:admin@earthsolutions.com.bd';
+const VAPID_PUBLIC  = process.env.VAPID_PUBLIC || null;
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE || null;
+const VAPID_EMAIL   = process.env.VAPID_EMAIL || 'mailto:admin@earthsolutions.com.bd';
+let pushConfigured = false;
 
-try {
-  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
-} catch (e) {
-  console.warn('[Push] VAPID not configured — push notifications disabled:', e.message);
+if (VAPID_PUBLIC && VAPID_PRIVATE && !VAPID_PUBLIC.includes('REPLACE') && !VAPID_PRIVATE.includes('REPLACE')) {
+  try {
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
+    pushConfigured = true;
+  } catch (error) {
+    process.stderr.write('[Push] VAPID configuration rejected; push notifications disabled\\n');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -233,7 +237,11 @@ app.post('/api/analytics/event', async (req, res) => {
 // K. PUSH NOTIFICATION ENDPOINTS
 // ─────────────────────────────────────────────────────────────────────────
 app.get('/api/push/vapid-public-key', (req, res) => {
-  res.json({ key: VAPID_PUBLIC });
+  res.setHeader('Cache-Control', 'no-store');
+  if (!pushConfigured || !VAPID_PUBLIC) {
+    return res.status(503).json({ error: 'Push notifications are not configured' });
+  }
+  return res.json({ key: VAPID_PUBLIC });
 });
 
 app.post('/api/push/subscribe', async (req, res) => {
