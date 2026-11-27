@@ -31,7 +31,7 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
   require.cache[dbPath].exports = { ...originalDb, withTransaction: withRealTransaction };
   delete require.cache[persistencePath];
   const persistence = require('../lib/persistence.cjs');
-  const owner = 'anon_' + randomUUID().replace(/-/g, '');
+  const owner = 'guest_' + randomUUID().replace(/-/g, '');
   const conversationId = randomUUID();
   const otherConversationId = randomUUID();
   const ids = Array.from({ length: 12 }, () => randomUUID());
