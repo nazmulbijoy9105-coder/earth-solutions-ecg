@@ -65,8 +65,10 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
     assert.equal(usage.rows[0].count, 10);
     assert.equal(messages.rows[0].count, 10);
 
+    const acceptedIndex = results.findIndex(result => result.allowed && !result.duplicate);
+    const acceptedMessageId = ids[acceptedIndex];
     const retry = await persistence.appendUserMessageWithQuota({
-      conversationId, anonymousId: owner, messageId: ids[0], content: 'concurrent message', dailyLimit: 10,
+      conversationId, anonymousId: owner, messageId: acceptedMessageId, content: 'concurrent message', dailyLimit: 10,
     });
     assert.equal(retry.duplicate, true);
 
@@ -74,7 +76,7 @@ test('PostgreSQL serializes concurrent guest quota consumption and rejects messa
       () => persistence.appendUserMessageWithQuota({
         conversationId: otherConversationId,
         anonymousId: owner,
-        messageId: ids[0],
+        messageId: acceptedMessageId,
         content: 'concurrent message',
         dailyLimit: 10,
       }),
