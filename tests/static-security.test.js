@@ -10,6 +10,7 @@ const { after, before, test } = require('node:test');
 const root = path.resolve(__dirname, '..');
 let child;
 let baseUrl;
+let startupStderr = '';
 
 async function getFreePort() {
   const listener = net.createServer();
@@ -34,13 +35,15 @@ before(async () => {
       ADMIN_PASSWORD: 'test-only-password-123',
       GROQ_API_KEY: ''
     },
-    stdio: 'ignore'
+    stdio: ['ignore', 'ignore', 'pipe']
   });
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', chunk => { startupStderr = (startupStderr + chunk).slice(-12000); });
 
   const deadline = Date.now() + 15000;
   while (Date.now() < deadline) {
     if (child.exitCode !== null) {
-      throw new Error(`Server exited before becoming ready (code ${child.exitCode})`);
+      throw new Error(`Server exited before becoming ready (code ${child.exitCode}, signal ${child.signalCode || 'none'}). stderr: ${startupStderr || '[empty]'}`);
     }
     try {
       const response = await fetch(`${baseUrl}/index.html`);
