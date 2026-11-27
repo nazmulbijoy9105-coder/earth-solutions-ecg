@@ -36,7 +36,7 @@ Verify presence in Render's dashboard without copying values into tickets, logs,
 - `NEON_AUTH_BASE_URL`
 - `ALLOWED_ORIGIN`
 - `GROQ_API_KEY` (if AI chat is enabled)
-- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)
+- `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)\n- `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)
 
 Never print secret values. A present variable is not proof that the credential is valid or points to the intended production resource.
 
@@ -46,7 +46,7 @@ Never print secret values. A present variable is not proof that the credential i
 2. Verify Neon Auth email sender configuration, OTP, password recovery, sign-in/out, refresh and revocation in a real browser.
 3. Generate and set a matching VAPID key pair, subscribe a real browser, and confirm delivery and unsubscribe.
 4. Configure durable backups, retention, restore testing, and written RPO/RTO.
-5. Configure external monitoring and alert routes; verify a test alert reaches an on-call recipient.
+5. Configure an external Prometheus-compatible scraper for `/metrics` using `Authorization: Bearer <METRICS_TOKEN>`; set alerts for availability, elevated 5xx rates, latency, and resource pressure, then verify a test alert reaches an on-call recipient. The endpoint exposes process and aggregate request metrics only; it does not itself deliver alerts.
 6. Run complete browser journeys against a staging deployment with production-equivalent settings.
 7. Record the deployed commit SHA, migration version, rollback point, test evidence and approver.
 
