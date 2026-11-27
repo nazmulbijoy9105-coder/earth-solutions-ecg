@@ -27,7 +27,7 @@ This section is authoritative. The remaining legacy product-design sections belo
 
 ### Chat and persistence
 - The existing bilingual guest chat UI and streaming chat API remain.
-- PostgreSQL persistence code now covers guest conversations/messages, inquiries, analytics and push subscriptions.
+- PostgreSQL persistence code covers guest conversations/messages, inquiries, analytics, push subscriptions and server-enforced daily free-message usage (default 10 per UTC database day).
 - The application requires the new ordered migrations and a configured server-side `DATABASE_URL` before production chat persistence is available.
 - The staging schema was rehearsed separately; the default Neon branch has not been migrated.
 
