@@ -102,8 +102,8 @@ module.exports = async function handler(req, res) {
   res.setHeader('X-Conversation-Id', conversationId);
   if (typeof res.flushHeaders === 'function') res.flushHeaders();
 
-  const send = obj => res.write('data: ' + JSON.stringify(obj) + '\\n\\n');
-  const finish = () => { res.write('data: [DONE]\\n\\n'); res.end(); };
+  const send = obj => res.write('data: ' + JSON.stringify(obj) + '\n\n');
+  const finish = () => { res.write('data: [DONE]\n\n'); res.end(); };
   const streamText = async (text, delayMs) => {
     for (const word of String(text).split(' ')) {
       send({ choices: [{ delta: { content: word + ' ' } }] });
@@ -156,7 +156,7 @@ module.exports = async function handler(req, res) {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\\n');
+      const lines = buffer.split('\n');
       buffer = lines.pop();
       for (const line of lines) {
         if (!line.startsWith('data:')) continue;
@@ -165,7 +165,7 @@ module.exports = async function handler(req, res) {
         try {
           const parsed = JSON.parse(raw);
           fullReply += parsed.choices?.[0]?.delta?.content || '';
-          res.write('data: ' + raw + '\\n\\n');
+          res.write('data: ' + raw + '\n\n');
         } catch {}
       }
     }
@@ -175,7 +175,7 @@ module.exports = async function handler(req, res) {
     }
     return finish();
   } catch (error) {
-    process.stderr.write('[Peopole AI Vercel] request failed: ' + String(error.message || 'unknown error') + '\\n');
+    process.stderr.write('[Peopole AI Vercel] request failed: ' + String(error.message || 'unknown error') + '\n');
     const fallback = getFallback(lang);
     if (isFirstMessage && !inquiryLogged && database.isDatabaseConfigured()) {
       try {
