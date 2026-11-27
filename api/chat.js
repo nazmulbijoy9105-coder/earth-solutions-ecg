@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
     res.setHeader('Vary', 'Origin');
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
@@ -72,7 +72,6 @@ module.exports = async function handler(req, res) {
       }
       const ownedId = await persistence.getOrCreateConversation({
         conversationId, ...identity,
-        ...identity,
         stage,
         lang,
       });
@@ -147,7 +146,7 @@ module.exports = async function handler(req, res) {
 
     if (!process.env.GROQ_API_KEY) throw new Error('AI provider is not configured');
     if (isFirstMessage && database.isDatabaseConfigured()) {
-      await persistence.createInquiry({ userId, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'ai' });
+      await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'ai' });
       inquiryLogged = true;
     }
 
@@ -188,7 +187,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (fullReply && database.isDatabaseConfigured()) {
-      await persistence.appendConversationMessage({ conversationId, anonymousId: userId, role: 'assistant', content: fullReply, provider: 'groq', model: 'openai/gpt-oss-120b' });
+      await persistence.appendConversationMessage({ conversationId, ...identity, role: 'assistant', content: fullReply, provider: 'groq', model: 'openai/gpt-oss-120b' });
     }
     return finish();
   } catch (error) {
