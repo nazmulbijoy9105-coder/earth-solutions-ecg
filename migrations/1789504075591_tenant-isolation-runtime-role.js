@@ -10,6 +10,24 @@ exports.up = (pgm) => {
     ALTER ROLE earth_app_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
     ALTER ROLE earth_app_admin NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
     GRANT USAGE ON SCHEMA public TO earth_app_runtime, earth_app_admin;
+
+    -- Transfer ownership away from the prior web/runtime principal. The migration
+    -- connection must be a dedicated owner, never DATABASE_URL or peopole_app.
+    ALTER TABLE app_user_profiles OWNER TO CURRENT_USER;
+    ALTER TABLE legacy_account_imports OWNER TO CURRENT_USER;
+    ALTER TABLE chat_conversations OWNER TO CURRENT_USER;
+    ALTER TABLE chat_messages OWNER TO CURRENT_USER;
+    ALTER TABLE payment_orders OWNER TO CURRENT_USER;
+    ALTER TABLE payment_events OWNER TO CURRENT_USER;
+    ALTER TABLE immigration_sources OWNER TO CURRENT_USER;
+    ALTER TABLE immigration_source_versions OWNER TO CURRENT_USER;
+    ALTER TABLE immigration_source_reviews OWNER TO CURRENT_USER;
+    ALTER TABLE audit_events OWNER TO CURRENT_USER;
+    ALTER TABLE app_inquiries OWNER TO CURRENT_USER;
+    ALTER TABLE app_analytics_events OWNER TO CURRENT_USER;
+    ALTER TABLE app_push_subscriptions OWNER TO CURRENT_USER;
+    ALTER TABLE api_rate_limits OWNER TO CURRENT_USER;
+    ALTER TABLE free_message_usage OWNER TO CURRENT_USER;
     GRANT SELECT, INSERT, UPDATE ON chat_conversations TO earth_app_runtime;
     GRANT SELECT, INSERT ON chat_messages TO earth_app_runtime;
     GRANT SELECT, INSERT ON payment_orders TO earth_app_runtime;
