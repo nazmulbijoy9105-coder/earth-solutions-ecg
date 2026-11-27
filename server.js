@@ -16,6 +16,7 @@ const path      = require('path');
 const webpush   = require('web-push');
 const proxyNeonAuth = require('./lib/auth-proxy.cjs');
 const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
+const metrics = require('./lib/metrics.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -76,6 +77,7 @@ function requestRateLimit(req, res, next) {
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(securityHeaders);
+app.use(metrics.middleware);
 app.use('/api', requestRateLimit);
 const PORT = process.env.PORT || 3000;
 
@@ -199,6 +201,9 @@ app.post('/api/auth/claim-legacy', requireNeonAuth, async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────
 // J. HEALTH + ANALYTICS ENDPOINTS
+// Scrape endpoint is hidden unless a bearer token is configured.
+app.get('/metrics', metrics.handler);
+
 // Liveness must not depend on PostgreSQL: Render can distinguish a running
 // process from a process that is ready to serve customer traffic.
 app.get('/healthz', (req, res) => {
