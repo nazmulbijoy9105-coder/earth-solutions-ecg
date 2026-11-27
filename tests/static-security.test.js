@@ -124,9 +124,21 @@ test('Express push API fails closed when VAPID credentials are not configured', 
 });
 
 
-test('production health fails closed without PostgreSQL and legacy admin login is retired', async () => {
-  const health = await fetch(`${baseUrl}/api/health`);
-  assert.equal(health.status, 503);
+test('liveness stays healthy while readiness fails closed without PostgreSQL', async () => {
+  const liveness = await fetch(`${baseUrl}/healthz`);
+  assert.equal(liveness.status, 200);
+  assert.deepEqual(await liveness.json(), { status: 'alive' });
+
+  const readiness = await fetch(`${baseUrl}/readyz`);
+  assert.equal(readiness.status, 503);
+  assert.deepEqual(await readiness.json(), {
+    status: 'not_ready',
+    reason: 'database_unavailable',
+  });
+
+  const compatibilityHealth = await fetch(`${baseUrl}/api/health`);
+  assert.equal(compatibilityHealth.status, 503);
+
   const login = await fetch(`${baseUrl}/api/admin/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
