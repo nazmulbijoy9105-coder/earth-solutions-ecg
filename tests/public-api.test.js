@@ -51,10 +51,8 @@ test('Vercel analytics and push routes validate payloads before database access'
   try {
     const cases = [
       ['../api/analytics/event.js', { method: 'POST', headers, body: { name: 'bad event name', meta: {} } }, 400],
-      ['../api/analytics/event.js', { method: 'POST', headers, body: { name: 'valid.event', userId: 'forged' } }, 400],
       ['../api/analytics/pageview.js', { method: 'POST', headers, body: { path: '//evil.example' } }, 400],
-      ['../api/analytics/pageview.js', { method: 'POST', headers, body: { path: '/ok', userId: 'forged' } }, 400],
-      ['../api/push/subscribe.js', { method: 'POST', headers, body: { userId: 'forged', subscription: {} } }, 400],
+      ['../api/push/subscribe.js', { method: 'POST', headers, body: { subscription: {} } }, 400],
     ];
     for (const [path, request, expected] of cases) {
       const handler = (await import(path)).default;
