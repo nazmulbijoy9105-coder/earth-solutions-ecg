@@ -62,7 +62,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE neon_auth."user" (id uuid PRIMARY KEY)'
           npx node-pg-migrate up --database-url-var DATABASE_URL --migrations-dir migrations --schema public
           migration_count=$(psql "$DATABASE_URL" -Atc 'SELECT count(*) FROM pgmigrations')
-          test "$migration_count" -eq 5
+          test "$migration_count" -eq 7
           required_count=$(psql "$DATABASE_URL" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ANY (ARRAY['app_user_profiles','legacy_account_imports','chat_conversations','chat_messages','payment_orders','payment_events','immigration_sources','immigration_source_versions','immigration_source_reviews','audit_events','app_inquiries','app_analytics_events','app_push_subscriptions','api_rate_limits','free_message_usage'])")
           test "$required_count" -eq 15
 
