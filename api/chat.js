@@ -8,10 +8,6 @@ function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
 }
 
-function validGuestId(value) {
-  return typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
-}
-
 module.exports = async function handler(req, res) {
   const allowedOrigin = process.env.ALLOWED_ORIGIN;
   if (allowedOrigin && req.headers.origin === allowedOrigin) {
@@ -33,7 +29,7 @@ module.exports = async function handler(req, res) {
 
   let identity;
   try { identity = await resolveCustomerIdentity(req, res); }
-  catch { res.statusCode = 401; return res.end(JSON.stringify({ error: 'Invalid or unavailable customer identity' })); }
+  catch (error) { res.statusCode = error?.statusCode || 401; return res.end(JSON.stringify({ error: error?.statusCode === 503 ? 'Customer identity service is not configured' : error?.statusCode === 403 ? 'Untrusted request origin' : 'Invalid or unavailable customer identity' })); }
 
   const body = req.body || {};
   const lang = body.lang === 'bn' ? 'bn' : 'en';
@@ -51,7 +47,7 @@ module.exports = async function handler(req, res) {
   if (!Boolean(userId) || !validUuid(conversationId) || !validUuid(messageId) || !lastUserText.trim()) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ error: 'A valid guest id, conversation id, message id and message are required' }));
+    return res.end(JSON.stringify({ error: 'A valid customer identity, conversation id, message id and message are required' }));
   }
 
   if (process.env.NODE_ENV === 'production' && !database.isDatabaseConfigured()) {
