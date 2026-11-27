@@ -317,14 +317,14 @@ a {
 </div>
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab active" onclick="filterStage('all',this)">All Plans</button>
-    <button class="tab" onclick="filterStage('1',this)">🌱 Foundation</button>
-    <button class="tab" onclick="filterStage('2',this)">🔍 Development</button>
-    <button class="tab" onclick="filterStage('3',this)">🎯 Strategic</button>
-    <button class="tab" onclick="filterStage('4',this)">🎓 Undergraduate</button>
-    <button class="tab" onclick="filterStage('5',this)">🔬 Masters</button>
-    <button class="tab" onclick="filterStage('6',this)">🏛️ Doctoral</button>
-    <button class="tab parent-mode-tab" onclick="filterStage('7',this)">👨‍👩‍👧 Parent Mode</button>
+    <button class="tab active" data-stage-filter="all">All Plans</button>
+    <button class="tab" data-stage-filter="1">🌱 Foundation</button>
+    <button class="tab" data-stage-filter="2">🔍 Development</button>
+    <button class="tab" data-stage-filter="3">🎯 Strategic</button>
+    <button class="tab" data-stage-filter="4">🎓 Undergraduate</button>
+    <button class="tab" data-stage-filter="5">🔬 Masters</button>
+    <button class="tab" data-stage-filter="6">🏛️ Doctoral</button>
+    <button class="tab parent-mode-tab" data-stage-filter="7">👨‍👩‍👧 Parent Mode</button>
   </div>
 </div>
 
@@ -710,14 +710,6 @@ a {
   </p>
 </footer>
 
-<script>
-function filterStage(stage, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.stage-row').forEach(row => {
-    row.style.display = (stage === 'all' || row.dataset.stage === stage) ? '' : 'none';
-  });
-}
-</script>
+<script src="/frontend/pricing.js"></script>
 </body>
 </html>
