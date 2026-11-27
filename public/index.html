@@ -578,7 +578,7 @@
       </div>
       <div class="topbar-actions">
         <div class="status-dot" id="statusDot" title="Online"></div>
-        <button class="pricing-btn" id="pricingBtn" onclick="openPricingModal()" title="View Pricing Plans">
+        <button class="pricing-btn" id="pricingBtn" data-pricing-action="open" title="View Pricing Plans">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span id="pricingBtnLabel">Pricing</span>
         </button>
@@ -596,7 +596,7 @@
 
     <!-- FAQ Panel -->
     <div class="faq-area" id="faqArea">
-      <button class="faq-toggle" id="faqToggleBtn" onclick="toggleFAQ()">
+      <button class="faq-toggle" id="faqToggleBtn" data-pricing-action="faq">
         💡 <span id="faqToggleLabel">Common Questions</span>
         <i class="faq-arrow" id="faqArrow">▾</i>
       </button>
@@ -628,7 +628,7 @@
 </div>
 
 <!-- ═══════════ PRICING MODAL ═══════════ -->
-<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" onclick="closePricingOnBackdrop(event)">
+<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" data-pricing-action="backdrop">
   <div class="pricing-modal" id="pricingModalBox">
     <div class="pm-header">
       <div class="pm-title-wrap">
@@ -638,11 +638,11 @@
           <p id="pmSub">Earth Solutions Visa Zone — Choose what fits you</p>
         </div>
       </div>
-      <button class="pm-close" onclick="closePricingModal()">✕</button>
+      <button class="pm-close" data-pricing-action="close">✕</button>
     </div>
 
     <div class="pm-plans">
-      <div class="pm-plan free" onclick="selectPlan('free')">
+      <div class="pm-plan free" data-pricing-action="select-plan" data-plan="free">
         <div class="pm-plan-badge">🟢 FREE</div>
         <div class="pm-plan-name">Basic Pathway</div>
         <div class="pm-plan-price">৳0</div>
@@ -656,7 +656,7 @@
         <button class="pm-cta green" onclick="closePricingModal()">Start Chatting Free →</button>
       </div>
 
-      <div class="pm-plan entry" onclick="selectPlan('entry')">
+      <div class="pm-plan entry" data-pricing-action="select-plan" data-plan="entry">
         <div class="pm-plan-badge">💰 ENTRY</div>
         <div class="pm-plan-name">Entry-Level Report</div>
         <div class="pm-plan-price">৳30 <small>/ student</small></div>
@@ -670,7 +670,7 @@
         <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+%E2%82%B930" target="_blank">Get Report — ৳30 →</a>
       </div>
 
-      <div class="pm-plan structured" onclick="selectPlan('structured')">
+      <div class="pm-plan structured" data-pricing-action="select-plan" data-plan="structured">
         <div class="pm-plan-badge pm-popular">🔵 POPULAR</div>
         <div class="pm-plan-name">Structured Guidance</div>
         <div class="pm-plan-price">৳100–৳499</div>
@@ -684,7 +684,7 @@
         <a class="pm-cta blue" href="https://wa.me/8801535778111?text=I+want+Structured+Guidance" target="_blank">Get Started →</a>
       </div>
 
-      <div class="pm-plan midtier" onclick="selectPlan('midtier')">
+      <div class="pm-plan midtier" data-pricing-action="select-plan" data-plan="midtier">
         <div class="pm-plan-badge">💼 PREMIUM</div>
         <div class="pm-plan-name">Mentor-Led Programme</div>
         <div class="pm-plan-price">৳500–৳20,000+</div>
@@ -698,7 +698,7 @@
         <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+Mentor-Led+Programme" target="_blank">Book Consultation →</a>
       </div>
 
-      <div class="pm-plan elite" onclick="selectPlan('elite')">
+      <div class="pm-plan elite" data-pricing-action="select-plan" data-plan="elite">
         <div class="pm-plan-badge">🔴 ELITE</div>
         <div class="pm-plan-name">Elite Academic Board</div>
         <div class="pm-plan-price">Call for Details</div>
