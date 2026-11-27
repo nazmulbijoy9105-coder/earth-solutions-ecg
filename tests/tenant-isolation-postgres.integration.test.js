@@ -29,7 +29,7 @@ test('forced RLS prevents one guest from reading or writing another guest conver
 
     await client.query('BEGIN');
     await client.query('SET LOCAL ROLE earth_app_runtime');
-    await client.query("SELECT set_config('app.auth_user_id', '', true), set_config('app.anonymous_id', $1, true), set_config('app.access_role', 'user', true)", [guestA]);
+    await client.query("SELECT set_config('app.auth_user_id', '', true), set_config('app.anonymous_id', $1, true), set_config('app.access_role', 'admin', true)", [guestA]);
     const conversations = await client.query('SELECT id FROM chat_conversations ORDER BY id');
     assert.deepEqual(conversations.rows.map(row => row.id), [conversationA]);
 
