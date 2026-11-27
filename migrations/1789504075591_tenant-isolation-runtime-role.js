@@ -31,6 +31,12 @@ exports.up = (pgm) => {
     CREATE OR REPLACE FUNCTION public.app_ctx_verified_email() RETURNS text
     LANGUAGE sql STABLE PARALLEL SAFE
     AS 'SELECT nullif(lower(current_setting(''app.verified_email'', true)), '''')';
+    CREATE OR REPLACE FUNCTION public.app_ctx_rate_limit_key_1() RETURNS text
+    LANGUAGE sql STABLE PARALLEL SAFE
+    AS 'SELECT nullif(current_setting(''app.rate_limit_key_1'', true), '''')';
+    CREATE OR REPLACE FUNCTION public.app_ctx_rate_limit_key_2() RETURNS text
+    LANGUAGE sql STABLE PARALLEL SAFE
+    AS 'SELECT nullif(current_setting(''app.rate_limit_key_2'', true), '''')';
 
     ALTER TABLE app_user_profiles ENABLE ROW LEVEL SECURITY;
     ALTER TABLE app_user_profiles FORCE ROW LEVEL SECURITY;
@@ -156,7 +162,9 @@ exports.up = (pgm) => {
     ALTER TABLE api_rate_limits ENABLE ROW LEVEL SECURITY;
     ALTER TABLE api_rate_limits FORCE ROW LEVEL SECURITY;
     CREATE POLICY api_rate_limits_runtime ON api_rate_limits
-      FOR ALL TO earth_app_runtime USING (true) WITH CHECK (true);
+      FOR ALL TO earth_app_runtime
+      USING (bucket_key IN (public.app_ctx_rate_limit_key_1(), public.app_ctx_rate_limit_key_2()))
+      WITH CHECK (bucket_key IN (public.app_ctx_rate_limit_key_1(), public.app_ctx_rate_limit_key_2()));
 
     ALTER TABLE immigration_sources ENABLE ROW LEVEL SECURITY;
     ALTER TABLE immigration_sources FORCE ROW LEVEL SECURITY;
@@ -286,6 +294,8 @@ exports.down = (pgm) => {
     ALTER TABLE legacy_account_imports DISABLE ROW LEVEL SECURITY;
     ALTER TABLE app_user_profiles NO FORCE ROW LEVEL SECURITY;
     ALTER TABLE app_user_profiles DISABLE ROW LEVEL SECURITY;
+    DROP FUNCTION IF EXISTS public.app_ctx_rate_limit_key_2();
+    DROP FUNCTION IF EXISTS public.app_ctx_rate_limit_key_1();
     DROP FUNCTION IF EXISTS public.app_ctx_verified_email();
     DROP FUNCTION IF EXISTS public.app_ctx_is_admin();
     DROP FUNCTION IF EXISTS public.app_ctx_guest_id();
