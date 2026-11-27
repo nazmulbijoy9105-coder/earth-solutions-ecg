@@ -3,7 +3,6 @@
 const database = require('../../lib/db.cjs');
 const persistence = require('../../lib/persistence.cjs');
 
-const validGuestId = value => typeof value === 'string' && /^anon_[A-Za-z0-9_-]{16,100}$/.test(value);
 const json = (res, status, body) => {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -24,16 +23,15 @@ module.exports = async function handler(req, res) {
     return json(res, 503, { error: 'Analytics storage is not configured' });
   }
 
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch { return json(res, 401, { error: 'Invalid or unavailable customer identity' }); }
   const body = req.body || {};
   const pathname = typeof body.path === 'string' ? body.path : '';
   if (!pathname.startsWith('/') || pathname.startsWith('//') || /[\\\r\n]/.test(pathname) || pathname.length > 500) {
     return json(res, 400, { error: 'Invalid page path' });
   }
-  if (body.userId != null && !validGuestId(body.userId)) {
-    return json(res, 400, { error: 'Invalid anonymous identity' });
-  }
   try {
-    await persistence.logPageview(pathname, body.referrer, { userId: body.userId });
+    await persistence.logPageview(pathname, body.referrer, identity);
     return json(res, 202, { accepted: true });
   } catch {
     return json(res, 503, { error: 'Analytics storage unavailable' });
