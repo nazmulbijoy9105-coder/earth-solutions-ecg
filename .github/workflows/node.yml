@@ -2,9 +2,10 @@ name: Node.js CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'remediation/**']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -59,7 +60,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE SCHEMA neon_auth'
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE neon_auth."user" (id uuid PRIMARY KEY)'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE neon_auth."user" (id uuid PRIMARY KEY, name text NOT NULL, email text NOT NULL UNIQUE, "emailVerified" boolean NOT NULL DEFAULT false)'
           npx node-pg-migrate up --database-url-var DATABASE_URL --migrations-dir migrations --schema public
           migration_count=$(psql "$DATABASE_URL" -Atc 'SELECT count(*) FROM pgmigrations')
           test "$migration_count" -eq 9
