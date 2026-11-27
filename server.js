@@ -552,7 +552,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
       try {
         await persistence.appendConversationMessage({
           conversationId,
-          anonymousId: safeUserId,
+          ...req.identity,
           role: 'assistant',
           content: fallbackText,
           provider: 'fallback',
