@@ -220,7 +220,7 @@ app.get('/healthz', (req, res) => {
 // are never exposed to unauthenticated callers.
 async function readinessHandler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (runtimeConfigurationIssues().length) {
+  if (runtimeConfigurationIssues({ ...process.env, NODE_ENV: 'production' }).length) {
     return res.status(503).json({ status: 'not_ready', reason: 'runtime_configuration_incomplete' });
   }
   if (!isDatabaseConfigured()) {
