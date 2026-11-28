@@ -20,7 +20,7 @@ const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { getTrustedClientIp } = require('./lib/client-ip.cjs');
 const { runtimeConfigurationIssues } = require('./lib/runtime-config.cjs');
-const { isSafeStoredSubscription, safePushTarget } = require('./lib/push-endpoint.cjs');
+const { isValidPushSubscription, isSafeStoredSubscription, safePushTarget } = require('./lib/push-endpoint.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -282,8 +282,9 @@ app.get('/api/push/vapid-public-key', (req, res) => {
 
 app.post('/api/push/subscribe', requireCustomerIdentity, async (req, res) => {
   setCORS(res, req);
+  if (!pushConfigured) return res.status(503).json({ error: 'Push delivery is not configured' });
   const { subscription, stage, lang } = req.body || {};
-  if (!subscription || !subscription.endpoint) {
+  if (!isValidPushSubscription(subscription) || Buffer.byteLength(JSON.stringify(subscription)) > 8192) {
     return res.status(400).json({ error: 'Invalid subscription' });
   }
   try {
