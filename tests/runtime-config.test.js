@@ -6,6 +6,8 @@ const { runtimeConfigurationIssues } = require('../lib/runtime-config.cjs');
 
 const validProductionEnv = () => ({
   NODE_ENV: 'production',
+  DATABASE_URL: 'postgresql://runtime:secret@db.neon.tech/app',
+  ADMIN_DATABASE_URL: 'postgresql://admin:secret@db.neon.tech/app',
   GUEST_SESSION_SECRET: '0123456789abcdef0123456789abcdef',
   NEON_AUTH_BASE_URL: 'https://auth.neon.tech/project/auth',
   NEON_AUTH_JWKS_URL: 'https://auth.neon.tech/project/auth/.well-known/jwks.json',
@@ -66,4 +68,15 @@ test('valid VAPID key encodings use the expected uncompressed public and private
   env.VAPID_PUBLIC = Buffer.alloc(65, 4).toString('base64url');
   env.VAPID_PRIVATE = Buffer.alloc(32, 7).toString('base64url');
   assert.deepEqual(runtimeConfigurationIssues(env), []);
+});
+
+
+test('production readiness requires separate valid runtime and admin PostgreSQL URLs', () => {
+  const env = validProductionEnv();
+  delete env.ADMIN_DATABASE_URL;
+  assert.deepEqual(runtimeConfigurationIssues(env), ['ADMIN_DATABASE_URL']);
+
+  env.ADMIN_DATABASE_URL = 'postgresql://admin:secret@db.neon.tech/app';
+  env.DATABASE_URL = 'postgres-evil://runtime:secret@db.neon.tech/app';
+  assert.deepEqual(runtimeConfigurationIssues(env), ['DATABASE_URL']);
 });
