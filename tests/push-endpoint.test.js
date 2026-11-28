@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { isAllowedPushEndpoint, isSafeStoredSubscription, safePushTarget } = require('../lib/push-endpoint.cjs');
+const { isAllowedPushEndpoint, isValidPushSubscription, isSafeStoredSubscription, safePushTarget } = require('../lib/push-endpoint.cjs');
 
 test('accepts supported public browser push services only', () => {
   assert.equal(isAllowedPushEndpoint('https://fcm.googleapis.com/fcm/send/example'), true);
@@ -33,12 +33,23 @@ test('push notification click targets cannot redirect off-site', () => {
 
 test('stored push record must have one matching validated endpoint in both columns', () => {
   const endpoint = 'https://fcm.googleapis.com/fcm/send/example';
-  assert.equal(isSafeStoredSubscription({
-    endpoint,
-    subscription: { endpoint, keys: { p256dh: 'public', auth: 'secret' } },
-  }), true);
+  const keys = {
+    p256dh: Buffer.alloc(65, 4).toString('base64url'),
+    auth: Buffer.alloc(16, 7).toString('base64url'),
+  };
+  assert.equal(isValidPushSubscription({ endpoint, keys }), true);
+  assert.equal(isSafeStoredSubscription({ endpoint, subscription: { endpoint, keys } }), true);
   assert.equal(isSafeStoredSubscription({
     endpoint,
     subscription: { endpoint: 'https://attacker.example/ssrf', keys: {} },
+  }), false);
+});
+
+
+test('rejects subscriptions with malformed encryption key lengths', () => {
+  const endpoint = 'https://fcm.googleapis.com/fcm/send/example';
+  assert.equal(isValidPushSubscription({
+    endpoint,
+    keys: { p256dh: 'short', auth: 'short' },
   }), false);
 });
