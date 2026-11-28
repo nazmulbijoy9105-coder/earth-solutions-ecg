@@ -20,7 +20,7 @@ const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { getTrustedClientIp } = require('./lib/client-ip.cjs');
 const { runtimeConfigurationIssues } = require('./lib/runtime-config.cjs');
-const { isAllowedPushEndpoint, safePushTarget } = require('./lib/push-endpoint.cjs');
+const { isSafeStoredSubscription, safePushTarget } = require('./lib/push-endpoint.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -370,7 +370,7 @@ app.post('/api/admin/push/broadcast', ...adminOnly, async (req, res) => {
     let failed = 0;
     const toRemove = [];
     for (const item of subscriptions) {
-      if (!isAllowedPushEndpoint(item.endpoint || item.subscription?.endpoint)) {
+      if (!isSafeStoredSubscription(item)) {
         failed++;
         toRemove.push(item.endpoint);
         continue;
