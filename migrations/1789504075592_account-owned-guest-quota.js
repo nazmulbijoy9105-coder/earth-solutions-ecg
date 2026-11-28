@@ -4,6 +4,7 @@ exports.shorthands = undefined;
 // signed guest identities as a distinct ownership namespace.
 exports.up = (pgm) => {
   pgm.sql(`
+    SET ROLE earth_app_owner;
     ALTER TABLE free_message_usage DROP CONSTRAINT free_message_usage_pkey;
     ALTER TABLE free_message_usage ALTER COLUMN anonymous_id DROP NOT NULL;
     ALTER TABLE free_message_usage DROP CONSTRAINT free_message_usage_anonymous_id_check;
@@ -34,6 +35,7 @@ exports.up = (pgm) => {
         (auth_user_id::text = public.app_ctx_user_id() AND anonymous_id IS NULL) OR
         (auth_user_id IS NULL AND anonymous_id = public.app_ctx_guest_id())
       );
+    RESET ROLE;
   `);
 };
 
