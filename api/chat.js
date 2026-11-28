@@ -3,6 +3,7 @@ const { buildSystemPrompt, matchFAQ, getFallback } = require('../lib/ai-core.js'
 const persistence = require('../lib/persistence.cjs');
 const database = require('../lib/db.cjs');
 const { resolveCustomerIdentity } = require('../lib/customer-identity.cjs');
+const { getTrustedClientIp } = require('../lib/client-ip.cjs');
 
 function validUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
@@ -60,7 +61,7 @@ module.exports = async function handler(req, res) {
   let isFirstMessage = safeMessages.length === 1;
   if (database.isDatabaseConfigured()) {
     try {
-      const rateLimit = await persistence.consumeChatRateLimit({ userId, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress });
+      const rateLimit = await persistence.consumeChatRateLimit({ userId, ip: getTrustedClientIp(req) });
       if (!rateLimit.allowed) {
         res.statusCode = 429;
         res.setHeader('Retry-After', String(rateLimit.retryAfter));
@@ -130,7 +131,7 @@ module.exports = async function handler(req, res) {
       const faq = matchFAQ(lastUserText, lang);
       if (faq) {
         if (isFirstMessage && database.isDatabaseConfigured()) {
-          await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'faq' });
+          await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: getTrustedClientIp(req), source: 'faq' });
           inquiryLogged = true;
         }
         if (database.isDatabaseConfigured()) {
@@ -143,7 +144,7 @@ module.exports = async function handler(req, res) {
 
     if (!process.env.GROQ_API_KEY) throw new Error('AI provider is not configured');
     if (isFirstMessage && database.isDatabaseConfigured()) {
-      await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'ai' });
+      await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: getTrustedClientIp(req), source: 'ai' });
       inquiryLogged = true;
     }
 
@@ -192,7 +193,7 @@ module.exports = async function handler(req, res) {
     const fallback = getFallback(lang);
     if (isFirstMessage && !inquiryLogged && database.isDatabaseConfigured()) {
       try {
-        await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress, source: 'fallback' });
+        await persistence.createInquiry({ ...identity, stage, lang, firstMessage: lastUserText, ip: getTrustedClientIp(req), source: 'fallback' });
       } catch {}
     }
     if (database.isDatabaseConfigured()) {
