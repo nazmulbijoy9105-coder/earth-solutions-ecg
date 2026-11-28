@@ -47,9 +47,19 @@ function securityHeaders(req, res, next) {
 }
 
 function requestRateLimit(req, res, next) {
-  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+  const clientIp = getTrustedClientIp(req) || 'unknown';
 
   const now = Date.now();
+  if (!rateLimitBuckets.has(clientIp) && rateLimitBuckets.size >= 10000) {
+    for (const [key, entry] of rateLimitBuckets) {
+      if (now - entry.windowStart >= RATE_LIMIT_WINDOW_MS) rateLimitBuckets.delete(key);
+    }
+    if (rateLimitBuckets.size >= 10000) {
+      res.setHeader('Retry-After', '60');
+      return res.status(429).json({ error: 'Request capacity temporarily limited' });
+    }
+  }
+
   let bucket = rateLimitBuckets.get(clientIp);
 
   if (!bucket || now - bucket.windowStart >= RATE_LIMIT_WINDOW_MS) {
