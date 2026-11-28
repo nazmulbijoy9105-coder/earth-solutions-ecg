@@ -40,3 +40,30 @@ test('production runtime configuration rejects partial VAPID configuration', () 
 test('non-production runtime does not block local development configuration', () => {
   assert.deepEqual(runtimeConfigurationIssues({ NODE_ENV: 'development' }), []);
 });
+
+
+test('production configuration rejects long placeholder secrets and example hosts', () => {
+  const env = validProductionEnv();
+  env.GUEST_SESSION_SECRET = 'REPLACE_WITH_A_REAL_RANDOM_SECRET_VALUE_123456789';
+  env.NEON_AUTH_BASE_URL = 'https://auth.example.test/project/auth';
+  env.ALLOWED_ORIGIN = 'https://app.example.test';
+  assert.deepEqual(runtimeConfigurationIssues(env), [
+    'GUEST_SESSION_SECRET',
+    'NEON_AUTH_BASE_URL',
+    'ALLOWED_ORIGIN',
+  ]);
+});
+
+test('production configuration rejects malformed VAPID key material', () => {
+  const env = validProductionEnv();
+  env.VAPID_PUBLIC = 'not-a-valid-public-key';
+  env.VAPID_PRIVATE = 'not-a-valid-private-key';
+  assert.deepEqual(runtimeConfigurationIssues(env), ['VAPID_PUBLIC/VAPID_PRIVATE']);
+});
+
+test('valid VAPID key encodings use the expected uncompressed public and private lengths', () => {
+  const env = validProductionEnv();
+  env.VAPID_PUBLIC = Buffer.alloc(65, 4).toString('base64url');
+  env.VAPID_PRIVATE = Buffer.alloc(32, 7).toString('base64url');
+  assert.deepEqual(runtimeConfigurationIssues(env), []);
+});
