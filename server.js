@@ -20,6 +20,7 @@ const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { getTrustedClientIp } = require('./lib/client-ip.cjs');
 const { runtimeConfigurationIssues } = require('./lib/runtime-config.cjs');
+const { isAllowedPushEndpoint, safePushTarget } = require('./lib/push-endpoint.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -361,13 +362,19 @@ app.get('/api/admin/sessions', ...adminOnly, async (req, res) => {
 app.post('/api/admin/push/broadcast', ...adminOnly, async (req, res) => {
   const { title, body, url } = req.body || {};
   if (!title || !body) return res.status(400).json({ error: 'title and body required' });
+  if (!pushConfigured) return res.status(503).json({ error: 'Push delivery is not configured' });
   try {
     const subscriptions = await persistence.listPushSubscriptions();
-    const payload = JSON.stringify({ title: String(title).slice(0, 120), body: String(body).slice(0, 500), url: url || '/', icon: '/logo.jpg', badge: '/logo.jpg' });
+    const payload = JSON.stringify({ title: String(title).slice(0, 120), body: String(body).slice(0, 500), url: safePushTarget(url), icon: '/logo.jpg', badge: '/logo.jpg' });
     let sent = 0;
     let failed = 0;
     const toRemove = [];
     for (const item of subscriptions) {
+      if (!isAllowedPushEndpoint(item.endpoint || item.subscription?.endpoint)) {
+        failed++;
+        toRemove.push(item.endpoint);
+        continue;
+      }
       try {
         await webpush.sendNotification(item.subscription, payload);
         sent++;
