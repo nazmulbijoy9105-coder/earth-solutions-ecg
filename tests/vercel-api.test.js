@@ -19,9 +19,9 @@ test('Vercel health and auth endpoints fail closed when storage or identity is a
   delete process.env.DATABASE_URL;
   Object.assign(process.env, {
     GUEST_SESSION_SECRET: 'test-secret-with-at-least-32-bytes-long',
-    NEON_AUTH_BASE_URL: 'https://auth.example.test/project/auth',
-    NEON_AUTH_JWKS_URL: 'https://auth.example.test/project/auth/.well-known/jwks.json',
-    ALLOWED_ORIGIN: 'https://app.example.test',
+    NEON_AUTH_BASE_URL: 'https://auth.neon.tech/project/auth',
+    NEON_AUTH_JWKS_URL: 'https://auth.neon.tech/project/auth/.well-known/jwks.json',
+    ALLOWED_ORIGIN: 'https://app.earthsolutions.com.bd',
     GROQ_API_KEY: 'gsk_' + 'x'.repeat(40),
   });
   try {
@@ -68,12 +68,12 @@ test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async 
   const previousOrigin = process.env.ALLOWED_ORIGIN;
   const previousBase = process.env.NEON_AUTH_BASE_URL;
   let called = false;
-  process.env.ALLOWED_ORIGIN = 'https://app.example.test';
+  process.env.ALLOWED_ORIGIN = 'https://app.earthsolutions.com.bd';
   process.env.NEON_AUTH_BASE_URL = 'https://neon.example.test/peopole_ai/auth';
   global.fetch = async (url, options) => {
     called = true;
     assert.equal(String(url), 'https://neon.example.test/peopole_ai/auth/get-session');
-    assert.equal(options.headers.get('Origin'), 'https://app.example.test');
+    assert.equal(options.headers.get('Origin'), 'https://app.earthsolutions.com.bd');
     return new Response(JSON.stringify({ session: null }), {
       status: 200,
       headers: { 'content-type': 'application/json', 'set-cookie': 'auth=abc; Path=/; HttpOnly; Secure' },
@@ -84,7 +84,7 @@ test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async 
     const res = responseMock();
     await module.default({
       method: 'GET',
-      headers: { origin: 'https://app.example.test' },
+      headers: { origin: 'https://app.earthsolutions.com.bd' },
       url: '/api/neon-auth/get-session',
       query: { path: ['get-session'] },
     }, res);
