@@ -1375,3 +1375,58 @@ body.homepage-active { height: auto; min-height: 100%; overflow: visible; }
   .input-area { padding: 6px 8px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
   .input-wrap { border-radius: 22px; }
 }
+
+
+/* ── Optional account access ───────────────────────────────────────────── */
+.account-btn {
+  border: 1px solid var(--border-gold);
+  background: var(--navy3);
+  color: var(--gold);
+  border-radius: 9px;
+  padding: 7px 11px;
+  font: 600 11px var(--font-b);
+  cursor: pointer;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-btn:hover { background: var(--navy4); }
+.auth-dialog {
+  width: min(92vw, 430px);
+  max-width: 430px;
+  border: 1px solid var(--border-gold);
+  border-radius: 18px;
+  padding: 0;
+  background: var(--navy3);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  margin: auto;
+}
+.auth-dialog::backdrop { background: rgba(15, 15, 15, .48); backdrop-filter: blur(3px); }
+.auth-dialog-inner { padding: 22px; }
+.auth-dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.auth-dialog-heading h2 { font: 600 22px var(--font-d); color: var(--gold); }
+.auth-dialog-heading p { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.auth-close { border: 0; background: transparent; color: var(--text2); font-size: 25px; line-height: 1; cursor: pointer; }
+.auth-field { display: grid; gap: 5px; margin: 12px 0; }
+.auth-field span { font-size: 11px; color: var(--text2); font-weight: 600; }
+.auth-field input {
+  width: 100%; border: 1px solid var(--border2); border-radius: 9px;
+  background: var(--navy2); color: var(--text); padding: 11px 12px;
+  font: 13px var(--font-b); outline: none;
+}
+.auth-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(138,106,43,.12); }
+.auth-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.auth-primary, .auth-secondary {
+  border-radius: 9px; padding: 10px 14px; font: 600 12px var(--font-b); cursor: pointer;
+}
+.auth-primary { background: var(--gold); color: white; border: 1px solid var(--gold); }
+.auth-secondary { background: transparent; color: var(--gold); border: 1px solid var(--border-gold); }
+.auth-primary:disabled, .auth-secondary:disabled { opacity: .55; cursor: wait; }
+.auth-status { min-height: 20px; margin-top: 12px; color: var(--text2); font-size: 11px; overflow-wrap: anywhere; }
+.auth-status[data-state="error"] { color: var(--rose); }
+@media (max-width: 560px) {
+  .account-btn { padding: 6px 8px; max-width: 88px; }
+  .auth-dialog-inner { padding: 18px; }
+}

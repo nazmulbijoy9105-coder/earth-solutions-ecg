@@ -578,10 +578,11 @@
       </div>
       <div class="topbar-actions">
         <div class="status-dot" id="statusDot" title="Online"></div>
-        <button class="pricing-btn" id="pricingBtn" onclick="openPricingModal()" title="View Pricing Plans">
+        <button class="pricing-btn" id="pricingBtn" data-pricing-action="open" title="View Pricing Plans">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span id="pricingBtnLabel">Pricing</span>
         </button>
+        <button class="account-btn" id="accountBtn" type="button">Sign in</button>
         <button class="lang-btn" id="langBtn" title="Switch Language">বাংলা</button>
         <button class="icon-btn" id="clearBtn" title="Clear conversation">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -595,7 +596,7 @@
 
     <!-- FAQ Panel -->
     <div class="faq-area" id="faqArea">
-      <button class="faq-toggle" id="faqToggleBtn" onclick="toggleFAQ()">
+      <button class="faq-toggle" id="faqToggleBtn" data-pricing-action="faq">
         💡 <span id="faqToggleLabel">Common Questions</span>
         <i class="faq-arrow" id="faqArrow">▾</i>
       </button>
@@ -627,7 +628,7 @@
 </div>
 
 <!-- ═══════════ PRICING MODAL ═══════════ -->
-<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" onclick="closePricingOnBackdrop(event)">
+<div class="pricing-modal-backdrop hidden" id="pricingModalBackdrop" data-pricing-action="backdrop">
   <div class="pricing-modal" id="pricingModalBox">
     <div class="pm-header">
       <div class="pm-title-wrap">
@@ -637,11 +638,11 @@
           <p id="pmSub">Earth Solutions Visa Zone — Choose what fits you</p>
         </div>
       </div>
-      <button class="pm-close" onclick="closePricingModal()">✕</button>
+      <button class="pm-close" data-pricing-action="close">✕</button>
     </div>
 
     <div class="pm-plans">
-      <div class="pm-plan free" onclick="selectPlan('free')">
+      <div class="pm-plan free" data-pricing-action="select-plan" data-plan="free">
         <div class="pm-plan-badge">🟢 FREE</div>
         <div class="pm-plan-name">Basic Pathway</div>
         <div class="pm-plan-price">৳0</div>
@@ -652,10 +653,10 @@
           <li>✅ Bangla + English support</li>
           <li>✅ No registration needed</li>
         </ul>
-        <button class="pm-cta green" onclick="closePricingModal()">Start Chatting Free →</button>
+        <button class="pm-cta green" data-pricing-action="close">Start Chatting Free →</button>
       </div>
 
-      <div class="pm-plan entry" onclick="selectPlan('entry')">
+      <div class="pm-plan entry" data-pricing-action="select-plan" data-plan="entry">
         <div class="pm-plan-badge">💰 ENTRY</div>
         <div class="pm-plan-name">Entry-Level Report</div>
         <div class="pm-plan-price">৳30 <small>/ student</small></div>
@@ -669,7 +670,7 @@
         <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+the+Entry+Level+Report+%E2%82%B930" target="_blank">Get Report — ৳30 →</a>
       </div>
 
-      <div class="pm-plan structured" onclick="selectPlan('structured')">
+      <div class="pm-plan structured" data-pricing-action="select-plan" data-plan="structured">
         <div class="pm-plan-badge pm-popular">🔵 POPULAR</div>
         <div class="pm-plan-name">Structured Guidance</div>
         <div class="pm-plan-price">৳100–৳499</div>
@@ -683,7 +684,7 @@
         <a class="pm-cta blue" href="https://wa.me/8801535778111?text=I+want+Structured+Guidance" target="_blank">Get Started →</a>
       </div>
 
-      <div class="pm-plan midtier" onclick="selectPlan('midtier')">
+      <div class="pm-plan midtier" data-pricing-action="select-plan" data-plan="midtier">
         <div class="pm-plan-badge">💼 PREMIUM</div>
         <div class="pm-plan-name">Mentor-Led Programme</div>
         <div class="pm-plan-price">৳500–৳20,000+</div>
@@ -697,7 +698,7 @@
         <a class="pm-cta gold" href="https://wa.me/8801535778111?text=I+want+Mentor-Led+Programme" target="_blank">Book Consultation →</a>
       </div>
 
-      <div class="pm-plan elite" onclick="selectPlan('elite')">
+      <div class="pm-plan elite" data-pricing-action="select-plan" data-plan="elite">
         <div class="pm-plan-badge">🔴 ELITE</div>
         <div class="pm-plan-name">Elite Academic Board</div>
         <div class="pm-plan-price">Call for Details</div>
@@ -719,8 +720,53 @@
   </div>
 </div>
 
+<!-- ═══════════ ACCOUNT DIALOG ═══════════ -->
+<dialog class="auth-dialog" id="authDialog" aria-labelledby="authTitle">
+  <div class="auth-dialog-inner">
+    <div class="auth-dialog-heading">
+      <div>
+        <h2 id="authTitle">Your Peopole AI account</h2>
+        <p>Optional account access. Guest chat remains available.</p>
+      </div>
+      <button class="auth-close" id="authClose" type="button" aria-label="Close account dialog">×</button>
+    </div>
+    <form id="authForm" novalidate>
+      <div id="authFormFields">
+        <label class="auth-field" for="authName">
+          <span>Full name</span>
+          <input id="authName" name="name" autocomplete="name" maxlength="120" />
+        </label>
+        <label class="auth-field" for="authEmail">
+          <span>Email address</span>
+          <input id="authEmail" name="email" type="email" autocomplete="email" required maxlength="254" />
+        </label>
+        <label class="auth-field" for="authPassword">
+          <span>Password</span>
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" required />
+        </label>
+        <label class="auth-field" for="authOtp">
+          <span>Email verification code</span>
+          <input id="authOtp" name="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="12" />
+        </label>
+        <div class="auth-actions">
+          <button class="auth-primary" id="authSubmit" type="submit">Sign in</button>
+          <button class="auth-primary" id="authVerify" type="button" hidden>Verify email</button>
+          <button class="auth-secondary" id="authResend" type="button" hidden>Resend code</button>
+          <button class="auth-secondary" id="authSignup" type="button" hidden>Create account</button>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <button class="auth-secondary" id="authClaim" type="button" hidden>Claim existing account</button>
+        <button class="auth-secondary" id="authSignOut" type="button" hidden>Sign out</button>
+      </div>
+      <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</dialog>
+
 <script src="/frontend/homepage.js"></script>
 <script src="/frontend/chat.js"></script>
 <script src="/frontend/chat-pdf.js"></script>
+<script type="module" src="/frontend/neon-auth.js"></script>
 </body>
 </html>

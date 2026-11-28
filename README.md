@@ -14,172 +14,62 @@
 
 ---
 
-## ✨ Completed Features
+## Verified implementation status — 27 November 2026
 
-### 🔐 Authentication System
-- **Multiple Sign-In Methods:**
-  - ✅ Email/Password authentication
-  - ✅ Phone number with OTP verification (demo: use code `1234`)
-  - ✅ Google OAuth simulation
-- **Session Management:**
-  - User data persisted in localStorage
-  - Automatic session restoration on page reload
-  - Secure logout with conversation cleanup
+This section is authoritative. The remaining legacy product-design sections below describe intended UI/workflows and must not be read as evidence that those capabilities are production-integrated.
 
-### 💬 AI Chat Interface
-- **Core Features:**
-  - ✅ Real-time AI chatbot (Peopole AI)
-  - ✅ Bilingual support (English + বাংলা Bangla)
-  - ✅ Conversation persistence across sessions
-  - ✅ Typing indicators for natural UX
-  - ✅ Common questions quick-select
-  - ✅ Message history with timestamps
-- **AI Capabilities:**
-  - University and country recommendations
-  - Cost breakdown calculations
-  - Visa requirements guidance
-  - Scholarship information
-  - SOP writing tips
+### Authentication
+- A dedicated Neon PostgreSQL 17 project and Managed Better Auth provider are provisioned.
+- Same-origin auth proxy, EdDSA/JWKS token verification, and a basic account sign-in UI are included in the remediation branch.
+- New registration is intentionally disabled until Resend SMTP is configured and tested.
+- Legacy account metadata is preserved in a non-default Neon staging branch. No legacy password hashes were imported, no accounts were linked, and no admin privileges were granted.
+- The admin portal's password-only flow has been retired. Admin access requires a verified Neon Auth identity and a separately approved database role.
 
-### 💳 Payment Integration
-- **Payment Methods Supported:**
-  - ✅ bKash (Bangladesh mobile wallet)
-  - ✅ Nagad (Bangladesh mobile wallet)
-  - ✅ Stripe (International card payments)
-- **Payment Features:**
-  - Simulated payment processing
-  - Transaction history tracking
-  - Payment receipts and confirmations
-  - Secure payment modal UI
-  - Payment method selection interface
+### Chat and persistence
+- The existing bilingual guest chat UI and streaming chat API remain.
+- PostgreSQL persistence code covers guest conversations/messages, inquiries, analytics, push subscriptions and server-enforced daily free-message usage (default 10 per UTC database day).
+- The application requires the new ordered migrations and a configured server-side `DATABASE_URL` before production chat persistence is available.
+- The staging schema was rehearsed separately; the default Neon branch has not been migrated.
 
-### 📊 Student Dashboard
-- **Dashboard Sections:**
-  - ✅ **Conversations:** View and resume past chat sessions
-  - ✅ **My Reports:** Access purchased PDF reports (Entry-Level, Country Reports)
-  - ✅ **Progress Tracker:** Visual progress of application stages
-    - Profile Setup
-    - Country Selection
-    - University Shortlist
-    - SOP Writing
-    - Visa Application
-  - ✅ **Payment History:** Complete transaction records
+### Payments
+- bKash/Nagad are the intended providers, but verified merchant API integration, signed callback verification, idempotency and reconciliation are not complete.
+- Do not treat a frontend payment state, screenshot or chat message as proof of payment.
 
-### 💰 Service Tier System
-5-tier pricing model with feature gating:
+### Immigration information
+- Current FAQ and AI guidance are not yet backed by a complete, versioned authoritative-source registry and independent review workflow.
+- Do not treat generated answers as current immigration policy or legal advice.
 
-1. **🟢 FREE - Basic Pathway (৳0)**
-   - Unlimited AI chat
-   - Stage-based guidance
-   - Bangla + English support
-   - No registration needed
+### Production status
+- The remediation branch is open as a draft PR. It has not been merged or deployed to production.
+- CI currently verifies dependency audit, syntax, migration CLI loading, auth proxy/JWT tests, Vercel API guardrails and static asset isolation.
+- Passing CI does not establish live SMTP delivery, production database parity, browser QA, payment sandbox correctness, backup restore, load testing or penetration-test completion.
 
-2. **💰 ENTRY - Entry-Level Report (৳30)**
-   - Country suitability report
-   - University shortlist (AI-generated)
-   - Visa requirement overview
-   - Instant PDF delivery via WhatsApp
+## Currently accessible features
 
-3. **🔵 POPULAR - Structured Guidance (৳100–500)**
-   - AI risk analysis
-   - Human consultant review
-   - Full document checklist
-   - SOP draft review
+### Public
+- Main landing page and pricing content.
+- Guest chat UI and bilingual interface. Runtime chat availability depends on the AI provider and the configured database/migration state.
+- WhatsApp contact link.
 
-4. **💼 PREMIUM - Mid-Tier Mentorship (৳500–20,000+)**
-   - Matched alumni mentor
-   - Full SOP writing
-   - Visa interview prep
-   - Application filing support
+### Restricted / not yet production-enabled
+- New account registration is paused pending Resend SMTP verification and account-claim testing.
+- Admin workspace is intentionally disabled while role-based access is migrated.
+- bKash/Nagad payment processing is not verified; do not accept automated payment confirmation.
+- Student dashboard, purchased reports and durable account-linked history are not production-verified.
 
-5. **🔴 ELITE - Elite Academic Board (Call for Details)**
-   - Academic board review
-   - Professor outreach
-   - Scholarship negotiation
-   - End-to-end management
+## Data models & storage
 
-### 🎨 User Interface
-- ✅ Modern, responsive design
-- ✅ Gradient color scheme (purple/violet theme)
-- ✅ Smooth animations and transitions
-- ✅ Mobile-first responsive layout
-- ✅ Custom scrollbars
-- ✅ Loading states and spinners
-- ✅ Modal overlays for forms
-- ✅ Toast notifications
+The remediation migrations define:
+- `app_user_profiles`: application role/status linked to a Neon Auth identity.
+- `legacy_account_imports`: review-only legacy account metadata; no password hashes.
+- `chat_conversations` and `chat_messages`: guest conversation ownership and history.
+- `app_inquiries`, `app_analytics_events`, `app_push_subscriptions`: durable operational records.
+- `payment_orders` and `payment_events`: payment state and callback event ledger.
+- `immigration_sources`, `immigration_source_versions`, `immigration_source_reviews`: source provenance and review history.
+- `audit_events`: application audit trail.
+- `free_message_usage`: idempotent per-guest daily free-message accounting.
 
----
-
-## 🚀 Currently Accessible Features
-
-### Public (No Login Required)
-- **Chat Interface** - Ask unlimited questions to Peopole AI
-- **Language Toggle** - Switch between English and বাংলা
-- **Pricing View** - Browse all service tiers
-- **WhatsApp Contact** - Direct link to business WhatsApp
-
-### Authenticated Users Only
-- **Dashboard Access** - Full student dashboard
-- **Conversation History** - Resume previous chats
-- **Payment Processing** - Purchase paid services
-- **Progress Tracking** - Monitor application stages
-- **Report Downloads** - Access purchased PDF reports
-- **Profile Management** - View account details
-
----
-
-## 📂 Data Models & Storage
-
-### LocalStorage Structure
-
-```javascript
-// User Object
-{
-  id: "unique-user-id",
-  name: "Student Name",
-  email: "student@email.com",
-  phone: "+8801XXXXXXXXX",
-  method: "email" | "phone" | "google",
-  avatar: "https://ui-avatars.com/...",
-  tier: "free" | "entry" | "structured" | "premium" | "elite",
-  createdAt: timestamp
-}
-
-// Conversation Object
-{
-  id: "conversation-id",
-  userId: "user-id-or-guest",
-  messages: [
-    {
-      id: "message-id",
-      role: "user" | "assistant",
-      content: "Message text",
-      timestamp: timestamp
-    }
-  ],
-  active: true/false,
-  createdAt: timestamp,
-  updatedAt: timestamp
-}
-
-// Payment Object
-{
-  id: "payment-id",
-  tier: "entry" | "structured" | "premium" | "elite",
-  amount: number,
-  method: "bkash" | "nagad" | "stripe",
-  phone: "+8801XXXXXXXXX",
-  status: "completed" | "pending" | "failed",
-  timestamp: timestamp
-}
-```
-
-### Storage Keys
-- `user` - Current logged-in user object
-- `conversations` - Array of all conversation objects
-- `payments` - Array of all payment transaction objects
-
----
+Migration files are in `migrations/`. The legacy JSON import script defaults to dry-run and accepts a separately secured `LEGACY_DATA_DIR`. Never commit database credentials, Resend keys, raw push subscription archives or user data.
 
 ## 🛠️ Technical Architecture
 
@@ -238,26 +128,25 @@ Login → Switch to Dashboard → Navigate tabs:
 
 ---
 
-## 🎮 Demo Credentials & Testing
+## Testing
 
-### Test Authentication
-- **Phone OTP:** Use code `1234` for any phone number
-- **Google OAuth:** Simulated - creates a demo Google user
-- **Email/Password:** Any email/password combination works (demo mode)
+There are no production demo credentials or simulated payment approvals.
 
-### Test Payments
-- **bKash/Nagad:** Any phone number works
-- **Stripe Card:** Use `4242 4242 4242 4242` (standard test card)
-- **CVC:** Any 3 digits
-- **Expiry:** Any future date (MM/YY format)
+Run locally:
+```bash
+npm ci
+npm audit
+npm test
+```
 
-### Test Conversations
-1. Ask: "What are the best countries for Computer Science?"
-2. Ask: "How much does it cost to study in Canada?"
-3. Ask: "What IELTS score do I need for USA?"
-4. Toggle language to বাংলা and repeat questions
+The current automated suite covers static-file isolation, Neon JWT signature/claim verification with test keys, same-origin auth proxy behavior, Vercel API guardrails, and database-missing readiness behavior.
 
----
+Not yet covered by automated live integration tests:
+- Real Neon Auth sign-up, OTP delivery, sign-in and password reset through Resend.
+- Actual `node-pg-migrate up` execution against a fresh disposable Neon branch.
+- End-to-end browser sign-in/session restoration.
+- bKash/Nagad sandbox payments, callbacks, refunds and reconciliation.
+- Backup restore, load testing and penetration testing.
 
 ## 🚧 Features NOT Yet Implemented
 

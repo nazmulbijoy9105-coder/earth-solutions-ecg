@@ -10,6 +10,7 @@ const { after, before, test } = require('node:test');
 const root = path.resolve(__dirname, '..');
 let child;
 let baseUrl;
+let startupStderr = '';
 
 async function getFreePort() {
   const listener = net.createServer();
@@ -30,15 +31,21 @@ before(async () => {
     env: {
       ...process.env,
       PORT: String(port),
-      ADMIN_PASSWORD: 'test-only-password-123'
+      DATABASE_URL: '',
+      ADMIN_PASSWORD: 'test-only-password-123',
+      GROQ_API_KEY: '',
+      METRICS_TOKEN: 'test-only-metrics-token',
+      GUEST_SESSION_SECRET: 'test-secret-with-at-least-32-bytes-long'
     },
-    stdio: 'ignore'
+    stdio: ['ignore', 'ignore', 'pipe']
   });
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', chunk => { startupStderr = (startupStderr + chunk).slice(-12000); });
 
   const deadline = Date.now() + 15000;
   while (Date.now() < deadline) {
     if (child.exitCode !== null) {
-      throw new Error(`Server exited before becoming ready (code ${child.exitCode})`);
+      throw new Error(`Server exited before becoming ready (code ${child.exitCode}, signal ${child.signalCode || 'none'}). stderr: ${startupStderr || '[empty]'}`);
     }
     try {
       const response = await fetch(`${baseUrl}/index.html`);
@@ -63,10 +70,26 @@ after(async () => {
   if (child.exitCode === null) child.kill('SIGKILL');
 });
 
-test('public homepage remains available', async () => {
-  const response = await fetch(`${baseUrl}/index.html`);
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get('content-type') || '', /text\/html/);
+test('public homepage and allowlisted assets remain available', async () => {
+  for (const pathname of ['/index.html', '/', '/style.css', '/frontend/chat.js', '/frontend/homepage.js', '/frontend/chat-pdf.js', '/frontend/neon-auth.js', '/frontend/pricing.js', '/pricing.html', '/admin.html', '/admin', '/logo.jpg', '/manifest.json', '/sw.js']) {
+    const response = await fetch(`${baseUrl}${pathname}`);
+    assert.equal(response.status, 200, `${pathname} should be publicly available`);
+  }
+});
+
+test('public HTML uses CSP-compatible external event handlers', async () => {
+  const homepage = await fetch(`${baseUrl}/index.html`);
+  const policy = homepage.headers.get('content-security-policy') || '';
+  assert.match(policy, /default-src 'self'/);
+  assert.match(policy, /script-src 'self' https:\/\/esm\.sh/);
+  assert.doesNotMatch(policy, /script-src[^;]*unsafe-inline/);
+
+  for (const pathname of ['/index.html', '/pricing.html', '/admin.html']) {
+    const response = await fetch(`${baseUrl}${pathname}`);
+    const html = await response.text();
+    assert.doesNotMatch(html, /\son[a-z]+\s*=/i, `${pathname} must not contain inline event handlers`);
+    assert.doesNotMatch(html, /<script(?![^>]*src=)[^>]*>/i, `${pathname} must not contain inline script blocks`);
+  }
 });
 
 test('private data and server implementation files are not served', async () => {
@@ -84,7 +107,9 @@ test('private data and server implementation files are not served', async () => 
     '/lib/ai-core.js',
     '/package.json',
     '/package-lock.json',
-    '/vercel.json'
+    '/vercel.json',
+    '/frontend/auth-client.js',
+    '/migrations/1789504075584_init-schema.js'
   ];
 
   for (const pathname of privatePaths) {
@@ -93,9 +118,69 @@ test('private data and server implementation files are not served', async () => 
   }
 });
 
-test('Express API routes still reach their handlers', async () => {
+test('Express push API fails closed when VAPID credentials are not configured', async () => {
   const response = await fetch(`${baseUrl}/api/push/vapid-public-key`);
-  assert.equal(response.status, 200);
+  assert.equal(response.status, 503);
   const body = await response.json();
-  assert.equal(typeof body.key, 'string');
+  assert.match(body.error, /not configured/i);
+});
+
+
+test('Prometheus metrics require a bearer token and expose bounded request metrics', async () => {
+  const denied = await fetch(`${baseUrl}/metrics`);
+  assert.equal(denied.status, 404);
+
+  const allowed = await fetch(`${baseUrl}/metrics`, {
+    headers: { Authorization: 'Bearer test-only-metrics-token' },
+  });
+  assert.equal(allowed.status, 200);
+  assert.match(allowed.headers.get('content-type') || '', /text\/plain/);
+  const body = await allowed.text();
+  assert.match(body, /process_uptime_seconds/);
+  assert.match(body, /http_requests_total/);
+  assert.match(body, /http_request_duration_seconds_count/);
+  assert.doesNotMatch(body, /127\.0\.0\.1|anon_[A-Za-z0-9_-]+/);
+});
+
+test('liveness stays healthy while readiness fails closed without PostgreSQL', async () => {
+  const liveness = await fetch(`${baseUrl}/healthz`);
+  assert.equal(liveness.status, 200);
+  assert.deepEqual(await liveness.json(), { status: 'alive' });
+
+  const readiness = await fetch(`${baseUrl}/readyz`);
+  assert.equal(readiness.status, 503);
+  assert.deepEqual(await readiness.json(), {
+    status: 'not_ready',
+    reason: 'database_unavailable',
+  });
+
+  const compatibilityHealth = await fetch(`${baseUrl}/api/health`);
+  assert.equal(compatibilityHealth.status, 503);
+
+  const login = await fetch(`${baseUrl}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: 'legacy-password' }),
+  });
+  assert.equal(login.status, 410);
+});
+
+
+test('Express chat fallback emits standards-compliant SSE delimiters', async () => {
+  const response = await fetch(`${baseUrl}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: 'anon_1234567890123456',
+      conversationId: '123e4567-e89b-42d3-a456-426614174000',
+      messageId: '123e4567-e89b-42d3-a456-426614174001',
+      messages: [{ role: 'user', content: 'A question outside the FAQ catalog' }],
+    }),
+  });
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /text\/event-stream/);
+  const output = await response.text();
+  assert.match(output, /data: \{.*\}\n\n/);
+  assert.match(output, /data: \[DONE\]\n\n$/);
+  assert.equal(output.includes(String.fromCharCode(92) + 'n'), false);
 });

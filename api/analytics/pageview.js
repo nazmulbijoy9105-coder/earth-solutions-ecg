@@ -1,5 +1,40 @@
-export default function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  res.status(200).json({ ok: true });
-}
+'use strict';
+
+const database = require('../../lib/db.cjs');
+const persistence = require('../../lib/persistence.cjs');
+const { resolveCustomerIdentity } = require('../../lib/customer-identity.cjs');
+
+const json = (res, status, body) => {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  return res.end(JSON.stringify(body));
+};
+
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return json(res, 405, { error: 'Method not allowed' });
+  }
+  const trustedOrigin = process.env.ALLOWED_ORIGIN;
+  if (req.headers.origin && (!trustedOrigin || req.headers.origin !== trustedOrigin)) {
+    return json(res, 403, { error: 'Untrusted origin' });
+  }
+  if (!database.isDatabaseConfigured()) {
+    return json(res, 503, { error: 'Analytics storage is not configured' });
+  }
+
+  const body = req.body || {};
+  const pathname = typeof body.path === 'string' ? body.path : '';
+  if (!pathname.startsWith('/') || pathname.startsWith('//') || /[\\\r\n]/.test(pathname) || pathname.length > 500) {
+    return json(res, 400, { error: 'Invalid page path' });
+  }
+  let identity;
+  try { identity = await resolveCustomerIdentity(req, res); } catch (error) { const status = error?.statusCode || 401; return json(res, status, { error: status === 503 ? 'Customer identity service is not configured' : status === 403 ? 'Untrusted request origin' : 'Invalid or unavailable customer identity' }); }
+  try {
+    await persistence.logPageview(pathname, body.referrer, identity);
+    return json(res, 202, { accepted: true });
+  } catch {
+    return json(res, 503, { error: 'Analytics storage unavailable' });
+  }
+};

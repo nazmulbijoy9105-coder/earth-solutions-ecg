@@ -26,3 +26,6 @@ npm-debug.log*
 
 .vercel
 .env*
+# Application data stores and local migration archives
+/data/*.json
+/legacy-data/

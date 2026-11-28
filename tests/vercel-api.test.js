@@ -1,0 +1,135 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+
+function responseMock() {
+  return {
+    headers: {},
+    statusCode: 200,
+    body: null,
+    setHeader(name, value) { this.headers[name.toLowerCase()] = value; },
+    end(value) { this.body = value; },
+  };
+}
+
+test('Vercel health and auth endpoints fail closed when storage or identity is absent', async () => {
+  const keys = ['DATABASE_URL', 'GUEST_SESSION_SECRET', 'NEON_AUTH_BASE_URL', 'NEON_AUTH_JWKS_URL', 'ALLOWED_ORIGIN', 'GROQ_API_KEY'];
+  const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  delete process.env.DATABASE_URL;
+  Object.assign(process.env, {
+    GUEST_SESSION_SECRET: 'test-secret-with-at-least-32-bytes-long',
+    NEON_AUTH_BASE_URL: 'https://auth.neon.tech/project/auth',
+    NEON_AUTH_JWKS_URL: 'https://auth.neon.tech/project/auth/.well-known/jwks.json',
+    ALLOWED_ORIGIN: 'https://app.earthsolutions.com.bd',
+    GROQ_API_KEY: 'gsk_' + 'x'.repeat(40),
+  });
+  try {
+    const healthModule = await import('../api/health.js');
+    const healthRes = responseMock();
+    await healthModule.default({ method: 'GET' }, healthRes);
+    assert.equal(healthRes.statusCode, 503);
+    assert.equal(JSON.parse(healthRes.body).database, 'not_configured');
+
+    const authModule = await import('../api/auth/me.js');
+    const authRes = responseMock();
+    await authModule.default({ method: 'GET', headers: {} }, authRes);
+    assert.equal(authRes.statusCode, 401);
+  } finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+});
+
+test('Vercel chat endpoints ignore client owner IDs and reject malformed conversation references', async () => {
+  const previousSecret = process.env.GUEST_SESSION_SECRET;
+  process.env.GUEST_SESSION_SECRET = 'test-secret-with-at-least-32-bytes-long';
+  try {
+  const chatModule = await import('../api/chat.js');
+  const chatRes = responseMock();
+  await chatModule.default({ method: 'POST', body: { messages: [] }, headers: {} }, chatRes);
+  assert.equal(chatRes.statusCode, 400);
+
+  const historyModule = await import('../api/chat/history.js');
+  const historyRes = responseMock();
+  await historyModule.default({ method: 'POST', body: { userId: 'bad', conversationId: 'bad' }, headers: {} }, historyRes);
+  assert.equal(historyRes.statusCode, 400);
+  } finally {
+    if (previousSecret === undefined) delete process.env.GUEST_SESSION_SECRET;
+    else process.env.GUEST_SESSION_SECRET = previousSecret;
+  }
+});
+
+
+test('Vercel Neon Auth proxy forwards only trusted same-origin requests', async () => {
+  const previousFetch = global.fetch;
+  const previousOrigin = process.env.ALLOWED_ORIGIN;
+  const previousBase = process.env.NEON_AUTH_BASE_URL;
+  let called = false;
+  process.env.ALLOWED_ORIGIN = 'https://app.earthsolutions.com.bd';
+  process.env.NEON_AUTH_BASE_URL = 'https://neon.example.test/peopole_ai/auth';
+  global.fetch = async (url, options) => {
+    called = true;
+    assert.equal(String(url), 'https://neon.example.test/peopole_ai/auth/get-session');
+    assert.equal(options.headers.get('Origin'), 'https://app.earthsolutions.com.bd');
+    return new Response(JSON.stringify({ session: null }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'set-cookie': 'auth=abc; Path=/; HttpOnly; Secure' },
+    });
+  };
+  try {
+    const module = await import('../api/neon-auth/[...path].js');
+    const res = responseMock();
+    await module.default({
+      method: 'GET',
+      headers: { origin: 'https://app.earthsolutions.com.bd' },
+      url: '/api/neon-auth/get-session',
+      query: { path: ['get-session'] },
+    }, res);
+    assert.equal(called, true);
+    assert.equal(res.statusCode, 200);
+    assert.ok(String(res.headers['set-cookie'] || res.headers['Set-Cookie']).includes('Path=/api/neon-auth'));
+    assert.equal(res.headers['cache-control'], 'no-store');
+  } finally {
+    global.fetch = previousFetch;
+    if (previousOrigin === undefined) delete process.env.ALLOWED_ORIGIN;
+    else process.env.ALLOWED_ORIGIN = previousOrigin;
+    if (previousBase === undefined) delete process.env.NEON_AUTH_BASE_URL;
+    else process.env.NEON_AUTH_BASE_URL = previousBase;
+  }
+});
+
+
+test('legacy account claim endpoint requires a verified Neon bearer token', async () => {
+  const module = await import('../api/auth/claim-legacy.js');
+  const res = responseMock();
+  await module.default({ method: 'POST', headers: {}, body: {} }, res);
+  assert.equal(res.statusCode, 401);
+});
+
+test('Vercel bearer-protected endpoints recognize a Bearer scheme and reach token validation', async () => {
+  const previousBase = process.env.NEON_AUTH_BASE_URL;
+  const previousJwks = process.env.NEON_AUTH_JWKS_URL;
+  delete process.env.NEON_AUTH_BASE_URL;
+  delete process.env.NEON_AUTH_JWKS_URL;
+  const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+  const syntacticallyValidToken = encode({ alg: 'EdDSA', kid: 'test-key' }) + '.' + encode({}) + '.AA';
+  try {
+    const authModule = await import('../api/auth/me.js');
+    const authRes = responseMock();
+    await authModule.default({ method: 'GET', headers: { authorization: 'Bearer ' + syntacticallyValidToken } }, authRes);
+    assert.equal(authRes.statusCode, 503, 'valid Bearer syntax should reach auth configuration validation');
+
+    const claimModule = await import('../api/auth/claim-legacy.js');
+    const claimRes = responseMock();
+    await claimModule.default({ method: 'POST', headers: { authorization: 'Bearer ' + syntacticallyValidToken }, body: {} }, claimRes);
+    assert.equal(claimRes.statusCode, 503, 'valid Bearer syntax should reach auth configuration validation');
+  } finally {
+    if (previousBase === undefined) delete process.env.NEON_AUTH_BASE_URL;
+    else process.env.NEON_AUTH_BASE_URL = previousBase;
+    if (previousJwks === undefined) delete process.env.NEON_AUTH_JWKS_URL;
+    else process.env.NEON_AUTH_JWKS_URL = previousJwks;
+  }
+});

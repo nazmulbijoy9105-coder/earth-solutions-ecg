@@ -2,9 +2,10 @@ name: Node.js CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'remediation/**']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,6 +13,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: peopole_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d peopole_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -28,9 +43,62 @@ jobs:
       - name: Check server syntax
         run: node --check server.js
 
-      - name: Dependency security audit (informational)
-        continue-on-error: true
+      - name: Dependency security audit
         run: npm audit
 
+      - name: Check migration syntax
+        run: |
+          for file in migrations/*.js; do
+            node --check "$file"
+          done
+
+      - name: Verify migration CLI loads
+        run: npx node-pg-migrate --help
+
+      - name: Execute complete migration chain on clean PostgreSQL
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE SCHEMA neon_auth'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'CREATE TABLE neon_auth."user" (id uuid PRIMARY KEY, name text NOT NULL, email text NOT NULL UNIQUE, "emailVerified" boolean NOT NULL DEFAULT false)'
+          npx node-pg-migrate up --database-url-var DATABASE_URL --migrations-dir migrations --schema public
+          migration_count=$(psql "$DATABASE_URL" -Atc 'SELECT count(*) FROM pgmigrations')
+          test "$migration_count" -eq 9
+          required_count=$(psql "$DATABASE_URL" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ANY (ARRAY['app_user_profiles','legacy_account_imports','chat_conversations','chat_messages','payment_orders','payment_events','immigration_sources','immigration_source_versions','immigration_source_reviews','audit_events','app_inquiries','app_analytics_events','app_push_subscriptions','api_rate_limits','free_message_usage'])")
+          test "$required_count" -eq 15
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE earth_app_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD 'ci-runtime-password'"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE earth_app_admin_login LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD 'ci-admin-password'"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'GRANT earth_app_runtime TO earth_app_login'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'GRANT earth_app_admin TO earth_app_admin_login'
+
+      - name: Check Neon Auth and database integration syntax
+        run: |
+          node --check lib/auth-proxy.cjs
+          node --check lib/neon-auth.cjs
+          node --check lib/legacy-accounts.cjs
+          node --check lib/db.cjs
+          node --check lib/persistence.cjs
+          node --check lib/customer-identity.cjs
+          node --check scripts/import-legacy-json.js
+          node --check scripts/transfer-staging-metadata.js
+          node --check public/frontend/chat.js
+          node --check "api/neon-auth/[...path].js"
+          node --check api/chat.js
+          node --check api/chat/history.js
+          node --check api/analytics/event.js
+          node --check api/analytics/pageview.js
+          node --check api/push/subscribe.js
+          node --check api/auth/me.js
+          node --check api/auth/claim-legacy.js
+          node --check api/health.js
+          node --check public/frontend/neon-auth.js
+
+      - name: Validate legacy import dry-run
+        run: node scripts/import-legacy-json.js
+
       - name: Run tests
+        env:
+          DATABASE_URL: postgresql://earth_app_login:ci-runtime-password@localhost:5432/peopole_test
+          ADMIN_DATABASE_URL: postgresql://earth_app_admin_login:ci-admin-password@localhost:5432/peopole_test
+          TEST_DATABASE_OWNER_URL: postgresql://postgres:postgres@localhost:5432/peopole_test
         run: npm test
