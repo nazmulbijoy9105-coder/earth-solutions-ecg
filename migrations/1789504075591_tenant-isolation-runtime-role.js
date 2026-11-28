@@ -32,6 +32,10 @@ exports.up = (pgm) => {
     ALTER TABLE app_push_subscriptions OWNER TO earth_app_owner;
     ALTER TABLE api_rate_limits OWNER TO earth_app_owner;
     ALTER TABLE free_message_usage OWNER TO earth_app_owner;
+    -- After ownership transfer, perform policy/function/grant DDL as the new owner.
+    -- Reset before node-pg-migrate writes the migration ledger row.
+    SET ROLE earth_app_owner;
+
     GRANT SELECT, INSERT, UPDATE ON chat_conversations TO earth_app_runtime;
     GRANT SELECT, INSERT ON chat_messages TO earth_app_runtime;
     GRANT SELECT, INSERT ON payment_orders TO earth_app_runtime;
@@ -248,6 +252,8 @@ exports.up = (pgm) => {
     CREATE POLICY admin_access_app_push_subscriptions ON app_push_subscriptions FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
     CREATE POLICY admin_access_api_rate_limits ON api_rate_limits FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
     CREATE POLICY admin_access_free_message_usage ON free_message_usage FOR ALL TO earth_app_admin USING (true) WITH CHECK (true);
+
+    RESET ROLE;
   `);
 };
 
