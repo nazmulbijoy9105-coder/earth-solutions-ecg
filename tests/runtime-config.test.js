@@ -7,9 +7,9 @@ const { runtimeConfigurationIssues } = require('../lib/runtime-config.cjs');
 const validProductionEnv = () => ({
   NODE_ENV: 'production',
   GUEST_SESSION_SECRET: '0123456789abcdef0123456789abcdef',
-  NEON_AUTH_BASE_URL: 'https://auth.example.test/project/auth',
-  NEON_AUTH_JWKS_URL: 'https://auth.example.test/project/auth/.well-known/jwks.json',
-  ALLOWED_ORIGIN: 'https://app.example.test',
+  NEON_AUTH_BASE_URL: 'https://auth.neon.tech/project/auth',
+  NEON_AUTH_JWKS_URL: 'https://auth.neon.tech/project/auth/.well-known/jwks.json',
+  ALLOWED_ORIGIN: 'https://app.earthsolutions.com.bd',
   GROQ_API_KEY: 'gsk_' + 'x'.repeat(40),
   VAPID_PUBLIC: '',
   VAPID_PRIVATE: '',
@@ -45,8 +45,8 @@ test('non-production runtime does not block local development configuration', ()
 test('production configuration rejects long placeholder secrets and example hosts', () => {
   const env = validProductionEnv();
   env.GUEST_SESSION_SECRET = 'REPLACE_WITH_A_REAL_RANDOM_SECRET_VALUE_123456789';
-  env.NEON_AUTH_BASE_URL = 'https://auth.example.test/project/auth';
-  env.ALLOWED_ORIGIN = 'https://app.example.test';
+  env.NEON_AUTH_BASE_URL = 'https://auth.neon.tech/project/auth';
+  env.ALLOWED_ORIGIN = 'https://app.earthsolutions.com.bd';
   assert.deepEqual(runtimeConfigurationIssues(env), [
     'GUEST_SESSION_SECRET',
     'NEON_AUTH_BASE_URL',
