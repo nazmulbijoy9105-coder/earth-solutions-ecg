@@ -3,7 +3,7 @@ const { runtimeConfigurationIssues } = require('../lib/runtime-config.cjs');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (runtimeConfigurationIssues().length) {
+  if (runtimeConfigurationIssues({ ...process.env, NODE_ENV: 'production' }).length) {
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ status: 'degraded', reason: 'runtime_configuration_incomplete' }));
