@@ -19,6 +19,7 @@ const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
 const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
 const { getTrustedClientIp } = require('./lib/client-ip.cjs');
+const { runtimeConfigurationIssues } = require('./lib/runtime-config.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -219,6 +220,9 @@ app.get('/healthz', (req, res) => {
 // are never exposed to unauthenticated callers.
 async function readinessHandler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
+  if (runtimeConfigurationIssues().length) {
+    return res.status(503).json({ status: 'not_ready', reason: 'runtime_configuration_incomplete' });
+  }
   if (!isDatabaseConfigured()) {
     return res.status(503).json({ status: 'not_ready', reason: 'database_unavailable' });
   }
