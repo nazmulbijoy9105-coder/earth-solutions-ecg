@@ -229,7 +229,8 @@ exports.up = (pgm) => {
     GRANT SELECT, INSERT, UPDATE, DELETE ON app_push_subscriptions, api_rate_limits TO earth_app_runtime;
     GRANT SELECT, INSERT, DELETE ON free_message_usage TO earth_app_runtime;
     GRANT SELECT ON immigration_sources, immigration_source_versions TO earth_app_runtime;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO earth_app_runtime, earth_app_admin;
+    -- Current application tables use UUID keys; do not grant across the schema,
+    -- which includes the migration ledger sequence and legacy-owned sequences.
     GRANT SELECT, INSERT, UPDATE, DELETE ON
       app_user_profiles, legacy_account_imports, chat_conversations, chat_messages,
       payment_orders, payment_events, immigration_sources, immigration_source_versions,
