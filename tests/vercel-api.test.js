@@ -14,8 +14,16 @@ function responseMock() {
 }
 
 test('Vercel health and auth endpoints fail closed when storage or identity is absent', async () => {
-  const previousDatabaseUrl = process.env.DATABASE_URL;
+  const keys = ['DATABASE_URL', 'GUEST_SESSION_SECRET', 'NEON_AUTH_BASE_URL', 'NEON_AUTH_JWKS_URL', 'ALLOWED_ORIGIN', 'GROQ_API_KEY'];
+  const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
   delete process.env.DATABASE_URL;
+  Object.assign(process.env, {
+    GUEST_SESSION_SECRET: 'test-secret-with-at-least-32-bytes-long',
+    NEON_AUTH_BASE_URL: 'https://auth.example.test/project/auth',
+    NEON_AUTH_JWKS_URL: 'https://auth.example.test/project/auth/.well-known/jwks.json',
+    ALLOWED_ORIGIN: 'https://app.example.test',
+    GROQ_API_KEY: 'gsk_' + 'x'.repeat(40),
+  });
   try {
     const healthModule = await import('../api/health.js');
     const healthRes = responseMock();
@@ -28,8 +36,10 @@ test('Vercel health and auth endpoints fail closed when storage or identity is a
     await authModule.default({ method: 'GET', headers: {} }, authRes);
     assert.equal(authRes.statusCode, 401);
   } finally {
-    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
-    else process.env.DATABASE_URL = previousDatabaseUrl;
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
   }
 });
 
