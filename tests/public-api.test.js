@@ -17,7 +17,7 @@ test('Vercel analytics and push routes reject unsupported methods and untrusted 
   const previousOrigin = process.env.ALLOWED_ORIGIN;
   const previousDatabaseUrl = process.env.DATABASE_URL;
   process.env.ALLOWED_ORIGIN = 'https://app.example.test';
-  process.env.DATABASE_URL = 'postgresql://test.invalid/app';
+  process.env.DATABASE_URL = 'postgresql://runtime:secret@db.neon.tech/app';
   try {
     const routes = [
       ['../api/analytics/event.js', { method: 'GET', headers: {} }, 405],
@@ -46,7 +46,7 @@ test('Vercel analytics and push routes validate payloads before database access'
   const previousOrigin = process.env.ALLOWED_ORIGIN;
   const previousDatabaseUrl = process.env.DATABASE_URL;
   process.env.ALLOWED_ORIGIN = 'https://app.example.test';
-  process.env.DATABASE_URL = 'postgresql://test.invalid/app';
+  process.env.DATABASE_URL = 'postgresql://runtime:secret@db.neon.tech/app';
   const headers = { origin: 'https://app.example.test' };
   try {
     const cases = [
