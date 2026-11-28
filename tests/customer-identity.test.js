@@ -15,7 +15,7 @@ test('guest identity is server-issued, signed, HttpOnly and stable across reques
   try {
     const firstResponse = responseMock();
     const first = await resolveCustomerIdentity({
-      headers: { cookie: '', authorization: '' },
+      headers: { cookie: '', authorization: '', 'x-forwarded-proto': 'https' },
       body: { userId: 'guest_attacker_controlled_id' },
     }, firstResponse);
     assert.match(first.anonymousId, /^guest_[A-Za-z0-9_-]{32,80}$/);
@@ -23,6 +23,7 @@ test('guest identity is server-issued, signed, HttpOnly and stable across reques
     const setCookie = firstResponse.headers['Set-Cookie'];
     assert.match(setCookie, /HttpOnly/);
     assert.match(setCookie, /SameSite=Lax/);
+    assert.match(setCookie, /Secure/);
     assert.match(setCookie, /Path=\/api/);
     assert.doesNotMatch(setCookie, /guest_attacker_controlled_id/);
 
