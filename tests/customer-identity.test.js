@@ -39,6 +39,20 @@ test('guest identity is server-issued, signed, HttpOnly and stable across reques
   }
 });
 
+
+test('malformed authorization schemes are rejected instead of receiving a guest identity', async () => {
+  const previous = process.env.GUEST_SESSION_SECRET;
+  process.env.GUEST_SESSION_SECRET = 'test-secret-with-at-least-32-bytes-long';
+  try {
+    await assert.rejects(() => resolveCustomerIdentity({
+      headers: { authorization: 'Basic attacker-controlled', cookie: '' },
+    }, responseMock()), error => error.statusCode === 401);
+  } finally {
+    if (previous === undefined) delete process.env.GUEST_SESSION_SECRET;
+    else process.env.GUEST_SESSION_SECRET = previous;
+  }
+});
+
 test('invalid bearer token is rejected instead of silently downgraded to guest', async () => {
   const previousSecret = process.env.GUEST_SESSION_SECRET;
   const previousAuth = process.env.NEON_AUTH_BASE_URL;
