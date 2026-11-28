@@ -22,7 +22,7 @@ Use `npm ci` so Render installs the committed lockfile without silently resolvin
 ## Readiness contract
 
 - `/healthz` returns 200 when the Node process is alive. It does not prove database availability.
-- `/readyz` returns 200 only when the application schema and migration ledger exist; the customer and admin connections use separate inherited memberships in their respective non-login roles; neither login is superuser, BYPASSRLS, CREATEROLE, CREATEDB or a table owner; all required application tables have forced RLS and policies; and the runtime login is not a member of the admin role.
+- `/readyz` returns 200 only when production runtime configuration is complete, the application schema and migration ledger exist, the customer and admin connections use separate inherited memberships in their respective non-login roles, neither login is superuser/BYPASSRLS/CREATEROLE/CREATEDB or a table owner, all required application tables have forced RLS and policies, and the runtime login is not a member of the admin role. It checks the presence and basic shape of required secrets, not whether external providers will accept them.
 - `/api/health` remains a compatibility alias for `/readyz`.
 - A 503 from `/readyz` is intentional. Do not weaken the check to make a deployment appear healthy.
 
@@ -40,10 +40,10 @@ Verify presence in Render's dashboard without copying values into tickets, logs,
 - `ADMIN_DATABASE_URL` (separate privileged admin login; member of `earth_app_admin` only; use only from the server-side admin pool, never expose to browser)
 - `NEON_AUTH_BASE_URL`
 - `ALLOWED_ORIGIN`
-- `GROQ_API_KEY` (if AI chat is enabled)
+- `GROQ_API_KEY` (required for production AI chat readiness)
 - `VAPID_PUBLIC`, `VAPID_PRIVATE`, `VAPID_EMAIL` (if push is enabled)
 - `METRICS_TOKEN` (generate a high-entropy random token; configure the monitoring scraper to send it as a Bearer token)
-- `GUEST_SESSION_SECRET` (at least 32 random bytes; keep stable across instances and restarts; never expose it to the browser)
+- `GUEST_SESSION_SECRET` (at least 32 random bytes; required by the production readiness gate; keep stable across instances and restarts; never expose it to the browser)
 
 Never print secret values. A present variable is not proof that the credential is valid or points to the intended production resource.
 
