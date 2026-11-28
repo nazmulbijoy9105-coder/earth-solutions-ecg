@@ -3,7 +3,7 @@
 const database = require('../../lib/db.cjs');
 const persistence = require('../../lib/persistence.cjs');
 const { resolveCustomerIdentity } = require('../../lib/customer-identity.cjs');
-const { isAllowedPushEndpoint } = require('../../lib/push-endpoint.cjs');
+const { isValidPushSubscription } = require('../../lib/push-endpoint.cjs');
 
 const json = (res, status, body) => {
   res.statusCode = status;
@@ -27,11 +27,7 @@ module.exports = async function handler(req, res) {
 
   const body = req.body || {};
   const subscription = body.subscription;
-  if (!subscription || typeof subscription !== 'object' ||
-      typeof subscription.endpoint !== 'string' || subscription.endpoint.length > 4096 ||
-      !isAllowedPushEndpoint(subscription.endpoint) ||
-      !subscription.keys || typeof subscription.keys.p256dh !== 'string' ||
-      typeof subscription.keys.auth !== 'string' ||
+  if (!isValidPushSubscription(subscription) ||
       Buffer.byteLength(JSON.stringify(subscription)) > 8192) {
     return json(res, 400, { error: 'Invalid push subscription' });
   }
