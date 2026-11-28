@@ -18,6 +18,7 @@ const proxyNeonAuth = require('./lib/auth-proxy.cjs');
 const { requireNeonAuth, requireAppAdmin } = require('./lib/neon-auth.cjs');
 const { requireCustomerIdentity } = require('./lib/customer-identity.cjs');
 const metrics = require('./lib/metrics.cjs');
+const { getTrustedClientIp } = require('./lib/client-ip.cjs');
 const { claimLegacyAccount } = require('./lib/legacy-accounts.cjs');
 
 const app  = express();
@@ -409,7 +410,7 @@ app.post('/api/chat', requireCustomerIdentity, async (req, res) => {
     return res.status(400).json({ error: 'A valid customer identity, conversation id, message id and message are required' });
   }
 
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const ip = getTrustedClientIp(req);
   let previousMessages = [];
   let isFirstMessage = userMessages.length === 1;
 
